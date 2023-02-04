@@ -30,6 +30,6 @@
       <ProjectReference Include="..\Dotbot.Common\Dotbot.Common.csproj" />
       <ProjectReference Include="..\Dotbot.Database\Dotbot.Database.csproj" />
       <ProjectReference Include="..\Dotbot.Discord\Dotbot.Discord.csproj" />
-    </ItemGroup>
+  </ItemGroup>
 
 </Project>
