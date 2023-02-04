@@ -10,6 +10,9 @@ public class CommandType : Enumeration
     public static CommandType Saved = new(3, nameof(Saved));
     public static CommandType Avatar = new(4, nameof(Avatar));
     public static CommandType Xkcd = new(5, nameof(Xkcd));
+    public static CommandType AddModerator = new(6, nameof(AddModerator));
+    public static CommandType RemoveModerator = new(7, nameof(RemoveModerator));
+    public static CommandType SetXkcdChannel = new(8, nameof(SetXkcdChannel));
     public CommandType(int id, string name) : base(id, name)
     {
         

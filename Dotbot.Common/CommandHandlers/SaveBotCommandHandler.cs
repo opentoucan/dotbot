@@ -5,7 +5,7 @@ using static FluentResults.Result;
 
 namespace Dotbot.Common.CommandHandlers;
 
-public class SaveBotCommandHandler: IBotCommandHandler
+public class SaveBotCommandHandler: BotCommandHandler
 {
     private readonly IBotCommandRepository _botCommandRepository;
     private readonly HttpClient _httpClient;
@@ -18,9 +18,10 @@ public class SaveBotCommandHandler: IBotCommandHandler
         _fileService = fileService;
     }
     
-    public CommandType CommandType => CommandType.Save;
-
-    public async Task<Result> HandleAsync(string content, IServiceContext context)
+    public override CommandType CommandType => CommandType.Save;
+    public override Privilege PrivilegeLevel => Privilege.Base;
+    
+    protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
         var split = content.Split(' ');
         var key = split[1];

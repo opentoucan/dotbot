@@ -6,7 +6,7 @@ using FluentResults;
 
 namespace Dotbot.Common.CommandHandlers;
 
-public class SavedCommandHandler: IBotCommandHandler
+public class SavedCommandHandler: BotCommandHandler
 {
     private const int MaxPageSize = 20;
     private readonly IBotCommandRepository _botCommandRepository;
@@ -16,8 +16,10 @@ public class SavedCommandHandler: IBotCommandHandler
         _botCommandRepository = botCommandRepository;
     }
 
-    public CommandType CommandType => CommandType.Saved;
-    public async Task<Result> HandleAsync(string content, IServiceContext context)
+    public override CommandType CommandType => CommandType.Saved;
+    public override Privilege PrivilegeLevel => Privilege.Base;
+
+    protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
         var split = content.Split(' ');
         var page = 1;
@@ -65,7 +67,7 @@ public class SavedCommandHandler: IBotCommandHandler
             formattedMessage.Description = page < 0 ? "Invalid page" : "No commands found";  
         }
         
-        await context.SendEmbedAsync(formattedMessage);
+        await context.SendFormattedMessageAsync(formattedMessage);
 
         return Result.Ok();
     }

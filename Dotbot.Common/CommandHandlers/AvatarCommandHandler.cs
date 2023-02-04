@@ -4,11 +4,12 @@ using static FluentResults.Result;
 
 namespace Dotbot.Common.CommandHandlers;
 
-public class AvatarCommandHandler : IBotCommandHandler
+public class AvatarCommandHandler : BotCommandHandler
 {
-    public CommandType CommandType => CommandType.Avatar;
+    public override CommandType CommandType => CommandType.Avatar;
+    public override Privilege PrivilegeLevel => Privilege.Base;
 
-    public async Task<Result> HandleAsync(string content, IServiceContext context)
+    protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
         var mentionedIds = await context.GetUserMentionsAsync();
 
@@ -22,7 +23,7 @@ public class AvatarCommandHandler : IBotCommandHandler
 
     private static async Task SendAvatarEmbed(User user, IServiceContext context)
     {
-        await context.SendEmbedAsync(new FormattedMessage
+        await context.SendFormattedMessageAsync(new FormattedMessage
         {
             Title = user.Username, 
             ImageUrl = user.EffectiveAvatarUrl

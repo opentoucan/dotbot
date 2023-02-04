@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using Dotbot.Common.CommandHandlers;
 using Dotbot.Common.Models;
+using Dotbot.Database.Entities;
 using Dotbot.Discord.Extensions;
 
 namespace Dotbot.Discord.CommandHandlers;
@@ -9,10 +10,24 @@ namespace Dotbot.Discord.CommandHandlers;
 public class DiscordChannelMessageContext : IServiceContext
 {
     private readonly SocketMessage _message;
-
+    private readonly ChatServer? _guild;
+    
     public DiscordChannelMessageContext(SocketMessage message)
     {
         _message = message;
+    }    
+    
+    public DiscordChannelMessageContext(SocketMessage message, ChatServer? guild)
+    {
+        _message = message;
+        _guild = guild;
+    }
+
+    public Privilege GetPrivilege()
+    {
+        if (_guild is null) return Privilege.Base;
+
+        return _guild.ModeratorIds.Contains(_message.Author.Id.ToString()) ? Privilege.Moderator : Privilege.Base;
     }
 
     public async Task ReplyAsync(string msg)
@@ -51,9 +66,9 @@ public class DiscordChannelMessageContext : IServiceContext
         return _message.Attachments.Select(Convert).ToList();
     }
 
-    public async Task SendEmbedAsync(FormattedMessage build)
+    public async Task SendFormattedMessageAsync(FormattedMessage message)
     {
-        await _message.Channel.SendMessageAsync(embed: Convert(build));
+        await _message.Channel.SendMessageAsync(embed: message.Convert());
     }
 
 
@@ -72,6 +87,11 @@ public class DiscordChannelMessageContext : IServiceContext
     {
         var user = _message.Channel.AsGuildChannel()?.Guild.GetUser(userId);
         return user == null ? null : Convert(user);
+    }
+
+    public async Task<ulong> GetAuthorId()
+    {
+        return _message.Author.Id;
     }
 
     //TODO: Can probably make these extension functions or something
@@ -94,32 +114,5 @@ public class DiscordChannelMessageContext : IServiceContext
             Url = attachment.Url
         };
     }
-
-    private static Embed Convert(FormattedMessage message)
-    {
-        Color? color = null;
-
-        if (message.Color != null)
-        {
-            var msgColor = (System.Drawing.Color)message.Color;
-            color = new Color(msgColor.R, msgColor.G, msgColor.B);
-        }
-
-        var eb = new EmbedBuilder
-        {
-            Title = message.Title,
-            ImageUrl = message.ImageUrl,
-            Description = message.Description,
-            Color = color,
-            Timestamp = message.Timestamp
-        };
-
-        foreach (var field in message.Fields)
-        {
-            eb.AddField(field.Name, field.Value, field.Inline);
-        }
-
-        return eb.Build();
-    }
-
+    
 }

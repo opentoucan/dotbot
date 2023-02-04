@@ -4,16 +4,16 @@ namespace Dotbot.Common.Factories;
 
 public class BotCommandHandlerFactory : IBotCommandHandlerFactory
 {
-    private readonly IList<IBotCommandHandler> _handlers;
+    private readonly IList<BotCommandHandler> _handlers;
 
-    public BotCommandHandlerFactory(IEnumerable<IBotCommandHandler> handlers)
+    public BotCommandHandlerFactory(IEnumerable<BotCommandHandler> handlers)
     {
         _handlers = handlers.ToList();
     }
 
-    public IBotCommandHandler GetCommand(string str)
+    public BotCommandHandler GetCommand(string str, Privilege privilege = Privilege.Base)
     {
         var commandType = CommandType.FromDisplayName(str);
-        return _handlers.First(x => commandType.Equals(x.CommandType));
+        return _handlers.First(x => commandType.Equals(x.CommandType) && x.PrivilegeLevel == privilege);
     }
 }

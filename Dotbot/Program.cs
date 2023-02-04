@@ -3,6 +3,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Dotbot.Common.CommandHandlers;
+using Dotbot.Common.CommandHandlers.Moderator;
 using Dotbot.Common.Factories;
 using Dotbot.Common.Services;
 using Dotbot.Common.Settings;
@@ -63,24 +64,30 @@ internal static class Program
         builder.Services.AddSingleton<IAudioService, AudioService>();
         builder.Services.AddSingleton<IPersistentSettingsService, PersistentSettingsService>();
         builder.Services.AddSingleton<IXkcdService, XkcdService>();
+        builder.Services.AddSingleton<IChatServerService, ChatServerService>();
         builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
         builder.Services.AddSingleton<InteractionHandler>();
         builder.Services.AddSingleton<MessageReceivedEventListener>();
+        builder.Services.AddSingleton<IHostedService, XkcdHostedService>();
         builder.Services.AddHttpClient<SaveBotCommandHandler>();
         builder.Services.AddHttpClient<XkcdService>();
         
         //TODO: .AddImplementingInterfaces
         builder.Services.AddTransient<IFileService, FileService>();
-        builder.Services.AddTransient<IBotCommandHandler, DefaultBotCommandHandler>();
-        builder.Services.AddTransient<IBotCommandHandler, PingBotCommandHandler>();
-        builder.Services.AddTransient<IBotCommandHandler, SaveBotCommandHandler>();
-        builder.Services.AddTransient<IBotCommandHandler, SavedCommandHandler>();
-        builder.Services.AddTransient<IBotCommandHandler, AvatarCommandHandler>();
-        builder.Services.AddTransient<IBotCommandHandler, XkcdBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, DefaultBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, PingBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SaveBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SavedCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, AvatarCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, XkcdBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, AddModeratorCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, RemoveModeratorCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
         builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
         builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
         builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();
         builder.Services.AddTransient<IPersistentSettingsRepository, PersistentSettingsRepository>();
+        builder.Services.AddTransient<IXkcdSenderService, DiscordXkcdSenderService>();
         builder.Services.AddSingleton<DbContext>(c =>
             new DbContext(c.GetRequiredService<IMongoCollection<BotCommand>>(),
                 c.GetRequiredService<IMongoCollection<ChatServer>>(), 
@@ -103,7 +110,7 @@ internal static class Program
 
         //app.MapControllers();
 
-        var client = ClientEventRegistrations.RegisterClientEvents(app.Services);
+        var client = app.Services.RegisterClientEvents();
         
         await app.Services.GetRequiredService<InteractionHandler>()
             .InitializeAsync();
@@ -115,4 +122,5 @@ internal static class Program
         await client.SetGameAsync("Getting re-written in .NET");
         await app.RunAsync();
     }
+    
 }

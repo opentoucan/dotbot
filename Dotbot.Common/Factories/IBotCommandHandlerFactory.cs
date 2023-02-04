@@ -4,5 +4,5 @@ namespace Dotbot.Common.Factories;
 
 public interface IBotCommandHandlerFactory
 {
-    IBotCommandHandler GetCommand(string str);
+    BotCommandHandler GetCommand(string str, Privilege privilege = Privilege.Base);
 }

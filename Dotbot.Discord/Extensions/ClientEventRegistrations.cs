@@ -6,7 +6,7 @@ namespace Dotbot.Discord.Extensions;
 
 public static class ClientEventRegistrations
 {
-    public static DiscordSocketClient RegisterClientEvents(IServiceProvider serviceProvider)
+    public static DiscordSocketClient RegisterClientEvents(this IServiceProvider serviceProvider)
     {
         var client = serviceProvider.GetRequiredService<DiscordSocketClient>();
         var messageReceivedEventListener = serviceProvider.GetRequiredService<MessageReceivedEventListener>();

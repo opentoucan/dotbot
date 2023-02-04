@@ -30,4 +30,36 @@ public class ChatServerRepository : IChatServerRepository
         await _dbContext.ChatServers.InsertOneAsync(new ChatServer(serverId));
         return await GetServerAsync(serverId);
     }
+
+    public async Task AddModId(string serverId, string modId)
+    {
+        var filter = Builders<ChatServer>.Filter.Where(x => x.ServiceId == serverId);
+        var update = Builders<ChatServer>.Update.Push(u => u.ModeratorIds, modId);
+        await _dbContext.ChatServers.UpdateOneAsync(filter, update);
+    }
+
+    public async Task RemoveModId(string serverId, string modId)
+    {
+        var filter = Builders<ChatServer>.Filter.Where(x => x.ServiceId == serverId);
+        var update = Builders<ChatServer>.Update.Pull(u => u.ModeratorIds, modId);
+        await _dbContext.ChatServers.UpdateOneAsync(filter, update);
+    }
+    public async Task SetXkcdChannelId(string serverId, string channelId)
+    {
+        var filter = Builders<ChatServer>.Filter.Where(x => x.ServiceId == serverId);
+        var update = Builders<ChatServer>.Update.Set(u => u.XkcdChannelId, channelId);
+        await _dbContext.ChatServers.UpdateOneAsync(filter, update);
+    }
+    
+    public async Task UnSetXkcdChannelId(string serverId)
+    {
+        var filter = Builders<ChatServer>.Filter.Where(x => x.ServiceId == serverId);
+        var update = Builders<ChatServer>.Update.Unset(u => u.XkcdChannelId);
+        await _dbContext.ChatServers.UpdateOneAsync(filter, update);
+    }
+
+    public async Task<Result<List<ChatServer>>> GetAll()
+    {
+        return Result.Ok(_dbContext.ChatServers.AsQueryable().ToList());
+    }
 }

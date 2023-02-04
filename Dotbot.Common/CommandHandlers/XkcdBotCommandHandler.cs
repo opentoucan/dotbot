@@ -5,21 +5,25 @@ using FluentResults;
 
 namespace Dotbot.Common.CommandHandlers;
 
-public class XkcdBotCommandHandler: IBotCommandHandler
+public class XkcdBotCommandHandler: BotCommandHandler
 {
     public XkcdBotCommandHandler(IXkcdService xkcdService)
     {
         _xkcdService = xkcdService;
     }
-    public CommandType CommandType => CommandType.Xkcd;
+    public override CommandType CommandType => CommandType.Xkcd;
+    public override Privilege PrivilegeLevel => Privilege.Base;
+
 
     private readonly IXkcdService _xkcdService;
     
-    public async Task<Result> HandleAsync(string content, IServiceContext context)
+    protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
         var strings = content.Split(' ');
         Result<XkcdComic> comic;
-        if (strings.Length > 1 && int.TryParse(strings[1], out var comicNum))
+        var comicNum = 0;
+        var hasComicNum = strings.Length > 1 && int.TryParse(strings[1], out comicNum);
+        if (hasComicNum)
         {
             comic = await _xkcdService.GetComic(comicNum);
         }
@@ -30,7 +34,7 @@ public class XkcdBotCommandHandler: IBotCommandHandler
 
         if (comic.IsFailed)
         {
-            await context.SendEmbedAsync(new FormattedMessage
+            await context.SendFormattedMessageAsync(new FormattedMessage
             {
                 Color = Color.Red,
                 Description = "Failed to retrieve latest comic",
@@ -39,33 +43,7 @@ public class XkcdBotCommandHandler: IBotCommandHandler
             return Result.Fail("Failed to retrieve latest comic");
         }
 
-        await context.SendEmbedAsync(new FormattedMessage
-        {
-            ImageUrl = comic.Value.Img,
-            Title = $"XKCD: #{comic.Value.Num}",
-            Color = Color.FromArgb(157,3, 252),
-            Fields = new List<FormattedMessage.Field>
-            {
-                new()
-                {
-                    Name = "Title",
-                    Value = comic.Value.Title,
-                    Inline = true
-                },
-                new()
-                {
-                    Name = "Published",
-                    Value = $"{comic.Value.Day}/{comic.Value.Month}/{comic.Value.Year}",
-                    Inline = true
-                },
-                new()
-                {
-                    Name = "Alt Text",
-                    Value = comic.Value.Alt,
-                    Inline = true
-                }
-            }
-        });
+        await context.SendFormattedMessageAsync(FormattedMessage.XkcdMessage(comic.Value, !hasComicNum));
         return Result.Ok();
     }
 }
