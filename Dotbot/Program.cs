@@ -2,77 +2,125 @@ using System.Reflection;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Dotbot.Common.CommandHandlers;
+using Dotbot.Common.CommandHandlers.Moderator;
+using Dotbot.Common.Factories;
+using Dotbot.Common.Services;
+using Dotbot.Common.Settings;
+using Dotbot.Database;
+using Dotbot.Database.Entities;
+using Dotbot.Database.Extensions;
+using Dotbot.Database.Repositories;
+using Dotbot.Database.Services;
+using Dotbot.Database.Settings;
 using Dotbot.Discord.EventListeners;
-using Dotbot.Discord.Models;
+using Dotbot.Discord.Extensions;
 using Dotbot.Discord.InteractionHandler;
 using Dotbot.Discord.Services;
-using Dotbot.Extensions.Discord;
-using Dotbot.Extensions.MongoDb;
 using MediatR;
+using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace Dotbot;
 
-// Add services to the container.
-
-//builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-
-
-// var section = builder.Configuration.GetSection("MongoDbSettings");
-//
-// var settings = MongoClientSettings.FromConnectionString(section["ConnectionString"]);
-//
-// var mongoClient = new MongoClient(settings);
-//
-// var collection = mongoClient.GetDatabase("test").GetCollection<ChatServer>("springGuild");
-//
-// var ourServer = collection.AsQueryable().FirstOrDefault(x => x.ServiceId == "632651372260753458");
-
-//Discord registrations
-var discordConfig = new DiscordSocketConfig()
+internal static class Program
 {
-    GatewayIntents = GatewayIntents.AllUnprivileged  | GatewayIntents.GuildMembers | GatewayIntents.MessageContent | GatewayIntents.GuildVoiceStates,
-    AlwaysDownloadUsers = true,
-};
-builder.Services.AddSingleton(discordConfig);
-builder.Services.AddSingleton<DiscordSocketClient>();
-builder.Services.AddSingleton<IAudioService, AudioService>();
-builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
-builder.Services.AddSingleton<InteractionHandler>();
-builder.Services.AddSingleton<MessageReceivedEventListener>();
+    public static async Task Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+        // Add services to the container.
 
-builder.Services.AddMongoDbCollection<ChatServer, ChatServerClassMapExtension>(new ChatServerClassMapExtension());
-builder.Services.AddMongoDbCollection<DiscordCommand, DiscordCommandClassMapExtension>(new DiscordCommandClassMapExtension());
+        //builder.Services.AddControllers();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        //builder.Services.AddEndpointsApiExplorer();
+        //builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
+        var section = builder.Configuration.GetSection("MongoDbSettings");
+        var settings = MongoClientSettings.FromConnectionString(section["ConnectionString"]);
+        var mongoClient = new MongoClient(settings);
 
-//app.UseHttpsRedirection();
+        //Discord registrations
+        var discordConfig = new DiscordSocketConfig()
+        {
+            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers |
+                             GatewayIntents.MessageContent | GatewayIntents.GuildVoiceStates,
+            AlwaysDownloadUsers = true,
+        };
+        //builder.Services.AddSingleton<IMongoClient>(mongoClient);
+        var db = mongoClient.GetDatabase("test");
+        builder.Services.AddSingleton(db);
+        builder.Services.AddSingleton<IGridFSBucket>(new GridFSBucket(db));
+        builder.Services.AddMongoDbCollection<ChatServer, ChatServerClassMapExtension>("springGuild", new ChatServerClassMapExtension());
+        builder.Services.AddMongoDbCollection<BotCommand, DiscordCommandClassMapExtension>("DiscordCommands", new DiscordCommandClassMapExtension());
+        builder.Services.AddMongoDbCollection<PersistentSetting, PersistentSettingClassMapExtension>("PersistentSettings", new PersistentSettingClassMapExtension());
+        
+        builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+        builder.Services.Configure<BotSettings>(builder.Configuration.GetSection("BotSettings"));
+        
+        builder.Services.AddSingleton(discordConfig);
+        builder.Services.AddSingleton<DiscordSocketClient>();
+        builder.Services.AddSingleton<IAudioService, AudioService>();
+        builder.Services.AddSingleton<IPersistentSettingsService, PersistentSettingsService>();
+        builder.Services.AddSingleton<IXkcdService, XkcdService>();
+        builder.Services.AddSingleton<IChatServerService, ChatServerService>();
+        builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
+        builder.Services.AddSingleton<InteractionHandler>();
+        builder.Services.AddSingleton<MessageReceivedEventListener>();
+        builder.Services.AddSingleton<IHostedService, XkcdHostedService>();
+        builder.Services.AddHttpClient<SaveBotCommandHandler>();
+        builder.Services.AddHttpClient<XkcdService>();
+        
+        //TODO: .AddImplementingInterfaces
+        builder.Services.AddTransient<IFileService, FileService>();
+        builder.Services.AddTransient<BotCommandHandler, DefaultBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, PingBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SaveBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SavedCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, AvatarCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, XkcdBotCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, AddModeratorCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, RemoveModeratorCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
+        builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
+        builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
+        builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();
+        builder.Services.AddTransient<IPersistentSettingsRepository, PersistentSettingsRepository>();
+        builder.Services.AddTransient<IXkcdSenderService, DiscordXkcdSenderService>();
+        builder.Services.AddSingleton<DbContext>(c =>
+            new DbContext(c.GetRequiredService<IMongoCollection<BotCommand>>(),
+                c.GetRequiredService<IMongoCollection<ChatServer>>(), 
+                c.GetRequiredService<IMongoCollection<PersistentSetting>>()));
+        
+        builder.Services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
-//app.UseAuthorization();
+        var app = builder.Build();
+        
+        // Configure the HTTP request pipeline.
+        //if (app.Environment.IsDevelopment())
+        //{
+        //    app.UseSwagger();
+        //    app.UseSwaggerUI();
+        //}
 
-//app.MapControllers();
+        //app.UseHttpsRedirection();
 
-var client = ClientEventRegistrations.RegisterClientEvents(app.Services);
+        //app.UseAuthorization();
 
-await app.Services.GetRequiredService<InteractionHandler>()
-    .InitializeAsync();
+        //app.MapControllers();
 
-//var listener = app.Services.GetRequiredService<DiscordEventListener>();
-//await listener.StartAsync();
-await client.LoginAsync(TokenType.Bot, builder.Configuration["Discord:BotToken"]);
-await client.StartAsync();
-app.Run();
+        var client = app.Services.RegisterClientEvents();
+        
+        await app.Services.GetRequiredService<InteractionHandler>()
+            .InitializeAsync();
 
-//await Task.Delay(Timeout.Infinite);
+        //var listener = app.Services.GetRequiredService<DiscordEventListener>();
+        //await listener.StartAsync();
+        await client.LoginAsync(TokenType.Bot, builder.Configuration["Discord:BotToken"]);
+        await client.StartAsync();
+        await client.SetGameAsync("Getting re-written in .NET");
+        await app.RunAsync();
+    }
+    
+}

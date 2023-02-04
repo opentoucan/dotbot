@@ -2,7 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot", "Dotbot\Dotbot.csproj", "{9DFF2272-E298-45A2-97B7-28E3C98A30BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Infrastructure", "Dotbot.Infrastructure\Dotbot.Infrastructure.csproj", "{099AB7AF-A6E9-46FE-9B53-5F136BC32964}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Database", "Dotbot.Database\Dotbot.Database.csproj", "{7CD7C3A8-AF29-4759-8574-7D05449193F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Common", "Dotbot.Common\Dotbot.Common.csproj", "{A3E79AF3-71DF-4DAD-9646-9F76E60BAAD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Discord", "Dotbot.Discord\Dotbot.Discord.csproj", "{7536E5FF-8244-453C-B8E2-393B4E62C67A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,9 +18,17 @@ Global
 		{9DFF2272-E298-45A2-97B7-28E3C98A30BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DFF2272-E298-45A2-97B7-28E3C98A30BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DFF2272-E298-45A2-97B7-28E3C98A30BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{099AB7AF-A6E9-46FE-9B53-5F136BC32964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{099AB7AF-A6E9-46FE-9B53-5F136BC32964}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{099AB7AF-A6E9-46FE-9B53-5F136BC32964}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{099AB7AF-A6E9-46FE-9B53-5F136BC32964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CD7C3A8-AF29-4759-8574-7D05449193F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CD7C3A8-AF29-4759-8574-7D05449193F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CD7C3A8-AF29-4759-8574-7D05449193F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CD7C3A8-AF29-4759-8574-7D05449193F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3E79AF3-71DF-4DAD-9646-9F76E60BAAD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3E79AF3-71DF-4DAD-9646-9F76E60BAAD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3E79AF3-71DF-4DAD-9646-9F76E60BAAD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3E79AF3-71DF-4DAD-9646-9F76E60BAAD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
