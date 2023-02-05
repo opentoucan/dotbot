@@ -34,12 +34,7 @@ public class XkcdBotCommandHandler: BotCommandHandler
 
         if (comic.IsFailed)
         {
-            await context.SendFormattedMessageAsync(new FormattedMessage
-            {
-                Color = Color.Red,
-                Description = "Failed to retrieve latest comic",
-                Title = "Error"
-            });
+            await context.SendFormattedMessageAsync(FormattedMessage.Error("Failed to retrieve latest comic"));
             return Result.Fail("Failed to retrieve latest comic");
         }
 

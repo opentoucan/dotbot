@@ -61,7 +61,7 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
            {
                _logger.LogError("Failed to execute handler: {}", string.Join(", ", executionResult.Errors));
                await context.SendFormattedMessageAsync(
-                   FormattedMessage.ErrorMessage(
+                   FormattedMessage.Error(
                        "Command could not be executed, this may be due to insufficient permissions"));
            }
            

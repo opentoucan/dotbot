@@ -3,10 +3,11 @@ using Dotbot.Common.Models;
 using Dotbot.Database.Entities;
 using Dotbot.Database.Repositories;
 using FluentResults;
+using static FluentResults.Result;
 
 namespace Dotbot.Common.CommandHandlers;
 
-public class SavedCommandHandler: BotCommandHandler
+public class SavedCommandHandler : BotCommandHandler
 {
     private const int MaxPageSize = 20;
     private readonly IBotCommandRepository _botCommandRepository;
@@ -27,9 +28,7 @@ public class SavedCommandHandler: BotCommandHandler
         if (split.Length > 1 && !int.TryParse(split[1], out page)) page = 1;
 
         var countDbResult = await _botCommandRepository.GetCommandCount();
-
-        var formattedMessage = new FormattedMessage();
-
+        
         if (countDbResult.IsSuccess && countDbResult.Value != 0 && page >= 0)
         {
             var commandCount = countDbResult.Value;
@@ -38,37 +37,36 @@ public class SavedCommandHandler: BotCommandHandler
 
             if (page <= pages)
             {
-                formattedMessage.Title = "Saved commands";
-                formattedMessage.Description = $"Page {page} of {pages} pages ({commandCount} saved commands)";
-                formattedMessage.Color = Color.FromArgb(157, 3, 252);
-
+                var formattedMessage = FormattedMessage
+                    .Info()
+                    .SetTitle("Saved Commands")
+                    .SetDescription($"Page {page} of {pages} pages ({commandCount} saved commands)")
+                    .SetColor(Color.FromArgb(157, 3, 252));
+                
                 var commands = await _botCommandRepository.GetCommands(page - 1, MaxPageSize);
 
                 if (commands.IsSuccess)
                 {
-                    formattedMessage.Fields.AddRange(commands.Value.Select(x => new FormattedMessage.Field
-                    {
-                        Name = x.Key,
-                        Value = x.Type == BotCommand.CommandType.FILE ? x.FileName : x.Content
-                    }).ToList());
+                    commands.Value.ForEach(x =>
+                        formattedMessage.AddField(x.Key,
+                            x.Type == BotCommand.CommandType.FILE ? x.FileName : x.Content));
                 }
+                await context.SendFormattedMessageAsync(formattedMessage);
             }
             else
             {
-                formattedMessage.Title = "Error";
-                formattedMessage.Color = Color.Red;
-                formattedMessage.Description = "Invalid page";  
+                const string error = "Invalid page";
+                await context.SendFormattedMessageAsync(FormattedMessage.Error(error));
+                return Fail(error);
             }
         }
         else
         {
-            formattedMessage.Title = "Error";
-            formattedMessage.Color = Color.Red;
-            formattedMessage.Description = page < 0 ? "Invalid page" : "No commands found";  
+            var error = page < 0 ? "Invalid page" : "No commands found";
+            await context.SendFormattedMessageAsync(FormattedMessage.Error(error));
+            return Fail(error);
         }
-        
-        await context.SendFormattedMessageAsync(formattedMessage);
 
-        return Result.Ok();
+        return Ok();
     }
 }

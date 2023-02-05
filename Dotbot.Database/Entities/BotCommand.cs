@@ -17,4 +17,8 @@ public class BotCommand : Entity
     
     public CommandType Type { get; set; }
     
+    public string? CreatorId { get; set; }
+    
+    public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
+    
 }

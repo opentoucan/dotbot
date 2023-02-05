@@ -13,6 +13,7 @@ public class CommandType : Enumeration
     public static CommandType AddModerator = new(6, nameof(AddModerator));
     public static CommandType RemoveModerator = new(7, nameof(RemoveModerator));
     public static CommandType SetXkcdChannel = new(8, nameof(SetXkcdChannel));
+    public static CommandType Info = new(8, nameof(Info));
     public CommandType(int id, string name) : base(id, name)
     {
         

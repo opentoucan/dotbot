@@ -23,7 +23,7 @@ public class RemoveModeratorCommandHandler : BotCommandHandler
 
         if (mentions.Count == 0)
         {
-            await context.SendFormattedMessageAsync(ErrorMessage("No users provided"));
+            await context.SendFormattedMessageAsync(Error("No users provided"));
             return Fail("No users provided");
         }
 
@@ -34,7 +34,7 @@ public class RemoveModeratorCommandHandler : BotCommandHandler
             var result = await _chatServerService.RemoveModerator(serverId, mention.Id.ToString());
             if (result.IsFailed)
             {
-                await context.SendFormattedMessageAsync(ErrorMessage(result.Errors));
+                await context.SendFormattedMessageAsync(Error(result.Errors));
                 return Fail(result.Reasons.ToString());
             }
         }

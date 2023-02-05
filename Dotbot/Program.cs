@@ -83,6 +83,7 @@ internal static class Program
         builder.Services.AddTransient<BotCommandHandler, AddModeratorCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, RemoveModeratorCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, InfoCommandHandler>();
         builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
         builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
         builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();

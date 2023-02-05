@@ -20,6 +20,10 @@ public class DiscordCommandClassMapExtension : IClassMapExtension
                 .SetElementName("fileName");
             cm.MapMember(m => m.Type)
                 .SetElementName("type");
+            cm.MapMember(m => m.CreatorId)
+                .SetElementName("creatorId");
+            cm.MapMember(m => m.Created)
+                .SetElementName("created");
         });
     }
 }

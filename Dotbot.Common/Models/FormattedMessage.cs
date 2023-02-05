@@ -7,12 +7,11 @@ namespace Dotbot.Common.Models;
 public class FormattedMessage
 {
     public string Title { get; set; }
-
     public DateTimeOffset? Timestamp { get; set; }
-    public string ImageUrl { get; init; }
-    public string Description { get; set; }
+    public string?ImageUrl { get; set; }
+    public string? Description { get; set; }
     public Color? Color { get; set; }
-    public List<Field> Fields { get; set; } = new();
+    public List<Field> Fields { get; private init; } = new();
 
     //TODO: Footer, Author, Header
 
@@ -20,11 +19,52 @@ public class FormattedMessage
     {
         public string Name { get; set; }
         public string? Value { get; set; }
-
         public bool Inline { get; set; } = false;
     }
 
-    public static FormattedMessage Info(string message)
+    private FormattedMessage()
+    {
+        
+    }
+    
+    public FormattedMessage SetTitle(string title)
+    {
+        Title = title;
+        return this;
+    }
+
+    public FormattedMessage SetImage(string url)
+    {
+        ImageUrl = url;
+        return this;
+    }
+
+    public FormattedMessage SetDescription(string description)
+    {
+        Description = description;
+        return this;
+    }
+
+    public FormattedMessage AddField(string name, string value, bool inline = false)
+    {
+        Fields.Add(new Field
+        {
+            Name = name,
+            Value = value,
+            Inline = inline
+        });
+        return this;
+    }
+
+    public FormattedMessage SetColor(Color color)
+    {
+        Color = color;
+        return this;
+    }
+    
+
+    
+    public static FormattedMessage Info(string? message = null)
     {
         return new FormattedMessage
         {
@@ -44,7 +84,7 @@ public class FormattedMessage
         };
     }
     
-    public static FormattedMessage ErrorMessage(string message)
+    public static FormattedMessage Error(string? message = null)
     {
         return new FormattedMessage
         {
@@ -54,7 +94,7 @@ public class FormattedMessage
         };
     }
     
-    public static FormattedMessage ErrorMessage(IEnumerable<IError> errors)
+    public static FormattedMessage Error(IEnumerable<IError> errors)
     {
         var errorNum = 1;
         return new FormattedMessage
@@ -95,5 +135,6 @@ public class FormattedMessage
             }
         };
     }
-    
+
+
 }
