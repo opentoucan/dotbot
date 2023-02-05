@@ -34,6 +34,7 @@ public class SaveBotCommandHandler : BotCommandHandler
 
             var serverId = await context.GetServerId();
 
+            //TODO: This should really be called in the Commands service
             var fileUploadResult = await _fileService.SaveFile($"{serverId}:{attachments.Filename}:{key}", fileStream);
             if (fileUploadResult.IsFailed) return Fail(fileUploadResult.Errors);
 

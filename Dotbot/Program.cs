@@ -65,6 +65,7 @@ internal static class Program
         builder.Services.AddSingleton<IPersistentSettingsService, PersistentSettingsService>();
         builder.Services.AddSingleton<IXkcdService, XkcdService>();
         builder.Services.AddSingleton<IChatServerService, ChatServerService>();
+        builder.Services.AddSingleton<IBotCommandsService, BotCommandsService>();
         builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
         builder.Services.AddSingleton<InteractionHandler>();
         builder.Services.AddSingleton<MessageReceivedEventListener>();
@@ -84,6 +85,7 @@ internal static class Program
         builder.Services.AddTransient<BotCommandHandler, RemoveModeratorCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, InfoCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, SearchCommandHandler>();
         builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
         builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
         builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();

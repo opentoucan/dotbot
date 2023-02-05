@@ -1,6 +1,7 @@
 ﻿using Dotbot.Database.Entities;
 using FluentResults;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using static FluentResults.Result;
 
 namespace Dotbot.Database.Repositories;
@@ -74,13 +75,13 @@ public class BotCommandRepository : IBotCommandRepository
         return Ok();
     }
 
-    public async Task<Result<List<BotCommand>>> GetCommands(int page, int pageSize)
+    public async Task<Result<List<BotCommand>>> GetCommands(string serverId, int page, int pageSize)
     {
         if (pageSize < 0)
             return Fail($"Invalid {nameof(pageSize)} {pageSize}");
 
         var commands = await _dbContext.BotCommands
-            .Find(Builders<BotCommand>.Filter.Empty)
+            .Find(OnServerId(serverId))
             .SortBy(x => x.Key)
             .Skip(page * pageSize)
             .Limit(pageSize)
@@ -88,9 +89,17 @@ public class BotCommandRepository : IBotCommandRepository
         return Ok(commands);
     }
 
-    public async Task<Result<long>> GetCommandCount()
+    public async Task<Result<long>> GetCommandCount(string serverId)
     {
-        var count = await _dbContext.BotCommands.CountDocumentsAsync(FilterDefinition<BotCommand>.Empty);
+        var count = await _dbContext.BotCommands.CountDocumentsAsync(Builders<BotCommand>.Filter.Where(x => x.ServiceId == serverId));
         return Ok(count);
     }
+
+    public async Task<Result<List<string>>> GetAllNames(string serverId)
+    {
+        return Ok(await _dbContext.BotCommands.AsQueryable().Where(x => x.ServiceId == serverId).Select(x => x.Key).ToListAsync());
+    }
+    
+    private static FilterDefinition<BotCommand> OnServerId(string serverId) =>
+        Builders<BotCommand>.Filter.Where(x => x.ServiceId == serverId);
 }

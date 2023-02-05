@@ -45,6 +45,12 @@ public class FormattedMessage
         return this;
     }
 
+    public FormattedMessage AppendDescription(string description)
+    {
+        Description += $"\n{description}";
+        return this;
+    }
+
     public FormattedMessage AddField(string name, string value, bool inline = false)
     {
         Fields.Add(new Field

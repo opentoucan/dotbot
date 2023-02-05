@@ -27,7 +27,9 @@ public class SavedCommandHandler : BotCommandHandler
 
         if (split.Length > 1 && !int.TryParse(split[1], out page)) page = 1;
 
-        var countDbResult = await _botCommandRepository.GetCommandCount();
+        var serverId = await context.GetServerId();
+
+        var countDbResult = await _botCommandRepository.GetCommandCount(serverId);
         
         if (countDbResult.IsSuccess && countDbResult.Value != 0 && page >= 0)
         {
@@ -43,7 +45,7 @@ public class SavedCommandHandler : BotCommandHandler
                     .SetDescription($"Page {page} of {pages} pages ({commandCount} saved commands)")
                     .SetColor(Color.FromArgb(157, 3, 252));
                 
-                var commands = await _botCommandRepository.GetCommands(page - 1, MaxPageSize);
+                var commands = await _botCommandRepository.GetCommands(serverId, page - 1, MaxPageSize);
 
                 if (commands.IsSuccess)
                 {
