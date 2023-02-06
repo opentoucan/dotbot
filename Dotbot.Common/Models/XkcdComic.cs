@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Dotbot.Common.Services;
+namespace Dotbot.Common.Models;
 
 public class XkcdComic
 {

@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using Dotbot.Common.Models;
 using FluentResults;
 using static FluentResults.Result;
 

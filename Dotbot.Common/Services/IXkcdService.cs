@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using Dotbot.Common.Models;
+using FluentResults;
 
 namespace Dotbot.Common.Services;
 
