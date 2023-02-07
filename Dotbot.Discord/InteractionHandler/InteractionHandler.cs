@@ -28,7 +28,7 @@ public class InteractionHandler
             _handler.Log += LogAsync;
 
             // Add the public modules that inherit InteractionModuleBase<T> to the InteractionService
-            await _handler.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            await _handler.AddModulesAsync(Assembly.GetExecutingAssembly(), _services);
 
             // Process the InteractionCreated payloads to execute Interactions commands
             _client.InteractionCreated += HandleInteraction;

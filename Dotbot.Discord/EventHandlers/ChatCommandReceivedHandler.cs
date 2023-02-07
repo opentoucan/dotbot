@@ -54,16 +54,24 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
         if (handler != null)
         {
             var context = new DiscordChannelMessageContext(notification.Message, server);
-            var executionResult = await handler.HandleAsync(
-                notification.Message.Content[1..], context);
+            try
+            {
+                var executionResult = await handler.HandleAsync(
+                    notification.Message.Content[1..], context);
 
-           if (executionResult.IsFailed)
-           {
-               var errs = string.Join(", ",executionResult.Errors.Select(x => x.Message));
-               _logger.LogError("Failed to execute handler: {}", errs);
-               await context.SendFormattedMessageAsync(FormattedMessage.Error(errs));
-           }
-           
+                if (executionResult.IsFailed)
+                {
+                    var errs = string.Join(", ",executionResult.Errors.Select(x => x.Message));
+                    _logger.LogError("Failed to execute handler: {}", errs);
+                    await context.SendFormattedMessageAsync(FormattedMessage.Error(errs));
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                await context.SendFormattedMessageAsync(FormattedMessage.Error(e.Message));
+            }
+            
         }
         
     }

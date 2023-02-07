@@ -15,12 +15,13 @@ public class CommandType : Enumeration
     public static CommandType SetXkcdChannel = new(8, nameof(SetXkcdChannel));
     public static CommandType Info = new(8, nameof(Info));
     public static CommandType Search = new(9, nameof(Search));
+    public static CommandType Play = new(10, nameof(Play));
 
     public CommandType(int id, string name) : base(id, name)
     {
         
     }
-    
+
     public static CommandType FromDisplayName(string displayName)
     {
         var matchingItem = GetAll<CommandType>().FirstOrDefault(item => item.Name.Equals(displayName, StringComparison.InvariantCultureIgnoreCase));

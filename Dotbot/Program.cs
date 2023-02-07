@@ -13,6 +13,7 @@ using Dotbot.Database.Extensions;
 using Dotbot.Database.Repositories;
 using Dotbot.Database.Services;
 using Dotbot.Database.Settings;
+using Dotbot.Discord.CommandHandlers;
 using Dotbot.Discord.EventListeners;
 using Dotbot.Discord.Extensions;
 using Dotbot.Discord.InteractionHandler;
@@ -86,6 +87,7 @@ internal static class Program
         builder.Services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, InfoCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, SearchCommandHandler>();
+        builder.Services.AddTransient<BotCommandHandler, PlayMusicHandler>();
         builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
         builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
         builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();

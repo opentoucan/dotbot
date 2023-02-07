@@ -7,7 +7,14 @@ using Dotbot.Discord.Extensions;
 
 namespace Dotbot.Discord.CommandHandlers;
 
-public class DiscordChannelMessageContext : IServiceContext
+internal interface IDiscordChannelMessageContext : IServiceContext
+{
+    internal IGuild? GetGuild();
+    internal IVoiceState? GetUserVoiceState();
+    IMessageChannel? GetChannel();
+}
+
+public class DiscordChannelMessageContext : IDiscordChannelMessageContext
 {
     private readonly SocketMessage _message;
     private readonly ChatServer? _guild;
@@ -114,5 +121,20 @@ public class DiscordChannelMessageContext : IServiceContext
             Url = attachment.Url
         };
     }
-    
+
+    public IGuild? GetGuild()
+    {
+        return _message.Channel.AsGuildChannel()?.Guild;
+    }
+
+    public IVoiceState? GetUserVoiceState()
+    {
+        if (_message.Author is IVoiceState vs) return vs;
+        return null;
+    }
+
+    public IMessageChannel? GetChannel()
+    {
+        return _message.Channel;
+    }
 }

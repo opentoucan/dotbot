@@ -7,7 +7,7 @@ public interface IAudioService
 {
     Task JoinAudio(IGuild guild, IVoiceChannel target);
     Task LeaveAudio(IGuild guild);
-    Task SendAudioAsync(IGuild guild, IMessageChannel channel);
+    Task SendAudioAsync(string guid, IGuild guild, IMessageChannel channel);
     Task Skip(SocketGuild contextGuild, ISocketMessageChannel contextChannel);
     Task EnqueueAudio(IGuild guild, IMessageChannel channel, string url);
 }
