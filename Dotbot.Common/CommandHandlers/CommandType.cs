@@ -16,6 +16,7 @@ public class CommandType : Enumeration
     public static CommandType Info = new(8, nameof(Info));
     public static CommandType Search = new(9, nameof(Search));
     public static CommandType Play = new(10, nameof(Play));
+    public static CommandType Skip = new(11, nameof(Skip));
 
     public CommandType(int id, string name) : base(id, name)
     {

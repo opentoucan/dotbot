@@ -41,9 +41,9 @@ public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
         [SlashCommand("play", "play music",false, RunMode.Async)]
         public async Task PlayCmd([Remainder] string song)
         {
-            await _audioService.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+            //await _audioService.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
             await RespondAsync($"Playing audio");
-            await _audioService.EnqueueAudio(Context.Guild, Context.Channel, song);
+            await _audioService.EnqueueAudioThread(Context.Guild, (Context.User as IVoiceState).VoiceChannel, Context.Channel, song);
         }
         
         [SlashCommand("skip", "Skip current track",false, RunMode.Async)]

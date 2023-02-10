@@ -6,30 +6,25 @@ using static FluentResults.Result;
 
 namespace Dotbot.Discord.CommandHandlers;
 
-public class PlayMusicHandler : BotCommandHandler
+public class SkipMusicHandler : BotCommandHandler
 {
     private readonly IAudioService _audioService;
 
-    public PlayMusicHandler(IAudioService audioService)
+    public SkipMusicHandler(IAudioService audioService)
     {
         _audioService = audioService;
     }
 
-    public override CommandType CommandType => CommandType.Play;
+    public override CommandType CommandType => CommandType.Skip;
     public override Privilege PrivilegeLevel => Privilege.Base;
 
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
         if (context is not IDiscordChannelMessageContext discordContext) return Fail("Not in discord context");
         
-        var split = content.Split(' ');
         var guild = discordContext.GetGuild();
-        var userVoiceState = discordContext.GetUserVoiceState();
-
-        await _audioService.EnqueueAudioThread(guild, userVoiceState.VoiceChannel, discordContext.GetChannel(),
-            split[1]);
-            
-        await context.SendFormattedMessageAsync(FormattedMessage.Info($"Playing {split[1]}"));
+        //TODO: Check user is in audio channel
+        await _audioService.Skip(guild, discordContext.GetChannel());
         return Ok();
 
     }

@@ -52,24 +52,32 @@ public class AudioService : IAudioService
         }
     }
 
-    public async Task EnqueueAudio(IGuild guild, IMessageChannel channel, string url)
+    public async Task EnqueueAudioThread(IGuild guild, IVoiceChannel voiceChannel, IMessageChannel channel, string url)
     {
+        //This must be run in a new thread otherwise it might block the main thread and cause all sorts of headeaches
+        Task.Run(() => EnqueueAudio(guild, voiceChannel, channel, url));
+    }
+    
+    private async Task EnqueueAudio(IGuild guild, IVoiceChannel voiceChannel, IMessageChannel channel, string url)
+    {
+        await JoinAudio(guild, voiceChannel);
+        
         var guid = Guid.NewGuid().ToString();
-        await LogToChannel(nameof(EnqueueAudio), guid, "", channel);
+        await LogToChannel(nameof(EnqueueAudioThread), guid, "", channel);
         _logger.LogDebug("Add {} to queue for {}", url, guild.Id);
         if (!_audioQueue.ContainsKey(guild.Id))
         {
-            await LogToChannel(nameof(EnqueueAudio), guid, "Add new queue for guild", channel);
+            await LogToChannel(nameof(EnqueueAudioThread), guid, "Add new queue for guild", channel);
             _audioQueue.TryAdd(guild.Id, new ConcurrentQueue<string>(new[] { url }));
         }
         else
         {
             _audioQueue[guild.Id].Enqueue(url);
-            await LogToChannel(nameof(EnqueueAudio), guid,
+            await LogToChannel(nameof(EnqueueAudioThread), guid,
                 $"Adding to existing queue Size: {_audioQueue[guild.Id].Count}", channel);
         }
 
-        await LogToChannel(nameof(EnqueueAudio), guid,
+        await LogToChannel(nameof(EnqueueAudioThread), guid,
             $"Is {(_currentlyPlaying.ContainsKey(guild.Id) ? "" : "Not")} currently playing", channel);
         if (!_currentlyPlaying.ContainsKey(guild.Id))
         {
@@ -77,10 +85,11 @@ public class AudioService : IAudioService
         }
     }
 
-    private static async Task LogToChannel(string source, string guid, string msg, IMessageChannel channel)
+    private async Task LogToChannel(string source, string guid, string msg, IMessageChannel channel)
     {
-        await channel.SendMessageAsync($"<{guid}> {source}(): {msg}");
-        Thread.Sleep(50);
+        _logger.LogInformation($"<{guid}> {source}(): {msg}");
+        // await channel.SendMessageAsync($"<{guid}> {source}(): {msg}");
+        // Thread.Sleep(50);
     }
 
     public async Task SendAudioAsync(string guid, IGuild guild, IMessageChannel channel)
@@ -177,9 +186,13 @@ public class AudioService : IAudioService
                 $"Marked as not currently playing {_currentlyPlaying.ContainsKey(guild.Id)}", channel);
             await LogToChannel(nameof(SendAudioAsync), guid, $"Exiting", channel);
         }
+        else
+        {
+            _logger.LogWarning("No connected audio channel");
+        }
     }
 
-    public async Task Skip(SocketGuild contextGuild, ISocketMessageChannel contextChannel)
+    public async Task Skip(IGuild contextGuild, IMessageChannel contextChannel)
     {
         if (_currentlyPlaying.ContainsKey(contextChannel.Id) &&
             _streamCancellationTokens.TryGetValue(contextGuild.Id, out var csToken))
