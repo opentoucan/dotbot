@@ -1,0 +1,13 @@
+cloudflare_api_token="BEES"
+cloudflare_account_id="BEES"
+tunnel_name="My tunnel na... BEES"
+ingress_rules = [
+    {
+        subdomain="BEES"
+        address="https://BEES.svc.cluster.local"
+    },
+    {
+        subdomain="BEES"
+        address="https://BEESBEES.svc.cluster.local"
+    }
+]
