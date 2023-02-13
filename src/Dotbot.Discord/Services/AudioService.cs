@@ -2,22 +2,26 @@
 using CliWrap;
 using Discord;
 using Discord.Audio;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
 
 namespace Dotbot.Discord.Services;
 
+public class AudioState
+{
+    public readonly Guid Id = Guid.NewGuid();
+    public IAudioClient? Client { get; set; }
+    public CancellationTokenSource? CancellationToken { get; set; }
+    public string? CurrentlyPlaying { get; set; }
+    public ConcurrentQueue<string> AudioQueue { get; } = new();
+}
+
 public class AudioService : IAudioService
 {
     private readonly ILogger _logger;
 
-    private readonly ConcurrentDictionary<ulong, IAudioClient> _connectedChannels = new();
-    private readonly ConcurrentDictionary<ulong, CancellationTokenSource> _streamCancellationTokens = new();
-    private readonly ConcurrentDictionary<ulong, ConcurrentQueue<string>> _audioQueue = new();
-    private readonly ConcurrentDictionary<ulong, string> _currentlyPlaying = new();
-
+    private readonly ConcurrentDictionary<ulong, AudioState> _audioStates = new();
     public AudioService(ILogger<AudioService> logger)
     {
         _logger = logger;
@@ -25,179 +29,154 @@ public class AudioService : IAudioService
 
     public async Task JoinAudio(IGuild guild, IVoiceChannel target)
     {
-        _logger.LogDebug("{}", Environment.CurrentManagedThreadId);
-        if (_connectedChannels.TryGetValue(guild.Id, out _))
+        if (_audioStates.TryGetValue(guild.Id, out var audioState) &&
+            audioState.Client is { ConnectionState: ConnectionState.Connected })
         {
+            _logger.LogInformation("Already connected {}", guild.Id);
             return;
         }
 
+        _audioStates.TryRemove(guild.Id, out _);
+        
         var audioClient = await target.ConnectAsync();
 
-        if (_connectedChannels.TryAdd(guild.Id, audioClient))
+        audioClient.Disconnected += (exception => AudioClientOnDisconnected(guild.Id, exception));
+
+        _audioStates.TryAdd(guild.Id, new AudioState
         {
-            _audioQueue.TryAdd(guild.Id, new ConcurrentQueue<string>());
-            // If you add a method to log happenings from this service,
-            // you can uncomment these commented lines to make use of that.
-            //await Log(LogSeverity.Info, $"Connected to voice on {guild.Name}.");
+            Client = audioClient,
+        });
+    }
+
+    private async Task AudioClientOnDisconnected(ulong id, Exception arg)
+    {
+        if (_audioStates.TryGetValue(id, out var audioState))
+        {
+            audioState.CancellationToken?.Cancel();
+            audioState.CancellationToken?.Dispose();
         }
     }
 
     public async Task LeaveAudio(IGuild guild)
     {
-        if (_connectedChannels.TryRemove(guild.Id, out var client))
+        if (_audioStates.TryRemove(guild.Id, out var audioState))
         {
             _logger.LogDebug("Leaving VC in {GuildId}", guild.Id);
 
-            await client.StopAsync();
+            await audioState.Client.StopAsync();
         }
     }
 
     public async Task EnqueueAudioThread(IGuild guild, IVoiceChannel voiceChannel, IMessageChannel channel, string url)
     {
         //This must be run in a new thread otherwise it might block the main thread and cause all sorts of headeaches
+        #pragma warning disable CS4014
         Task.Run(() => EnqueueAudio(guild, voiceChannel, channel, url));
+        #pragma warning restore CS4014
     }
-    
+
     private async Task EnqueueAudio(IGuild guild, IVoiceChannel voiceChannel, IMessageChannel channel, string url)
     {
         await JoinAudio(guild, voiceChannel);
-        
-        var guid = Guid.NewGuid().ToString();
-        await LogToChannel(nameof(EnqueueAudioThread), guid, "", channel);
-        _logger.LogDebug("Add {} to queue for {}", url, guild.Id);
-        if (!_audioQueue.ContainsKey(guild.Id))
-        {
-            await LogToChannel(nameof(EnqueueAudioThread), guid, "Add new queue for guild", channel);
-            _audioQueue.TryAdd(guild.Id, new ConcurrentQueue<string>(new[] { url }));
-        }
-        else
-        {
-            _audioQueue[guild.Id].Enqueue(url);
-            await LogToChannel(nameof(EnqueueAudioThread), guid,
-                $"Adding to existing queue Size: {_audioQueue[guild.Id].Count}", channel);
-        }
 
-        await LogToChannel(nameof(EnqueueAudioThread), guid,
-            $"Is {(_currentlyPlaying.ContainsKey(guild.Id) ? "" : "Not")} currently playing", channel);
-        if (!_currentlyPlaying.ContainsKey(guild.Id))
+        var guid = Guid.NewGuid().ToString();
+        _logger.LogDebug("Add {} to queue for {}", url, guild.Id);
+
+        var audioState = _audioStates[guild.Id];
+
+        audioState.AudioQueue.Enqueue(url);
+        
+        if (audioState.CurrentlyPlaying == null)
         {
             await SendAudioAsync(guid, guild, channel);
         }
     }
-
-    private async Task LogToChannel(string source, string guid, string msg, IMessageChannel channel)
-    {
-        _logger.LogInformation($"<{guid}> {source}(): {msg}");
-        // await channel.SendMessageAsync($"<{guid}> {source}(): {msg}");
-        // Thread.Sleep(50);
-    }
-
     public async Task SendAudioAsync(string guid, IGuild guild, IMessageChannel channel)
     {
-        await LogToChannel(nameof(SendAudioAsync), guid, "", channel);
-        if (!_audioQueue[guild.Id].TryDequeue(out var url))
+        var audioState = _audioStates[guild.Id];
+
+        if (audioState.Client is { ConnectionState: ConnectionState.Disconnected }) return;
+
+        if (!audioState.AudioQueue.TryDequeue(out var url))
         {
-            await LogToChannel(nameof(SendAudioAsync), guid, "Nothing Queued", channel);
             _logger.LogDebug("Nothing queued");
             return;
         }
-
-        _currentlyPlaying[guild.Id] = url;
-
         _logger.LogDebug("Received request to play {Url} in {GuildId}", url, guild.Id);
-        await LogToChannel(nameof(SendAudioAsync), guid,
-            $"Playing {url.TrimStart('h')} (queue now at {_audioQueue.Count})", channel);
 
         var offsetInSeconds = 0;
         if (url.Contains("?t")) offsetInSeconds = int.Parse(url.Split("?t=")[1]);
-        if (_connectedChannels.TryGetValue(guild.Id, out var client))
+
+        var youtube = new YoutubeClient();
+
+        // You can specify either video ID or URL
+        var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
+        var streamInfo = streamManifest.GetAudioOnlyStreams().TryGetWithHighestBitrate();
+
+        if (streamInfo == null)
         {
-            var youtube = new YoutubeClient();
-
-            // You can specify either video ID or URL
-            var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
-            var streamInfo = streamManifest.GetAudioOnlyStreams().TryGetWithHighestBitrate();
-
-            if (streamInfo == null)
-            {
-                _logger.LogError("Failed to get streaminfo for {Url}", url);
-                return;
-            }
-
-            var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
-            var memoryStream = new MemoryStream();
-            var timeSpan = new TimeSpan(0, 0, offsetInSeconds);
-            var ffmpegArguments =
-                $"-ss {timeSpan:hh\\:mm\\:ss} -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1";
-            _logger.LogDebug("Running ffmpeg with arguments {Args}", ffmpegArguments);
-            await LogToChannel(nameof(SendAudioAsync), guid, $"Running ffmpeg with arguments {ffmpegArguments}",
-                channel);
-
-            if (_streamCancellationTokens.TryGetValue(guild.Id, out var csSource))
-            {
-                await LogToChannel(nameof(SendAudioAsync), guid, "Have cancellation token", channel);
-
-                if (!csSource.IsCancellationRequested)
-                {
-                    await LogToChannel(nameof(SendAudioAsync), guid, "Cancelling existing token", channel);
-
-                    csSource.Cancel();
-                    csSource.Dispose();
-                }
-            }
-
-            csSource = new CancellationTokenSource();
-            _streamCancellationTokens[guild.Id] = csSource;
-
-            await LogToChannel(nameof(SendAudioAsync), guid, "Creating PCM Stream", channel);
-            await using var discord = client.CreatePCMStream(AudioApplication.Mixed);
-            try
-            {
-                await LogToChannel(nameof(SendAudioAsync), guid, "Calling ffpmeg", channel);
-                await Cli.Wrap("ffmpeg")
-                    .WithArguments(ffmpegArguments)
-                    .WithStandardInputPipe(PipeSource.FromStream(stream))
-                    .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
-                    .ExecuteAsync(csSource.Token);
-                await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length, csSource.Token);
-                await LogToChannel(nameof(SendAudioAsync), guid, "Finished writing to buffer", channel);
-            }
-            catch (Exception e)
-            {
-                _logger.LogDebug("{}", e.Message);
-                await LogToChannel(nameof(SendAudioAsync), guid, $"{e.Message}", channel);
-            }
-            finally
-            {
-                await discord.FlushAsync();
-            }
-
-            if (!_audioQueue[guild.Id].IsEmpty)
-            {
-                await LogToChannel(nameof(SendAudioAsync), guid,
-                    $"Queue contains {string.Join(", ", _audioQueue[guild.Id].ToList())}", channel);
-                await LogToChannel(nameof(SendAudioAsync), guid, $"Queue is not empty calling {nameof(SendAudioAsync)}",
-                    channel);
-                await SendAudioAsync(guid, guild, channel);
-            }
-
-            _currentlyPlaying.Remove(guild.Id, out _);
-            await LogToChannel(nameof(SendAudioAsync), guid,
-                $"Marked as not currently playing {_currentlyPlaying.ContainsKey(guild.Id)}", channel);
-            await LogToChannel(nameof(SendAudioAsync), guid, $"Exiting", channel);
+            _logger.LogError("Failed to get streaminfo for {Url}", url);
+            return;
         }
-        else
+
+        var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
+        var memoryStream = new MemoryStream();
+        var timeSpan = new TimeSpan(0, 0, offsetInSeconds);
+        var ffmpegArguments =
+            $"-ss {timeSpan:hh\\:mm\\:ss} -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1";
+        _logger.LogDebug("Running ffmpeg with arguments {Args}", ffmpegArguments);
+
+        if (audioState.CancellationToken is { IsCancellationRequested: false })
         {
-            _logger.LogWarning("No connected audio channel");
+            _logger.LogInformation("Cancellation token for instance {}", audioState.Id);
+            audioState.CancellationToken.Cancel();
+            audioState.CancellationToken.Dispose();
         }
+
+        audioState.CancellationToken = new CancellationTokenSource();
+
+        _logger.LogDebug("Creating PCM Stream for instances {}", audioState.Id);
+        await using var discord = audioState.Client.CreatePCMStream(AudioApplication.Mixed);
+        audioState.CurrentlyPlaying = url;
+        try
+        {
+            _logger.LogDebug("Calling ffpmeg for instances {}", audioState.Id);
+            await Cli.Wrap("ffmpeg")
+                .WithArguments(ffmpegArguments)
+                .WithStandardInputPipe(PipeSource.FromStream(stream))
+                .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
+                .ExecuteAsync(audioState.CancellationToken.Token);
+            //TODO: Send bits of a stream at a time to support big videos
+            await discord.WriteAsync(memoryStream.ToArray().AsMemory(0, (int)memoryStream.Length), audioState.CancellationToken.Token);
+            _logger.LogDebug("Finished audio stream for instance {}", audioState.Id);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Exception in sending audio stream: {}", e.Message);
+        }
+        finally
+        {
+            audioState.CurrentlyPlaying = null;
+            await discord.FlushAsync();
+        }
+
+        if (!audioState.AudioQueue.IsEmpty)
+        {
+            _logger.LogDebug("Queue contains {} for instance {}",string.Join(", ", audioState.AudioQueue.ToList()), audioState.Id);
+            _logger.LogDebug("Queue is not empty calling {} for instance {}", nameof(SendAudioAsync), audioState.Id);
+            await SendAudioAsync(guid, guild, channel);
+        }
+
+        audioState.CurrentlyPlaying = null;
+        _logger.LogDebug("Marked as not currently playing for instances {}", audioState.Id);
     }
 
     public async Task Skip(IGuild contextGuild, IMessageChannel contextChannel)
     {
-        if (_currentlyPlaying.ContainsKey(contextChannel.Id) &&
-            _streamCancellationTokens.TryGetValue(contextGuild.Id, out var csToken))
+        var audioState = _audioStates[contextGuild.Id];
+        if (audioState is { CurrentlyPlaying: { }, CancellationToken: { } })
         {
-            csToken.Cancel();
+            audioState.CancellationToken.Cancel();
         }
 
         await SendAudioAsync(Guid.NewGuid().ToString(), contextGuild, contextChannel);
