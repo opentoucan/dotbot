@@ -29,7 +29,7 @@ public class PlayMusicHandler : BotCommandHandler
         await _audioService.EnqueueAudioThread(guild, userVoiceState.VoiceChannel, discordContext.GetChannel(),
             split[1]);
             
-        await context.SendFormattedMessageAsync(FormattedMessage.Info($"Playing {split[1]}"));
+        await context.SendFormattedMessageAsync(FormattedMessage.Info($"Adding {split[1]} to queue"));
         return Ok();
 
     }

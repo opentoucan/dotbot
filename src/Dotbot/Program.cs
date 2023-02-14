@@ -89,6 +89,7 @@ internal static class Program
         builder.Services.AddTransient<BotCommandHandler, SearchCommandHandler>();
         builder.Services.AddTransient<BotCommandHandler, PlayMusicHandler>();
         builder.Services.AddTransient<BotCommandHandler, SkipMusicHandler>();
+        builder.Services.AddTransient<BotCommandHandler, TrackInfoHandler>();
         builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
         builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
         builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();
