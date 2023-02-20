@@ -1,35 +1,46 @@
 using System.Reflection;
 using Discord;
-using Discord.Interactions;
 using Discord.WebSocket;
-using Dotbot.Common.CommandHandlers;
-using Dotbot.Common.CommandHandlers.Moderator;
-using Dotbot.Common.Factories;
-using Dotbot.Common.Services;
 using Dotbot.Common.Settings;
 using Dotbot.Database;
 using Dotbot.Database.Entities;
 using Dotbot.Database.Extensions;
-using Dotbot.Database.Repositories;
-using Dotbot.Database.Services;
 using Dotbot.Database.Settings;
-using Dotbot.Discord.CommandHandlers;
-using Dotbot.Discord.EventListeners;
 using Dotbot.Discord.Extensions;
 using Dotbot.Discord.InteractionHandler;
-using Dotbot.Discord.Services;
+using Dotbot.Ioc;
 using MediatR;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace Dotbot;
 
 internal static class Program
 {
+    
     public static async Task Main(string[] args)
     {
+        const string serviceName = "Dotbot";
+        var serviceVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+        
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddOpenTelemetryTracing(tracerProviderBuilder =>
+        {
+            tracerProviderBuilder
+                .AddConsoleExporter()
+                .AddSource(serviceName)
+                .SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(serviceName: serviceName, serviceVersion: serviceVersion))
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation();
+        });
+
+        builder.Services.AddSingleton(TracerProvider.Default.GetTracer(serviceName));
+        
         // Add services to the container.
 
         //builder.Services.AddControllers();
@@ -61,40 +72,9 @@ internal static class Program
         builder.Services.Configure<BotSettings>(builder.Configuration.GetSection("BotSettings"));
         
         builder.Services.AddSingleton(discordConfig);
-        builder.Services.AddSingleton<DiscordSocketClient>();
-        builder.Services.AddSingleton<IAudioService, AudioService>();
-        builder.Services.AddSingleton<IPersistentSettingsService, PersistentSettingsService>();
-        builder.Services.AddSingleton<IXkcdService, XkcdService>();
-        builder.Services.AddSingleton<IChatServerService, ChatServerService>();
-        builder.Services.AddSingleton<IBotCommandsService, BotCommandsService>();
-        builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
-        builder.Services.AddSingleton<InteractionHandler>();
-        builder.Services.AddSingleton<MessageReceivedEventListener>();
-        builder.Services.AddSingleton<IHostedService, XkcdHostedService>();
-        builder.Services.AddHttpClient<SaveBotCommandHandler>();
-        builder.Services.AddHttpClient<XkcdService>();
+
+        builder.Services.AddServices();
         
-        //TODO: .AddImplementingInterfaces
-        builder.Services.AddTransient<IFileService, FileService>();
-        builder.Services.AddTransient<BotCommandHandler, DefaultBotCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, PingBotCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, SaveBotCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, SavedCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, AvatarCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, XkcdBotCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, AddModeratorCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, RemoveModeratorCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, InfoCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, SearchCommandHandler>();
-        builder.Services.AddTransient<BotCommandHandler, PlayMusicHandler>();
-        builder.Services.AddTransient<BotCommandHandler, SkipMusicHandler>();
-        builder.Services.AddTransient<BotCommandHandler, TrackInfoHandler>();
-        builder.Services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
-        builder.Services.AddTransient<IChatServerRepository, ChatServerRepository>();
-        builder.Services.AddTransient<IBotCommandRepository, BotCommandRepository>();
-        builder.Services.AddTransient<IPersistentSettingsRepository, PersistentSettingsRepository>();
-        builder.Services.AddTransient<IXkcdSenderService, DiscordXkcdSenderService>();
         builder.Services.AddSingleton<DbContext>(c =>
             new DbContext(c.GetRequiredService<IMongoCollection<BotCommand>>(),
                 c.GetRequiredService<IMongoCollection<ChatServer>>(), 
@@ -119,11 +99,7 @@ internal static class Program
 
         var client = app.Services.RegisterClientEvents();
         
-        await app.Services.GetRequiredService<InteractionHandler>()
-            .InitializeAsync();
-
-        //var listener = app.Services.GetRequiredService<DiscordEventListener>();
-        //await listener.StartAsync();
+        await app.Services.GetRequiredService<InteractionHandler>().InitializeAsync();
         await client.LoginAsync(TokenType.Bot, builder.Configuration["Discord:BotToken"]);
         await client.StartAsync();
         await client.SetGameAsync("Getting re-written in .NET");

@@ -10,6 +10,7 @@ using Dotbot.Discord.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Trace;
 
 namespace Dotbot.Discord.EventHandlers;
 
@@ -19,14 +20,16 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
     private readonly IBotCommandHandlerFactory _commandHandlerFactory;
     private readonly IChatServerService _chatServerService;
     private readonly BotSettings _botSettings;
+    private readonly Tracer _tracer;
 
     public ChatCommandReceivedHandler(IBotCommandHandlerFactory commandHandlerFactory,
         ILogger<ChatCommandReceivedHandler> logger, IOptions<BotSettings> botSettings,
-        IChatServerService chatServerService)
+        IChatServerService chatServerService, Tracer tracer)
     {
         _commandHandlerFactory = commandHandlerFactory;
         _logger = logger;
         _chatServerService = chatServerService;
+        _tracer = tracer;
         _botSettings = botSettings.Value;
     }
 
@@ -53,14 +56,18 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
 
         if (handler != null)
         {
+            using var span = _tracer.StartActiveSpan("Handle-Command");
             var context = new DiscordChannelMessageContext(notification.Message, server);
             try
             {
+                span.AddEvent("Start execution");
                 var executionResult = await handler.HandleAsync(
                     notification.Message.Content[1..], context);
-
+                span.AddEvent("End execution");
+                
                 if (executionResult.IsFailed)
                 {
+                    span.AddEvent("Failed to execute");
                     var errs = string.Join(", ",executionResult.Errors.Select(x => x.Message));
                     _logger.LogError("Failed to execute handler: {}", errs);
                     await context.SendFormattedMessageAsync(FormattedMessage.Error(errs));
@@ -68,12 +75,11 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
+                _logger.LogError("{}",e.Message);
                 await context.SendFormattedMessageAsync(FormattedMessage.Error(e.Message));
             }
             
         }
-        
     }
 
     private async Task<ChatServer?> GetServer(DiscordMessageReceivedNotification notification)

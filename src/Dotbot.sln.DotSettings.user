@@ -3,4 +3,5 @@
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::42B5C81A-149A-4BB1-9C4B-D217F6655E7C::net7.0::Dotbot.Common.Tests.Services.BotCommandsServiceTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+&lt;/SessionState&gt;</s:String>
+	</wpf:ResourceDictionary>
