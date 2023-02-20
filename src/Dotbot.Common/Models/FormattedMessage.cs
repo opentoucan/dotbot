@@ -56,7 +56,7 @@ public class FormattedMessage
         Fields.Add(new Field
         {
             Name = name,
-            Value = value,
+            Value = value.Length > 1024 ? value[..1023] : value ,
             Inline = inline
         });
         return this;

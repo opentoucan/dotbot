@@ -51,7 +51,7 @@ public class SavedCommandHandler : BotCommandHandler
                 {
                     commands.Value.ForEach(x =>
                         formattedMessage.AddField(x.Key,
-                            x.Type == BotCommand.CommandType.FILE ? x.FileName : x.Content));
+                            x.Type == BotCommand.CommandType.FILE ? x.FileName : x.Content.Length > 40 ? x.Content[..40] : x.Content, true));
                 }
                 await context.SendFormattedMessageAsync(formattedMessage);
             }

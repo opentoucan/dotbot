@@ -43,10 +43,10 @@ public class InfoCommandHandler: BotCommandHandler
 
                 var fm = FormattedMessage
                     .Info()
-                    .SetTitle(command.Key)
+                    .SetTitle($"Command: {command.Key}")
                     .SetDescription(command.Content ?? command.FileName ?? "No Content")
                     .AddField("Creator", creatorName)
-                    .AddField("Created", command.Created.ToString("O"));
+                    .AddField("Created", command.Created.ToString("f"));
                 await context.SendFormattedMessageAsync(fm);
             }
             else

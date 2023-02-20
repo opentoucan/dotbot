@@ -50,7 +50,7 @@ internal static class Program
             AlwaysDownloadUsers = true,
         };
         //builder.Services.AddSingleton<IMongoClient>(mongoClient);
-        var db = mongoClient.GetDatabase("test");
+        var db = mongoClient.GetDatabase(section["DatabaseName"]);
         builder.Services.AddSingleton(db);
         builder.Services.AddSingleton<IGridFSBucket>(new GridFSBucket(db));
         builder.Services.AddMongoDbCollection<ChatServer, ChatServerClassMapExtension>("springGuild", new ChatServerClassMapExtension());
