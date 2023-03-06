@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
       <UserSecretsId>8749fa5e-6fb2-41f1-b46c-f91ce733fd1b</UserSecretsId>
+      <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
     <ItemGroup>
@@ -35,5 +36,11 @@
       <ProjectReference Include="..\Dotbot.Database\Dotbot.Database.csproj" />
       <ProjectReference Include="..\Dotbot.Discord\Dotbot.Discord.csproj" />
   </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
 
 </Project>
