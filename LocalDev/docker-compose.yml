@@ -1,17 +1,21 @@
 version: '3.8'
 
 services:
+  dotbot:
+    container_name: dotbot
+    image: dotbot
+    build: "../src"
+    environment:
+      Discord__BotToken: ""
+      MongoDbSettings__ConnectionString: "mongodb://mongo1:27017"
   mongo1:
     container_name: mongo1
     hostname: mongo1
-    image: mongo:latest
+    image: mongo:4
     volumes:
-      - ~/mongors/data1:/data/db
-      - ./rs-init.sh:/scripts/rs-init.sh
-    networks:
-      - mongors-network
-    ports:
-      - 27021:27017
+      - mongodata1:/data/db
+    expose:
+      - 27017
     links:
       - mongo2
       - mongo3
@@ -19,47 +23,35 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
   mongo2:
     container_name: mongo2
-    image: mongo:latest
+    image: mongo:4
     volumes:
-      - ~/mongors/data2:/data/db
-    networks:
-      - mongors-network
-    ports:
-      - 27022:27017
+      - mongodata2:/data/db
+    expose:
+      - 27017
     restart: always
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
   mongo3:
     container_name: mongo3
-    image: mongo:latest
+    image: mongo:4
     volumes:
-      - ~/mongors/data3:/data/db
-    networks:
-      - mongors-network
-    ports:
-      - 27023:27017
+      - mongodata3:/data/db
+    expose:
+      - 27017
     restart: always
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
 
-
-
-  mongoui:
-    image: mongo-express:latest
-    container_name: mongoui
+  mongosetup:
+    image: mongo-setup
+    build: "."
+    container_name: mongosetup
     depends_on:
-      - "mongo1"
-    environment:
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_SERVER: mongo1
-    ports:
-      - 8081:8081
-    networks:
-      - mongors-network
-
+      mongo1:
+        condition: service_started
+    volumes:
+      - mongostatus:/data/
+  
 volumes:
-  mongodb4_data:
-
-networks:
-  mongors-network:
-    driver: bridge
-
-#docker exec mongo1 /scripts/rs-init.sh
+  mongodata1:
+  mongodata2:
+  mongodata3:
+  mongostatus:

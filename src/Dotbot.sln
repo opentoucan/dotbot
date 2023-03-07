@@ -16,6 +16,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Database.Tests", "Do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Discord.Tests", "Dotbot.Discord.Tests\Dotbot.Discord.Tests.csproj", "{785DF0C2-C38E-42A3-8FE4-F27F1434742F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "localdev", "localdev", "{3906DFEB-2274-4D68-9DBB-F9C9D1EE72C6}"
+	ProjectSection(SolutionItems) = preProject
+		..\localdev\docker-compose.yml = ..\localdev\docker-compose.yml
+		..\localdev\Dockerfile = ..\localdev\Dockerfile
+		..\localdev\mongo-setup.js = ..\localdev\mongo-setup.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

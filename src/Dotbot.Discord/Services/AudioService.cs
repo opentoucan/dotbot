@@ -31,15 +31,20 @@ public class AudioService : IAudioService
         }
 
         _audioStates.TryRemove(guild.Id, out _);
-        
-        var audioClient = await target.ConnectAsync();
 
-        audioClient.Disconnected += (exception => AudioClientOnDisconnected(guild.Id, exception));
-
-        _audioStates.TryAdd(guild.Id, new AudioState
+        try
         {
-            Client = audioClient,
-        });
+            var audioClient = await target.ConnectAsync();
+            audioClient.Disconnected += (exception => AudioClientOnDisconnected(guild.Id, exception));
+            _audioStates.TryAdd(guild.Id, new AudioState
+            {
+                Client = audioClient,
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Failed to join audio channel: {ex.Message} stack trace: {ex.StackTrace}");
+        }
     }
 
     private async Task AudioClientOnDisconnected(ulong id, Exception arg)
