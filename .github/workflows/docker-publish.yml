@@ -76,7 +76,7 @@ jobs:
         with:
           context: ./src
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ github.sha }}
+          tags: sillock-inc/dotbot:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
