@@ -20,7 +20,7 @@ RUN dotnet publish "Dotbot.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN apt update && apt upgrade
+RUN apt update -y && apt upgrade -y
 RUN apt install -y ffmpeg
 RUN apt-get install -y libopus-dev
 RUN apt-get install -y libsodium-dev

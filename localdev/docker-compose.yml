@@ -11,7 +11,7 @@ services:
   mongo1:
     container_name: mongo1
     hostname: mongo1
-    image: mongo:4
+    image: docker.io/library/mongo:6
     volumes:
       - mongodata1:/data/db
     expose:
@@ -23,7 +23,7 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
   mongo2:
     container_name: mongo2
-    image: mongo:4
+    image: docker.io/library/mongo:6
     volumes:
       - mongodata2:/data/db
     expose:
@@ -32,7 +32,7 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
   mongo3:
     container_name: mongo3
-    image: mongo:4
+    image: docker.io/library/mongo:6
     volumes:
       - mongodata3:/data/db
     expose:
