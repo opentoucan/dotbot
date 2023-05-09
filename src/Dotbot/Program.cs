@@ -102,7 +102,7 @@ internal static class Program
         await app.Services.GetRequiredService<InteractionHandler>().InitializeAsync();
         await client.LoginAsync(TokenType.Bot, builder.Configuration["Discord:BotToken"]);
         await client.StartAsync();
-        await client.SetGameAsync("Getting re-written in .NET");
+        await client.SetGameAsync(builder.Configuration["Discord:GameStatus"]);
         await app.RunAsync();
     }
     
