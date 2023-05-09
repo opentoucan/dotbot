@@ -21,4 +21,4 @@ jobs:
 
       - uses: imjasonh/setup-crane@v0.1
       - run: |
-          crane tag "ghcr.io/${{ github.repository }}:${{ github.event.inputs.sourceImageTag }}" "${{ github.event.inputs.destinationImageTag }}"
+          crane tag "ghcr.io/sillock-inc/dotbot:${{ github.event.inputs.sourceImageTag }}" "${{ github.event.inputs.destinationImageTag }}"
