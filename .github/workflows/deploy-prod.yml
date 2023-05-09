@@ -1,0 +1,26 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: ['master']
+  workflow_dispatch:
+    inputs:
+      sourceImageTag:
+        description: 'Source image tag'     
+        required: true
+      destinationImageTag:
+        description: 'Release version ie. v0.1.0'     
+        required: true
+jobs:
+  retag:
+    name: retag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+      - uses: actions/checkout@v2
+
+      - uses: imjasonh/setup-crane@v0.1
+      - run: |
+          crane tag ghcr.io/${{ github.repository }}/${{ github.event.inputs.sourceImageTag }} ${{ github.event.inputs.destinationImageTag }} 
