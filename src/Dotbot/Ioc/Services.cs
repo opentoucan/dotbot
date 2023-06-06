@@ -26,6 +26,7 @@ public static class Services
         services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
         services.AddSingleton<InteractionHandler>();
         services.AddSingleton<MessageReceivedEventListener>();
+        services.AddSingleton<ReactionEventListener>();
         services.AddSingleton<IHostedService, XkcdHostedService>();
         services.AddHttpClient<SaveBotCommandHandler>();
         services.AddHttpClient<XkcdService>();
