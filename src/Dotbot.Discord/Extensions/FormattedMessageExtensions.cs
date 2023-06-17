@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Dotbot.Common.Models;
 using Dotbot.Discord.Models;
 using Dotbot.Discord.Services;
 using YoutubeExplode.Videos;

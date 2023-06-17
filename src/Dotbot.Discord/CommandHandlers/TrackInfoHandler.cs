@@ -1,7 +1,6 @@
 ﻿using Discord;
-using Dotbot.Common.CommandHandlers;
-using Dotbot.Common.Models;
 using Dotbot.Discord.Extensions;
+using Dotbot.Discord.Models;
 using Dotbot.Discord.Services;
 using FluentResults;
 using static FluentResults.Result;

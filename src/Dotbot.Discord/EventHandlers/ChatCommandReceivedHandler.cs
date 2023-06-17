@@ -1,12 +1,11 @@
 ﻿using Discord.WebSocket;
-using Dotbot.Common.CommandHandlers;
-using Dotbot.Common.Factories;
-using Dotbot.Common.Models;
-using Dotbot.Common.Services;
-using Dotbot.Common.Settings;
 using Dotbot.Database.Entities;
 using Dotbot.Discord.CommandHandlers;
 using Dotbot.Discord.Events;
+using Dotbot.Discord.Factories;
+using Dotbot.Discord.Models;
+using Dotbot.Discord.Services;
+using Dotbot.Discord.Settings;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

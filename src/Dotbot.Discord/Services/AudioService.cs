@@ -2,7 +2,6 @@
 using CliWrap;
 using Discord;
 using Discord.Audio;
-using Dotbot.Common.Models;
 using Dotbot.Discord.Extensions;
 using Dotbot.Discord.Models;
 using Microsoft.Extensions.Logging;
