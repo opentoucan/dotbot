@@ -12,14 +12,15 @@ public class XkcdPostedEventHandler : IConsumer<XkcdPostedEvent>
 {
 
     private readonly DiscordSocketClient _discordSocketClient;
-    public XkcdPostedEventHandler(DiscordSocketClient discordSocketClient)
+    private readonly IChatServerRepository _chatServerRepository;
+    public XkcdPostedEventHandler(DiscordSocketClient discordSocketClient, IChatServerRepository chatServerRepository)
     {
         _discordSocketClient = discordSocketClient;
+        _chatServerRepository = chatServerRepository;
     }
 
     public async Task Consume(ConsumeContext<XkcdPostedEvent> context)
     {
-        var channel = _discordSocketClient.GetChannel(301062316647120896);
-        await ((SocketTextChannel)channel).SendMessageAsync(embed: FormattedMessage.XkcdMessage(context.Message, true).Convert());
+
     }
 }
