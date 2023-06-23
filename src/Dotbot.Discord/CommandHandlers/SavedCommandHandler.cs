@@ -1,8 +1,10 @@
-﻿using System.Drawing;
-using Dotbot.Database.Entities;
-using Dotbot.Database.Repositories;
+﻿
+using System.Drawing;
+using System.Text.Json;
+using Dotbot.Discord.Entities;
 using Dotbot.Discord.Models;
 using FluentResults;
+using Newtonsoft.Json.Linq;
 using static FluentResults.Result;
 
 namespace Dotbot.Discord.CommandHandlers;
@@ -10,11 +12,11 @@ namespace Dotbot.Discord.CommandHandlers;
 public class SavedCommandHandler : BotCommandHandler
 {
     private const int MaxPageSize = 20;
-    private readonly IBotCommandRepository _botCommandRepository;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public SavedCommandHandler(IBotCommandRepository botCommandRepository)
+    public SavedCommandHandler(IHttpClientFactory httpClientFactory)
     {
-        _botCommandRepository = botCommandRepository;
+        _httpClientFactory = httpClientFactory;
     }
 
     public override CommandType CommandType => CommandType.Saved;
@@ -29,45 +31,37 @@ public class SavedCommandHandler : BotCommandHandler
 
         var serverId = await context.GetServerId();
 
-        var countDbResult = await _botCommandRepository.GetCommandCount(serverId);
-        
-        if (countDbResult.IsSuccess && countDbResult.Value != 0 && page >= 0)
+        var httpClient = _httpClientFactory.CreateClient("DotbotApiGateway");
+
+
+        try
         {
-            var commandCount = countDbResult.Value;
+            var result =
+                await httpClient.GetFromJsonAsync<PaginatedItemsViewModel<BotCommand>>(
+                    $"commands/{serverId}?pageSize={MaxPageSize}&pageIndex={page - 1}",
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var totalPages = Math.Ceiling((decimal)result?.Data.Count() / MaxPageSize);
 
-            var pages = Math.Ceiling((decimal)commandCount / MaxPageSize);
+            var formattedMessage = FormattedMessage
+                .Info()
+                .SetTitle("Saved Commands")
+                .SetDescription($"Page {page} of {totalPages} pages ({result.Data.Count()} saved commands)")
+                .SetColor(Color.FromArgb(157, 3, 252));
 
-            if (page <= pages)
+            foreach (var command in result.Data)
             {
-                var formattedMessage = FormattedMessage
-                    .Info()
-                    .SetTitle("Saved Commands")
-                    .SetDescription($"Page {page} of {pages} pages ({commandCount} saved commands)")
-                    .SetColor(Color.FromArgb(157, 3, 252));
-                
-                var commands = await _botCommandRepository.GetCommands(serverId, page - 1, MaxPageSize);
+                formattedMessage.AddField(command.Name,command.Content[..Math.Min(command.Content.Length, 40)], true);
+            }
 
-                if (commands.IsSuccess)
-                {
-                    commands.Value.ForEach(x =>
-                        formattedMessage.AddField(x.Key,
-                            x.Type == BotCommand.CommandType.FILE ? x.FileName : x.Content.Length > 40 ? x.Content[..40] : x.Content, true));
-                }
-                await context.SendFormattedMessageAsync(formattedMessage);
-            }
-            else
-            {
-                const string error = "Invalid page";
-                await context.SendFormattedMessageAsync(FormattedMessage.Error(error));
-                return Fail(error);
-            }
+            await context.SendFormattedMessageAsync(formattedMessage);
         }
-        else
+        catch (Exception)
         {
             var error = page < 0 ? "Invalid page" : "No commands found";
             await context.SendFormattedMessageAsync(FormattedMessage.Error(error));
             return Fail(error);
         }
+
 
         return Ok();
     }

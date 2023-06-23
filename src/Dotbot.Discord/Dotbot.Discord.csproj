@@ -23,10 +23,14 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.13" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.13" />
         <PackageReference Include="YoutubeExplode" Version="6.2.5" />
+        <PackageReference Include="MongoDB.Driver" Version="2.19.1" />
+        <PackageReference Include="MongoDB.Driver.GridFS" Version="2.19.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Dotbot.Common\Dotbot.Common.csproj" />
+      <Reference Include="MongoDB.Driver">
+        <HintPath>..\..\..\..\.nuget\packages\mongodb.driver\2.19.2\lib\netstandard2.1\MongoDB.Driver.dll</HintPath>
+      </Reference>
     </ItemGroup>
     
 </Project>

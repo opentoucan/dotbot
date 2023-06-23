@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Xkcd.API.Models;
+namespace Xkcd.API.Dtos;
 
 public class XkcdComic
 {
@@ -11,10 +11,4 @@ public class XkcdComic
     public string Img { get; set; }
     public string Title { get; set; }
     public int Day { get; set; }
-    public string News { get; set; }
-    [JsonPropertyName("safe_title")]
-    public string SafeTitle { get; set; }
-    public string Transcript { get; set; }
-    
-    public string Link { get; set; }
 }

@@ -7,7 +7,6 @@ public sealed class Xkcd : Entity
 
     public Xkcd(int comicNumber, DateTimeOffset posted)
     {
-        Id = Guid.NewGuid();
         ComicNumber = comicNumber;
         Posted = posted;
     }

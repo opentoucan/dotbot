@@ -1,6 +1,7 @@
-﻿using Dotbot.Database.Entities;
-using Dotbot.Database.Repositories;
-using Dotbot.Database.Services;
+﻿using System.Text.Json;
+using Dotbot.Discord.Entities;
+using Dotbot.Discord.Models;
+using Dotbot.Discord.Services;
 using FluentResults;
 using static FluentResults.Result;
 
@@ -8,13 +9,13 @@ namespace Dotbot.Discord.CommandHandlers;
 
 public class DefaultBotCommandHandler : BotCommandHandler
 {
-    private readonly IBotCommandRepository _botCommandRepository;
     private readonly IFileService _fileService;
-
-    public DefaultBotCommandHandler(IBotCommandRepository botCommandRepository, IFileService fileService)
+    private readonly IHttpClientFactory _httpClientFactory;
+    
+    public DefaultBotCommandHandler(IFileService fileService, IHttpClientFactory httpClientFactory)
     {
-        _botCommandRepository = botCommandRepository;
         _fileService = fileService;
+        _httpClientFactory = httpClientFactory;
     }
 
     public override CommandType CommandType => CommandType.Default;
@@ -22,19 +23,27 @@ public class DefaultBotCommandHandler : BotCommandHandler
 
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
+        var httpClient = _httpClientFactory.CreateClient("DotbotApiGateway");
+        
         var messageSplit = content.Split(' ');
 
         var key = messageSplit[0];
-        var command = await _botCommandRepository.GetCommand(await context.GetServerId(), key);
+        var command = await httpClient.GetFromJsonAsync<BotCommand>($"{await context.GetServerId()}?name={key}",
+        new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
-        if (command.IsSuccess)
+        if (command != null)
         {
-            return command.Value.Type switch
+            if (Equals(command.Type, BotCommandType.String))
             {
-                BotCommand.CommandType.STRING => await HandleString(command.Value, context),
-                BotCommand.CommandType.FILE => await HandleFile(command.Value, context),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                await HandleString(command, context);
+                return Ok();
+            }
+
+            if (Equals(command.Type, BotCommandType.File))
+            {
+                await HandleFile(command, context);
+                return Ok();
+            }
         }
 
         await context.SendMessageAsync($"No command {key} found");
@@ -44,15 +53,15 @@ public class DefaultBotCommandHandler : BotCommandHandler
 
     private async Task<Result> HandleFile(BotCommand command, IServiceContext context)
     {
-        if (command.Type != BotCommand.CommandType.FILE) return Fail("Command is not a file");
-        var fileStream = await _fileService.GetFile($"{command.ServiceId}:{command.FileName}:{command.Key}");
+        if (!Equals(command.Type, BotCommandType.File)) return Fail("Command is not a file");
+        var fileStream = await _fileService.GetFile($"{command.Content}");
         if (fileStream.IsFailed)
         {
-            await context.SendMessageAsync($"Cannot find file content for {command.Key}");
-            return Fail($"Cannot find file content for {command.Key}");
+            await context.SendMessageAsync($"Cannot find file content for {command.Name}");
+            return Fail($"Cannot find file content for {command.Name}");
         }
 
-        await context.SendFileAsync(command.FileName, fileStream.Value);
+        await context.SendFileAsync(command.Content, fileStream.Value);
         return Ok();
     }
 

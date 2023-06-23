@@ -1,5 +1,7 @@
-﻿using Dotbot.Database.Repositories;
-using Dotbot.Database.Services;
+﻿using System.Text;
+using System.Text.Json;
+using Dotbot.Discord.Models;
+using Dotbot.Discord.Services;
 using FluentResults;
 using static FluentResults.Result;
 
@@ -7,15 +9,12 @@ namespace Dotbot.Discord.CommandHandlers;
 
 public class SaveBotCommandHandler : BotCommandHandler
 {
-    private readonly IBotCommandRepository _botCommandRepository;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IFileService _fileService;
 
-    public SaveBotCommandHandler(IBotCommandRepository botCommandRepository, HttpClient httpClient,
-        IFileService fileService)
+    public SaveBotCommandHandler(IHttpClientFactory httpClientFactory, IFileService fileService)
     {
-        _botCommandRepository = botCommandRepository;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _fileService = fileService;
     }
 
@@ -24,26 +23,22 @@ public class SaveBotCommandHandler : BotCommandHandler
 
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
+        var dotbotHttpClient = _httpClientFactory.CreateClient("DotbotApiGateway");
+        var httpClient = _httpClientFactory.CreateClient();
         var split = content.Split(' ');
         var key = split[1];
+        var serverId = await context.GetServerId();
+        string commandContent;
+        var botCommandType = BotCommandType.String;
+
         if (await context.HasAttachments())
         {
             var attachments = (await context.GetAttachments()).First();
-
-            var fileStream = await _httpClient.GetStreamAsync(attachments.Url);
-
-            var serverId = await context.GetServerId();
-
-            //TODO: This should really be called in the Commands service
-            var fileUploadResult = await _fileService.SaveFile($"{serverId}:{attachments.Filename}:{key}", fileStream);
+            botCommandType = BotCommandType.File;
+            commandContent = $"{attachments.Filename}";
+            var fileStream = await httpClient.GetStreamAsync(attachments.Url);
+            var fileUploadResult = await _fileService.SaveFile(commandContent, fileStream);
             if (fileUploadResult.IsFailed) return Fail(fileUploadResult.Errors);
-
-            var result = await _botCommandRepository.SaveCommand(serverId, (await context.GetAuthorId()).ToString(),
-                key, attachments.Filename, fileStream, true);
-            if (result.IsFailed)
-            {
-                await context.SendMessageAsync("Failed to save command");
-            }
         }
         else
         {
@@ -53,15 +48,24 @@ public class SaveBotCommandHandler : BotCommandHandler
                 return Fail("No content given");
             }
 
-            var commandContent = string.Join(" ", split[2..]);
-            var result = await _botCommandRepository.SaveCommand(await context.GetServerId(),
-                (await context.GetAuthorId()).ToString(), key, commandContent, true);
-            if (result.IsFailed)
-            {
-                await context.SendMessageAsync($"Failed to save command:");
-            }
+            commandContent = string.Join(" ", split[2..]);
+        }
 
-            ;
+        var saveBotCommand = new SaveBotCommand
+        {
+            ServiceId = serverId,
+            CommandType = botCommandType.Id,
+            Content = commandContent,
+            CreatorId = (await context.GetAuthorId()).ToString(),
+            Name = key
+        };
+        var stringContent = new StringContent(JsonSerializer.Serialize(saveBotCommand), Encoding.UTF8, "application/json");
+        var result = await dotbotHttpClient.PutAsync("save", stringContent);
+        if (!result.IsSuccessStatusCode)
+        {
+            var errorMessage = "Failed to save command";
+            await context.SendMessageAsync(errorMessage);
+            return Fail(errorMessage);
         }
 
         await context.SendMessageAsync($"Saved command as {key}");

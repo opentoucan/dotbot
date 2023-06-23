@@ -46,19 +46,6 @@ public class XkcdJob : IJob
 
         var xkcdPostedEvent = new XkcdPostedEvent(xkcdResponse.Id, xkcdLatest.Posted, xkcdResponse.AltText, xkcdResponse.ImageUrl, xkcdResponse.Title);
         await _bus.Publish(xkcdPostedEvent, context.CancellationToken);
-        /*
-         
-         
-        foreach (var service in _senderServices)
-        {
-            var sendNewComicResult = await service.SendNewComic(comic);
-            if (sendNewComicResult.IsFailed)
-            {
-                var errs = sendNewComicResult.Errors.Select(x => x.Message).ToList();
-                _logger.LogError("{} failed to send latest XKCD comic: {}", service.GetType().Name,
-                    string.Join(", ", errs));
-            }
-        }
-        */
+
     }
 }

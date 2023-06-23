@@ -1,10 +1,8 @@
 using System.Reflection;
 using Discord;
 using Discord.WebSocket;
-using Dotbot.Database;
-using Dotbot.Database.Entities;
-using Dotbot.Database.Extensions;
-using Dotbot.Database.Settings;
+using Dotbot.Discord;
+using Dotbot.Discord.Entities;
 using Dotbot.Discord.Extensions;
 using Dotbot.Discord.IntegrationEvents.EventHandlers;
 using Dotbot.Discord.InteractionHandler;
@@ -17,7 +15,7 @@ using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 
 // Add services to the container.
-const string serviceName = "Dotbot.API";
+const string serviceName = "Dotbot";
 var serviceVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,14 +34,6 @@ builder.Services.AddOpenTelemetryTracing(tracerProviderBuilder =>
 
 builder.Services.AddSingleton(TracerProvider.Default.GetTracer(serviceName));
 
-// Add services to the container.
-
-//builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-
 var section = builder.Configuration.GetSection("MongoDbSettings");
 var settings = MongoClientSettings.FromConnectionString(section["ConnectionString"]);
 var mongoClient = new MongoClient(settings);
@@ -59,12 +49,7 @@ var discordConfig = new DiscordSocketConfig()
 var db = mongoClient.GetDatabase(section["DatabaseName"]);
 builder.Services.AddSingleton(db);
 builder.Services.AddSingleton<IGridFSBucket>(new GridFSBucket(db));
-builder.Services.AddMongoDbCollection<ChatServer, ChatServerClassMapExtension>("springGuild",
-    new ChatServerClassMapExtension());
-builder.Services.AddMongoDbCollection<BotCommand, DiscordCommandClassMapExtension>("DiscordCommands",
-    new DiscordCommandClassMapExtension());
-builder.Services.AddMongoDbCollection<PersistentSetting, PersistentSettingClassMapExtension>("PersistentSettings",
-    new PersistentSettingClassMapExtension());
+builder.Services.AddMongoDbCollection<DiscordServer>();
 
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.Configure<BotSettings>(builder.Configuration.GetSection("BotSettings"));
@@ -74,9 +59,7 @@ builder.Services.AddSingleton(discordConfig);
 builder.Services.AddServices();
 
 builder.Services.AddSingleton<DbContext>(c =>
-    new DbContext(c.GetRequiredService<IMongoCollection<BotCommand>>(),
-        c.GetRequiredService<IMongoCollection<ChatServer>>(),
-        c.GetRequiredService<IMongoCollection<PersistentSetting>>()));
+    new DbContext(c.GetRequiredService<IMongoCollection<DiscordServer>>()));
 
 builder.Services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -84,6 +67,11 @@ builder.Services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddHttpClient("DotbotApiGateway", httpClient =>
+{
+    httpClient.BaseAddress = new Uri(builder.Configuration.GetValue<string>("DotbotGatewayUrl"));
+});
 
 var rabbitMqConfig = new RabbitMQConfig();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitMqConfig);

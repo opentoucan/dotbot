@@ -1,45 +1,49 @@
-﻿using Dotbot.Discord.Models;
+﻿using System.Text.Json;
+using Dotbot.Discord.Models;
 using Dotbot.Discord.Services;
 using FluentResults;
 
 namespace Dotbot.Discord.CommandHandlers;
 
-/*
+
 public class XkcdBotCommandHandler: BotCommandHandler
 {
-    public XkcdBotCommandHandler(IXkcdService xkcdService)
+    private readonly IHttpClientFactory _httpClientFactory;
+    public XkcdBotCommandHandler(IHttpClientFactory httpClientFactory)
     {
-        _xkcdService = xkcdService;
+        _httpClientFactory = httpClientFactory;
     }
     public override CommandType CommandType => CommandType.Xkcd;
     public override Privilege PrivilegeLevel => Privilege.Base;
 
-
-    private readonly IXkcdService _xkcdService;
     
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
+        var httpClient = _httpClientFactory.CreateClient("DotbotApiGateway");
+        
         var strings = content.Split(' ');
-        Result<XkcdComic> comic;
-        var comicNum = 0;
-        var hasComicNum = strings.Length > 1 && int.TryParse(strings[1], out comicNum);
+        XkcdComic comic;
+        var comicNumber = 0;
+        var hasComicNum = strings.Length > 1 && int.TryParse(strings[1], out comicNumber);
         if (hasComicNum)
         {
-            comic = await _xkcdService.GetComic(comicNum);
+            comic = await httpClient.GetFromJsonAsync<XkcdComic>($"api/v1/XkcdCommand/{comicNumber}",
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
         else
         {
-            comic = await _xkcdService.GetLatestComic();
+            comic = await httpClient.GetFromJsonAsync<XkcdComic>("api/v1/XkcdCommand/latest",
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
-        if (comic.IsFailed)
+        if (comic == null)
         {
             await context.SendFormattedMessageAsync(FormattedMessage.Error("Failed to retrieve latest comic"));
             return Result.Fail("Failed to retrieve latest comic");
         }
 
-        await context.SendFormattedMessageAsync(FormattedMessage.XkcdMessage(comic.Value, !hasComicNum));
+        await context.SendFormattedMessageAsync(FormattedMessage.XkcdMessage(comic, !hasComicNum));
         return Result.Ok();
     }
-}
-*/
+ 
+}  

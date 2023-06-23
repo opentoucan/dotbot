@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.Text.Json;
+using Dotbot.Discord.Entities;
 using Dotbot.Discord.Models;
 using Dotbot.Discord.Services;
 using FluentResults;
@@ -10,15 +12,16 @@ public class SearchCommandHandler : BotCommandHandler
 {
     public override CommandType CommandType => CommandType.Search;
     public override Privilege PrivilegeLevel => Privilege.Base;
-    private readonly IBotCommandsService _botCommandsService;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public SearchCommandHandler(IBotCommandsService botCommandsService)
+    public SearchCommandHandler(IHttpClientFactory httpClientFactory)
     {
-        _botCommandsService = botCommandsService;
+        _httpClientFactory = httpClientFactory;
     }
 
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
+        var httpClient = _httpClientFactory.CreateClient("DotbotApiGateway");
         var split = content.Split(' ');
 
         if (split.Length <= 1)
@@ -26,11 +29,14 @@ public class SearchCommandHandler : BotCommandHandler
             return Fail("No search term given");
         }
 
-        var result = await _botCommandsService.Search(await context.GetServerId(), split[1]);
+        var serverId = await context.GetServerId();
+        var searchTerm = split[1];
+        var result = await httpClient.GetFromJsonAsync<List<FuzzySearchViewModel>>($"search/{serverId}?searchTerm={searchTerm}&limit={20}&cutoff={20}",
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
-        if (result.IsFailed)
+        if (result == null)
         {
-            return Fail(result.Errors);
+            return Fail($"Failed to retrieve bot command {split[1]}");
         }
         
         var fm = FormattedMessage
@@ -39,9 +45,9 @@ public class SearchCommandHandler : BotCommandHandler
             .AppendDescription("")
             .SetColor(Color.FromArgb(157, 3, 252));
 
-        foreach (var (value, ratio) in result.Value.OrderByDescending(tuple => tuple.Item2))
+        foreach (var fuzzySearchResult in result.OrderByDescending(x => x.Score))
         {
-            fm.AppendDescription($"{value} - {ratio}%");
+            fm.AppendDescription($"{fuzzySearchResult.Value} - {fuzzySearchResult.Score}%");
         }
 
         await context.SendFormattedMessageAsync(fm);

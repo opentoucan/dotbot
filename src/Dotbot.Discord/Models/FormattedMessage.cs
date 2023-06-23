@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using Contracts.MessageBus;
 using FluentResults;
 
 namespace Dotbot.Discord.Models;
@@ -111,7 +110,7 @@ public class FormattedMessage
         };
     }
 
-    public static FormattedMessage XkcdMessage(XkcdPostedEvent comic, bool latest=false)
+    public static FormattedMessage XkcdMessage(XkcdComic comic, bool latest=false)
     {
         return new FormattedMessage
         {

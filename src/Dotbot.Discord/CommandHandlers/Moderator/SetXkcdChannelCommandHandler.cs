@@ -1,4 +1,5 @@
-﻿using Dotbot.Discord.Services;
+﻿using Dotbot.Discord.Repositories;
+using Dotbot.Discord.Services;
 using FluentResults;
 using static Dotbot.Discord.Models.FormattedMessage;
 using static FluentResults.Result;
@@ -7,10 +8,11 @@ namespace Dotbot.Discord.CommandHandlers.Moderator;
 
 public class SetXkcdChannelCommandHandler: BotCommandHandler
 {
-    private readonly IChatServerService _chatServerService;
-    public SetXkcdChannelCommandHandler(IChatServerService chatServerService)
+    private readonly IDiscordServerRepository _discordServerRepository;
+
+    public SetXkcdChannelCommandHandler(IDiscordServerRepository discordServerRepository)
     {
-        _chatServerService = chatServerService;
+        _discordServerRepository = discordServerRepository;
     }
 
     public override CommandType CommandType => CommandType.SetXkcdChannel;
@@ -19,13 +21,18 @@ public class SetXkcdChannelCommandHandler: BotCommandHandler
     {
         var channelId  = await context.GetChannelId();
         var serverId = await context.GetServerId();
-        var result = await _chatServerService.SetXkcdChannel(serverId, channelId);
-
-        if (result.IsSuccess)
+        try
         {
-            await context.SendFormattedMessageAsync(Success("Channel set as XKCD channel"));
+            await _discordServerRepository.SetXkcdChannelId(serverId, channelId);
+        }
+        catch (Exception)
+        {
+            var errorMessage = $"Failed to set XKCD channel";
+            await context.SendFormattedMessageAsync(Error(errorMessage));
+            return Fail(errorMessage);
         }
         
-        return OkIf(result.IsSuccess, string.Join(", ", result.Errors));
+        await context.SendFormattedMessageAsync(Success("Channel set as XKCD channel"));
+        return Ok();
     }
 }

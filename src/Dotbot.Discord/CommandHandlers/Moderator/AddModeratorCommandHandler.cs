@@ -1,4 +1,5 @@
-﻿using Dotbot.Discord.Services;
+﻿using Dotbot.Discord.Repositories;
+using Dotbot.Discord.Services;
 using FluentResults;
 using static Dotbot.Discord.Models.FormattedMessage;
 using static FluentResults.Result;
@@ -7,15 +8,15 @@ namespace Dotbot.Discord.CommandHandlers.Moderator;
 
 public class AddModeratorCommandHandler: BotCommandHandler
 {
-    public AddModeratorCommandHandler(IChatServerService chatServerService)
+    public AddModeratorCommandHandler(IDiscordServerRepository discordServerRepository)
     {
-        _chatServerService = chatServerService;
+        _discordServerRepository = discordServerRepository;
     }
 
     public override CommandType CommandType => CommandType.AddModerator;
     public override Privilege PrivilegeLevel => Privilege.Moderator;
 
-    private readonly IChatServerService _chatServerService;
+    private readonly IDiscordServerRepository _discordServerRepository;
     
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
@@ -31,11 +32,15 @@ public class AddModeratorCommandHandler: BotCommandHandler
 
         foreach (var mention in mentions)
         {
-            var result = await _chatServerService.AddModerator(serverId, mention.Id.ToString());
-            if(result.IsFailed)
+            try
             {
-                await context.SendFormattedMessageAsync(Error(result.Errors));
-                return Fail(result.Reasons.ToString()); 
+                await _discordServerRepository.AddModId(serverId, mention.Id.ToString());
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"Failed to add moderator: {mention.Username}";
+                await context.SendFormattedMessageAsync(Error(errorMessage));
+                return Fail(errorMessage);
             }
         }
 

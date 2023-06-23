@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
-using Dotbot.Database.Repositories;
+using System.Text.Json;
+using Dotbot.Discord.Entities;
 using Dotbot.Discord.Models;
 using FluentResults;
 using static FluentResults.Result;
@@ -11,15 +12,16 @@ public class InfoCommandHandler: BotCommandHandler
     public override CommandType CommandType => CommandType.Info;
     public override Privilege PrivilegeLevel => Privilege.Base;
     
-    private readonly IBotCommandRepository _botCommandRepository;
-    
-    public InfoCommandHandler(IBotCommandRepository botCommandRepository)
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public InfoCommandHandler(IHttpClientFactory httpClientFactory)
     {
-        _botCommandRepository = botCommandRepository;
+        _httpClientFactory = httpClientFactory;
     }
-    
+
     protected override async Task<Result> ExecuteAsync(string content, IServiceContext context)
     {
+        var httpClient = _httpClientFactory.CreateClient("DotbotApiGateway");
         var split = content.Split(' ');
 
         if (split.Length <= 1)
@@ -28,8 +30,9 @@ public class InfoCommandHandler: BotCommandHandler
         }
         else
         {
-            var (isSuccess, _, command) = await _botCommandRepository.GetCommand(await context.GetServerId(), split[1]);
-            if (isSuccess)
+            var command = await httpClient.GetFromJsonAsync<BotCommand>($"{context.GetServerId()}?name={split[1]}",
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            if (command != null)
             {
                 var creatorName = "Unknown";
                 if (command.CreatorId != null)
@@ -43,8 +46,8 @@ public class InfoCommandHandler: BotCommandHandler
 
                 var fm = FormattedMessage
                     .Info()
-                    .SetTitle($"Command: {command.Key}")
-                    .SetDescription(command.Content ?? command.FileName ?? "No Content")
+                    .SetTitle($"Command: {command.Name}")
+                    .SetDescription(command.Content)
                     .AddField("Creator", creatorName)
                     .AddField("Created", command.Created.ToString("f"));
                 await context.SendFormattedMessageAsync(fm);

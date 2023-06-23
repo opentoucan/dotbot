@@ -10,7 +10,6 @@ using Xkcd.API.Config;
 using Xkcd.API.Entities;
 using Xkcd.API.Extensions;
 using Xkcd.API.Infrastructure;
-using Xkcd.API.Models;
 using Xkcd.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +60,7 @@ builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(builder.Configu
 builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase("Xkcd"));
 
 builder.Services.AddMongoDbCollection<Xkcd.API.Entities.Xkcd>();
+builder.Services.AddMongoDbCollection<Entity>();
 var rabbitMqConfig = new RabbitMQConfig();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitMqConfig);
 builder.Services.AddMassTransit(x =>

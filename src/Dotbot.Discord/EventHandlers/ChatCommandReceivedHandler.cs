@@ -1,9 +1,10 @@
 ﻿using Discord.WebSocket;
-using Dotbot.Database.Entities;
 using Dotbot.Discord.CommandHandlers;
+using Dotbot.Discord.Entities;
 using Dotbot.Discord.Events;
 using Dotbot.Discord.Factories;
 using Dotbot.Discord.Models;
+using Dotbot.Discord.Repositories;
 using Dotbot.Discord.Services;
 using Dotbot.Discord.Settings;
 using MediatR;
@@ -17,17 +18,17 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
 {
     private readonly ILogger _logger;
     private readonly IBotCommandHandlerFactory _commandHandlerFactory;
-    private readonly IChatServerService _chatServerService;
+    private readonly IDiscordServerRepository _discordServerRepository;
     private readonly BotSettings _botSettings;
     private readonly Tracer _tracer;
 
     public ChatCommandReceivedHandler(IBotCommandHandlerFactory commandHandlerFactory,
         ILogger<ChatCommandReceivedHandler> logger, IOptions<BotSettings> botSettings,
-        IChatServerService chatServerService, Tracer tracer)
+        IDiscordServerRepository discordServerRepository, Tracer tracer)
     {
         _commandHandlerFactory = commandHandlerFactory;
         _logger = logger;
-        _chatServerService = chatServerService;
+        _discordServerRepository = discordServerRepository;
         _tracer = tracer;
         _botSettings = botSettings.Value;
     }
@@ -81,17 +82,17 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
         }
     }
 
-    private async Task<ChatServer?> GetServer(DiscordMessageReceivedNotification notification)
+    private async Task<DiscordServer?> GetServer(DiscordMessageReceivedNotification notification)
     {
-        ChatServer? server = null;
+        DiscordServer? server = null;
         
         if (notification.Message.Channel is not SocketGuildChannel sgc) return server;
         
-        var getServerResult = await _chatServerService.Get(sgc.Guild.Id.ToString());
+        var getServerResult = await _discordServerRepository.GetServerAsync(sgc.Guild.Id.ToString());
 
         if (getServerResult.IsFailed)
         {
-            var createServerResult = await _chatServerService.Create(sgc.Guild.Id.ToString());
+            var createServerResult = await _discordServerRepository.CreateServerAsync(sgc.Guild.Id.ToString());
             if (createServerResult.IsFailed)
             {
                 throw new Exception(

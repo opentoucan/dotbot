@@ -1,4 +1,5 @@
-﻿using Dotbot.Discord.Services;
+﻿using Dotbot.Discord.Repositories;
+using Dotbot.Discord.Services;
 using FluentResults;
 using static Dotbot.Discord.Models.FormattedMessage;
 using static FluentResults.Result;
@@ -7,11 +8,11 @@ namespace Dotbot.Discord.CommandHandlers.Moderator;
 
 public class RemoveModeratorCommandHandler : BotCommandHandler
 {
-    private readonly IChatServerService _chatServerService;
+    private readonly IDiscordServerRepository _discordServerRepository;
 
-    public RemoveModeratorCommandHandler(IChatServerService chatServerService)
+    public RemoveModeratorCommandHandler(IDiscordServerRepository discordServerRepository)
     {
-        _chatServerService = chatServerService;
+        _discordServerRepository = discordServerRepository;
     }
 
     public override CommandType CommandType => CommandType.RemoveModerator;
@@ -31,11 +32,15 @@ public class RemoveModeratorCommandHandler : BotCommandHandler
 
         foreach (var mention in mentions)
         {
-            var result = await _chatServerService.RemoveModerator(serverId, mention.Id.ToString());
-            if (result.IsFailed)
+            try
             {
-                await context.SendFormattedMessageAsync(Error(result.Errors));
-                return Fail(result.Reasons.ToString());
+                await _discordServerRepository.RemoveModId(serverId, mention.Id.ToString());
+            }
+            catch (Exception)
+            {
+                var errorMessage = $"Failed to remove moderator: {mention.Username}";
+                await context.SendFormattedMessageAsync(Error(errorMessage));
+                return Fail(errorMessage);
             }
         }
 

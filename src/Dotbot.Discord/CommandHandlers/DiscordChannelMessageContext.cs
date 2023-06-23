@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Dotbot.Database.Entities;
+using Dotbot.Discord.Entities;
 using Dotbot.Discord.Extensions;
 using Dotbot.Discord.Models;
 
@@ -16,14 +16,14 @@ internal interface IDiscordChannelMessageContext : IServiceContext
 public class DiscordChannelMessageContext : IDiscordChannelMessageContext
 {
     private readonly SocketMessage _message;
-    private readonly ChatServer? _guild;
+    private readonly DiscordServer? _guild;
     
     public DiscordChannelMessageContext(SocketMessage message)
     {
         _message = message;
     }    
     
-    public DiscordChannelMessageContext(SocketMessage message, ChatServer? guild)
+    public DiscordChannelMessageContext(SocketMessage message, DiscordServer? guild)
     {
         _message = message;
         _guild = guild;
