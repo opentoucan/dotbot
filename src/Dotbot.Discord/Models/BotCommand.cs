@@ -1,6 +1,4 @@
-﻿using Dotbot.Discord.Models;
-
-namespace Dotbot.Discord.Entities;
+﻿namespace Dotbot.Discord.Models;
 
 public class BotCommand
 {
