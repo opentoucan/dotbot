@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace Dotbot.Extensions;
@@ -18,10 +19,17 @@ public static class MongoDbDependencyConfigurationExtensions
         {
             try
             {
+                BsonSerializer.RegisterIdGenerator(
+                    typeof(Guid),
+                    GuidGenerator.Instance
+                );
+                
                 BsonClassMap.TryRegisterClassMap<Entity>(cm =>
                 {
-                    cm.SetIsRootClass(true);
                     cm.AutoMap();
+                    cm.SetIsRootClass(true);
+                    cm.MapIdMember(m => m.Id)
+                        .SetSerializer(GuidSerializer.StandardInstance);
                 });
 
                 BsonClassMap.TryRegisterClassMap<Enumeration>(cm =>
@@ -38,8 +46,7 @@ public static class MongoDbDependencyConfigurationExtensions
 
                 BsonClassMap.TryRegisterClassMap<BotCommand>(cm =>
                 {
-                    cm.MapIdMember(c => c.Id).SetIdGenerator(GuidGenerator.Instance).SetIgnoreIfDefault(true);
-                    cm.SetIgnoreExtraElements(true);
+                    cm.AutoMap();
                     cm.MapMember(m => m.ServiceId)
                         .SetElementName("guildId");
                     cm.MapMember(m => m.Name)
@@ -53,7 +60,7 @@ public static class MongoDbDependencyConfigurationExtensions
                     cm.MapMember(m => m.Created)
                         .SetElementName("created");
                 });
-                
+                    
             }
             catch (Exception e)
             {

@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using Dotbot.Discord.Entities;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace Dotbot.Discord.Extensions;
@@ -16,16 +18,22 @@ public static class MongoDbDependencyConfigurationExtensions
         {
             try
             {
-                BsonClassMap.TryRegisterClassMap<Entity>(cme =>
+                BsonSerializer.RegisterIdGenerator(
+                    typeof(Guid),
+                    GuidGenerator.Instance
+                );
+                
+                BsonClassMap.TryRegisterClassMap<Entity>(cm =>
                 {
-                    cme.SetIsRootClass(true);
-                    cme.AutoMap();
+                    cm.AutoMap();
+                    cm.SetIsRootClass(true);
+                    cm.MapIdMember(m => m.Id)
+                        .SetSerializer(GuidSerializer.StandardInstance);
                 });
-
+                
                 BsonClassMap.TryRegisterClassMap<DiscordServer>(cm =>
                 {
-                    cm.MapIdMember(c => c.Id).SetIdGenerator(GuidGenerator.Instance).SetIgnoreIfDefault(true);
-                    cm.SetIgnoreExtraElements(true);
+                    cm.AutoMap();
                     cm.MapMember(m => m.Server)
                         .SetElementName("guildId");
                     cm.MapMember(m => m.UserWordCounts)
@@ -40,7 +48,9 @@ public static class MongoDbDependencyConfigurationExtensions
                         .SetElementName("xkcdChannelId");
                     cm.MapMember(m => m.Volume)
                         .SetElementName("volume");
+                    
                 });
+                
             }
             catch (Exception e)
             {

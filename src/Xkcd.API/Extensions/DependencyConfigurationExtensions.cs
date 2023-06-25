@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using Xkcd.API.Entities;
+using Xkcd.API.Infrastructure.Entities;
 
 namespace Xkcd.API.Extensions;
 
@@ -15,18 +15,26 @@ public static class DependencyConfigurationExtensions
     {
         IMongoCollection<T> MongoDbCollectionFactory(IServiceProvider provider)
         {
+            BsonSerializer.RegisterIdGenerator(
+                typeof(Guid),
+                GuidGenerator.Instance
+            );
+
             BsonClassMap.TryRegisterClassMap<Entity>(cm =>
             {
-                cm.AutoMap();
                 cm.SetIsRootClass(true);
+                cm.AutoMap();
+                cm.MapIdMember(x => x.Id)
+                    .SetSerializer(GuidSerializer.StandardInstance);
             });
             
-            BsonClassMap.TryRegisterClassMap<Entities.Xkcd>(cm =>
+            BsonClassMap.TryRegisterClassMap<Infrastructure.Entities.Xkcd>(cm =>
             {
                 BsonSerializer.RegisterSerializer(typeof(DateTimeOffset),
                     new DateTimeOffsetSerializer(BsonType.DateTime));
-                cm.AutoMap();
-                cm.MapIdMember(c => c.Id).SetIdGenerator(GuidGenerator.Instance).SetIgnoreIfDefault(true);
+                cm.SetIgnoreExtraElements(true);
+                cm.MapMember(m => m.ComicNumber);
+                cm.MapMember(m => m.Posted);
             });
 
             var database = provider.GetRequiredService<IMongoDatabase>();

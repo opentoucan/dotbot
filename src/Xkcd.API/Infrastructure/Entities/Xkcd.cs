@@ -1,4 +1,4 @@
-namespace Xkcd.API.Entities;
+namespace Xkcd.API.Infrastructure.Entities;
 
 public sealed class Xkcd : Entity
 {

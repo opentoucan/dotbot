@@ -1,16 +1,19 @@
+using System.Reflection;
 using Grpc.Net.Client;
 using MassTransit;
+using MassTransit.MongoDbIntegration;
 using Microsoft.AspNetCore.Builder;
 using MongoDB.Driver;
 using Polly;
 using Polly.Extensions.Http;
 using Quartz;
 using Xkcd.API;
+using Xkcd.API.Behaviours;
 using Xkcd.API.Config;
-using Xkcd.API.Entities;
+using Xkcd.API.CronJob;
 using Xkcd.API.Extensions;
+using Xkcd.API.Grpc;
 using Xkcd.API.Infrastructure;
-using Xkcd.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,10 +60,9 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 }
 
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(builder.Configuration.GetValue<string>("MongoSettings:ConnectionString")));
-builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase("Xkcd"));
+builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(builder.Configuration.GetValue<string>("MongoSettings:DatabaseName")));
 
-builder.Services.AddMongoDbCollection<Xkcd.API.Entities.Xkcd>();
-builder.Services.AddMongoDbCollection<Entity>();
+builder.Services.AddMongoDbCollection<Xkcd.API.Infrastructure.Entities.Xkcd>();
 var rabbitMqConfig = new RabbitMQConfig();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitMqConfig);
 builder.Services.AddMassTransit(x =>
@@ -88,7 +90,14 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-builder.Services.AddScoped<IXkcdContext, XkcdContext>();
+builder.Services.AddScoped<DbContext>(c =>
+    new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<Xkcd.API.Infrastructure.Entities.Xkcd>>()));
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
+});
 
 var app = builder.Build();
 

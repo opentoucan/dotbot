@@ -1,7 +1,6 @@
+using Contracts.MessageBus;
 using Discord.WebSocket;
-using Dotbot.Discord.CommandHandlers;
 using Dotbot.Discord.Extensions;
-using Dotbot.Discord.IntegrationEvents.Events;
 using Dotbot.Discord.Models;
 using Dotbot.Discord.Repositories;
 using MassTransit;

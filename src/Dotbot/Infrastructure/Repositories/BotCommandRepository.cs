@@ -31,7 +31,7 @@ public class BotCommandRepository : IBotCommandRepository
             new ReplaceOptions { IsUpsert = true });
     }
 
-    public async Task<Result<List<BotCommand>>> GetCommands(string serverId, int index, int pageSize)
+    public async Task<FluentResults.Result<List<BotCommand>>> GetCommands(string serverId, int index, int pageSize)
     {
         if (pageSize < 0)
             return Fail($"Invalid {nameof(pageSize)} {pageSize}");

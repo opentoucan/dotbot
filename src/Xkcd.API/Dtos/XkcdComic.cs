@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Xkcd.API.Dtos;
+﻿namespace Xkcd.API.Dtos;
 
 public class XkcdComic
 {

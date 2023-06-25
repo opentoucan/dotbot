@@ -1,6 +1,7 @@
 using System.Reflection;
 using Dotbot.Extensions;
 using Dotbot.Infrastructure;
+using Dotbot.Infrastructure.GraphQL;
 using Dotbot.Ioc;
 using Dotbot.Models;
 using Dotbot.Settings;
@@ -65,6 +66,13 @@ internal static class Program
             o.Address = new Uri("http://localhost:5001");
         });
 
+        builder.Services
+            .AddGraphQLServer()
+            .AddQueryType<Query>()
+            .AddMongoDbSorting()
+            .AddMongoDbFiltering()
+            .AddMongoDbProjections()
+            .AddMongoDbPagingProviders();
         var app = builder.Build();
         
 
@@ -78,6 +86,7 @@ internal static class Program
 
         //app.UseAuthorization();
 
+        app.MapGraphQL("/graphql");
         app.MapControllers();
         app.Run();
 

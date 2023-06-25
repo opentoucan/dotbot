@@ -1,15 +1,11 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Newtonsoft.Json.Serialization;
 using Xkcd.API.Dtos;
-using Xkcd.API.Extensions;
 using XkcdApi;
-using static FluentResults.Result;
 
-namespace Xkcd.API.Services;
+namespace Xkcd.API.Grpc;
 
 public class XkcdService : XkcdApi.XkcdService.XkcdServiceBase
 {
@@ -27,7 +23,8 @@ public class XkcdService : XkcdApi.XkcdService.XkcdServiceBase
 
         _logger.LogInformation($"Url: {_httpClient.BaseAddress + url}");
         _logger.LogInformation($"XkcdRequest: {request.Id}");
-        var comic = await _httpClient.GetFromJsonAsync<XkcdComic>(url, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        
+        var comic = await _httpClient.GetFromJsonAsync<XkcdComic>(url, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, NumberHandling = JsonNumberHandling.AllowReadingFromString});
         return new XkcdResponse
         {
             Id = comic.Num,

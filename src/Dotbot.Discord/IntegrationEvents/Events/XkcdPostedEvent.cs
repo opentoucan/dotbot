@@ -1,4 +1,4 @@
-namespace Dotbot.Discord.IntegrationEvents.Events;
+namespace Contracts.MessageBus;
 
 public class XkcdPostedEvent
 {
