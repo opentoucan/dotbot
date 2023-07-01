@@ -1,4 +1,4 @@
-﻿using Discord.Entities;
+﻿using Discord.Application.Entities;
 
 namespace Discord.Application.Repositories;
 

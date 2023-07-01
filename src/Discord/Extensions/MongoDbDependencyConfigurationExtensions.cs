@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Discord.Entities;
+using Discord.Application.Entities;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;

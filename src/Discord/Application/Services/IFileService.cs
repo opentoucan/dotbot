@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace Discord.Services;
+namespace Discord.Application.Services;
 
 public interface IFileService
 {

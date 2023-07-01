@@ -1,33 +1,38 @@
-﻿using Discord.Application.Models;
+﻿using Discord.Application.BotCommandHandlers;
+using Discord.Application.BotCommands;
+using Discord.Application.DomainEvents.Events;
+using Discord.Application.Entities;
+using Discord.Application.Factories;
+using Discord.Application.Models;
 using Discord.Application.Repositories;
-using Discord.BotCommandHandlers;
-using Discord.DomainEvents.Events;
-using Discord.Entities;
-using Discord.Factories;
+using Discord.Discord;
+using Discord.Exceptions;
+using Discord.Extensions;
 using Discord.Settings;
 using Discord.WebSocket;
 using MediatR;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Trace;
 
-namespace Discord.DomainEvents.EventHandlers;
+namespace Discord.Application.DomainEvents.EventHandlers;
 
 public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageReceivedNotification>
 {
     private readonly ILogger _logger;
-    private readonly IBotCommandHandlerFactory _commandHandlerFactory;
     private readonly IDiscordServerRepository _discordServerRepository;
     private readonly BotSettings _botSettings;
     private readonly Tracer _tracer;
-
-    public ChatCommandReceivedHandler(IBotCommandHandlerFactory commandHandlerFactory,
-        ILogger<ChatCommandReceivedHandler> logger, IOptions<BotSettings> botSettings,
-        IDiscordServerRepository discordServerRepository, Tracer tracer)
+    private readonly IMediator _mediator;
+    private readonly IBotCommandCreatorFactory _botCommandCreatorFactory;
+    
+    public ChatCommandReceivedHandler(ILogger<ChatCommandReceivedHandler> logger, IOptions<BotSettings> botSettings,
+        IDiscordServerRepository discordServerRepository, Tracer tracer, IMediator mediator, IBotCommandCreatorFactory botCommandCreatorFactory)
     {
-        _commandHandlerFactory = commandHandlerFactory;
         _logger = logger;
         _discordServerRepository = discordServerRepository;
         _tracer = tracer;
+        _mediator = mediator;
+        _botCommandCreatorFactory = botCommandCreatorFactory;
         _botSettings = botSettings.Value;
     }
 
@@ -40,43 +45,32 @@ public class ChatCommandReceivedHandler : INotificationHandler<DiscordMessageRec
 
         var messageSplit = notification.Message.Content.Split(' ');
 
-        BotCommandHandler? handler = null;
-        
+        var channelGuild = notification.Message.Channel.AsGuildChannel();
+
+        var user = notification.Message.Author as SocketGuildUser;
+
         if (messageSplit[0].StartsWith(_botSettings.CommandPrefix))
         {
-            handler = _commandHandlerFactory.GetCommand(messageSplit[0][1..]);
-        }
+            var userRole =
+                channelGuild != null && user.Roles.Any(x => x.Permissions.ManageChannels)
+                    ? Privilege.Moderator
+                    : Privilege.Base;
 
-        if (messageSplit[0].StartsWith(_botSettings.ModCommandPrefix))
-        {
-            handler = _commandHandlerFactory.GetCommand(messageSplit[0][1..], Privilege.Moderator);
-        }
+            var commandName = messageSplit[0][1..];
+            Enum.TryParse<BotCommandTypes>(commandName, true, out var commandType);
+            var botCommand = _botCommandCreatorFactory.Create(commandType, userRole,
+                new DiscordChannelMessageContext(notification.Message, server), notification.Message.Content[1..]);
 
-        if (handler != null)
-        {
-            using var span = _tracer.StartActiveSpan("Handle-Command");
-            var context = new DiscordChannelMessageContext(notification.Message, server);
             try
             {
-                span.AddEvent("Start execution");
-                var executionResult = await handler.HandleAsync(
-                    notification.Message.Content[1..], context);
-                span.AddEvent("End execution");
-                
-                if (executionResult.IsFailed)
-                {
-                    span.AddEvent("Failed to execute");
-                    var errs = string.Join(", ",executionResult.Errors.Select(x => x.Message));
-                    _logger.LogError("Failed to execute handler: {}", errs);
-                    await context.SendFormattedMessageAsync(FormattedMessage.Error(errs));
-                }
+                await _mediator.Send(botCommand, cancellationToken);
             }
-            catch (Exception e)
+            catch (BotCommandPermissionException ex)
             {
-                _logger.LogError("{}",e.Message);
-                await context.SendFormattedMessageAsync(FormattedMessage.Error(e.Message));
+                _logger.LogWarning("<{AuthorUsername}> attempted to use a command with elevated privileges: {CommandName}", notification.Message.Author.Username,
+                    commandName);
+                await notification.Message.Channel.SendMessageAsync("You do not have permission to use this command");
             }
-            
         }
     }
 

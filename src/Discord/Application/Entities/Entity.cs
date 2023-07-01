@@ -1,4 +1,4 @@
-﻿namespace Discord.Entities;
+﻿namespace Discord.Application.Entities;
 
 public abstract class Entity
 {

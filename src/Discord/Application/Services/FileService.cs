@@ -3,7 +3,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using static FluentResults.Result;
 
-namespace Discord.Services;
+namespace Discord.Application.Services;
 
 public class FileService : IFileService
 {

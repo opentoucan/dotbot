@@ -1,8 +1,6 @@
-﻿using Discord;
-using Discord.Application.Models;
-using Discord.WebSocket;
+﻿using Discord.Application.Models;
 
-namespace Discord.Services;
+namespace Discord.Application.Services;
 
 public interface IAudioService
 {

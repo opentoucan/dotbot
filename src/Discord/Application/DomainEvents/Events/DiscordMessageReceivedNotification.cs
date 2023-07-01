@@ -1,7 +1,7 @@
 ﻿using Discord.WebSocket;
 using MediatR;
 
-namespace Discord.DomainEvents.Events;
+namespace Discord.Application.DomainEvents.Events;
 
 public class DiscordMessageReceivedNotification : INotification
 {

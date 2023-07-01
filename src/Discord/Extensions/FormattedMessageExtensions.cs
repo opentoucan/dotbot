@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Application.Models;
-using Discord.Services;
 using YoutubeExplode.Videos;
 
 namespace Discord.Extensions;

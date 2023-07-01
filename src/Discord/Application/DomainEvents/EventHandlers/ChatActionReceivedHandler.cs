@@ -1,7 +1,7 @@
-﻿using Discord.DomainEvents.Events;
+﻿using Discord.Application.DomainEvents.Events;
 using MediatR;
 
-namespace Discord.DomainEvents.EventHandlers;
+namespace Discord.Application.DomainEvents.EventHandlers;
 
 public class ChatActionReceivedHandler : INotificationHandler<DiscordMessageReceivedNotification>
 {

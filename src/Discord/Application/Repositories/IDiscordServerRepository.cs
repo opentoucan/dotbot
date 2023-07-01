@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Discord.Entities;
+using Discord.Application.Entities;
 using FluentResults;
 
 namespace Discord.Application.Repositories;

@@ -1,22 +1,20 @@
-﻿using Discord;
+﻿using Discord.Application.Services;
 using Discord.Commands;
-using Discord.Discord.InteractionHandler;
 using Discord.Interactions;
-using Discord.Services;
 using RunMode = Discord.Interactions.RunMode;
 
-namespace Discord.Modules;
+namespace Discord.Discord.Modules;
 
 public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
 {
     // Dependencies can be accessed through Property injection, public properties with public setters will be set by the service provider
         public InteractionService Commands { get; set; }
 
-        private InteractionHandler _handler;
+        private InteractionHandler.InteractionHandler _handler;
         private readonly IAudioService _audioService;
 
         // Constructor injection is also a valid way to access the dependencies
-        public InteractionModule(InteractionHandler handler, IAudioService audioService)
+        public InteractionModule(InteractionHandler.InteractionHandler handler, IAudioService audioService)
         {
             _handler = handler;
             _audioService = audioService;

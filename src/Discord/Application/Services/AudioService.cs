@@ -1,14 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using CliWrap;
-using Discord;
 using Discord.Application.Models;
 using Discord.Audio;
 using Discord.Extensions;
-using Microsoft.Extensions.Logging;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
 
-namespace Discord.Services;
+namespace Discord.Application.Services;
 
 public class AudioService : IAudioService
 {

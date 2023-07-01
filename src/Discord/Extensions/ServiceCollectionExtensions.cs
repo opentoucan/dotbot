@@ -1,11 +1,11 @@
+using Discord.Application.BotCommandHandlers;
+using Discord.Application.BotCommands;
+using Discord.Application.Factories;
 using Discord.Application.Repositories;
-using Discord.BotCommandHandlers;
-using Discord.BotCommandHandlers.Moderator;
+using Discord.Application.Services;
+using Discord.Discord.EventHandlers;
 using Discord.Discord.InteractionHandler;
-using Discord.EventHandlers;
-using Discord.Factories;
 using Discord.Interactions;
-using Discord.Services;
 using Discord.WebSocket;
 
 namespace Discord.Extensions;
@@ -19,26 +19,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
         services.AddSingleton<InteractionHandler>();
         services.AddSingleton<MessageReceivedEventHandler>();
+        services.AddSingleton<ButtonActionEventHandler>();
         services.AddHttpClient<SaveBotCommandHandler>();
         
         //TODO: .AddImplementingInterfaces
         services.AddTransient<IFileService, FileService>();
-        services.AddTransient<BotCommandHandler, DefaultBotCommandHandler>();
-        services.AddTransient<BotCommandHandler, PingBotCommandHandler>();
-        services.AddTransient<BotCommandHandler, SaveBotCommandHandler>();
-        services.AddTransient<BotCommandHandler, SavedCommandHandler>();
-        services.AddTransient<BotCommandHandler, AvatarCommandHandler>();
-        services.AddTransient<BotCommandHandler, XkcdBotCommandHandler>();
-        services.AddTransient<BotCommandHandler, AddModeratorCommandHandler>();
-        services.AddTransient<BotCommandHandler, RemoveModeratorCommandHandler>();
-        services.AddTransient<BotCommandHandler, SetXkcdChannelCommandHandler>();
-        services.AddTransient<BotCommandHandler, InfoCommandHandler>();
-        services.AddTransient<BotCommandHandler, SearchCommandHandler>();
-        services.AddTransient<BotCommandHandler, PlayMusicHandler>();
-        services.AddTransient<BotCommandHandler, SkipMusicHandler>();
-        services.AddTransient<BotCommandHandler, TrackInfoHandler>();
-        services.AddSingleton<IBotCommandHandlerFactory, BotCommandHandlerFactory>();
         services.AddTransient<IDiscordServerRepository, DiscordServerRepository>();
+        services.AddSingleton<IBotCommandCreatorFactory, BotCommandCreatorFactory>();
         return services;
     }
 }

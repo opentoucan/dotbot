@@ -1,11 +1,11 @@
-using Contracts.MessageBus;
+using Discord.Application.IntegrationEvents.Events;
 using Discord.Application.Models;
 using Discord.Application.Repositories;
-using Discord.WebSocket;
 using Discord.Extensions;
+using Discord.WebSocket;
 using MassTransit;
 
-namespace Discord.IntegrationEvents.EventHandlers;
+namespace Discord.Application.IntegrationEvents.EventHandlers;
 
 public class XkcdPostedEventHandler : IConsumer<XkcdPostedEvent>
 {

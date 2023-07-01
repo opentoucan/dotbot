@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Discord.Entities;
+using Discord.Application.Entities;
 using FluentResults;
 using MongoDB.Driver;
 using static FluentResults.Result;

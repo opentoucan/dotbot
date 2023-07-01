@@ -1,4 +1,4 @@
-﻿using Discord.EventHandlers;
+﻿using Discord.Discord.EventHandlers;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,8 +10,10 @@ public static class ClientEventRegistrations
     {
         var client = serviceProvider.GetRequiredService<DiscordSocketClient>();
         var messageReceivedEventHandler = serviceProvider.GetRequiredService<MessageReceivedEventHandler>();
-
+        var buttonActionEventHandler = serviceProvider.GetRequiredService<ButtonActionEventHandler>();
+        
         client.MessageReceived += messageReceivedEventHandler.OnMessageReceivedAsync;
+        client.ButtonExecuted += buttonActionEventHandler.OnButtonActionAsync;
         //Other client event registrations go here
         return client;
     }

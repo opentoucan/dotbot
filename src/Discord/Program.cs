@@ -1,10 +1,11 @@
 using System.Reflection;
 using Discord;
+using Discord.Application.Behaviours;
+using Discord.Application.Entities;
+using Discord.Application.IntegrationEvents.EventHandlers;
 using Discord.Discord.InteractionHandler;
 using Discord.WebSocket;
-using Discord.Entities;
 using Discord.Extensions;
-using Discord.IntegrationEvents.EventHandlers;
 using Discord.Settings;
 using MassTransit;
 using MediatR;
@@ -53,6 +54,10 @@ builder.Services.AddMongoDbCollection<DiscordServer>();
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.Configure<BotSettings>(builder.Configuration.GetSection("BotSettings"));
 
+builder.Services
+    .AddDotbotClient()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("GraphQLSettings:DotbotUrl")));
+
 builder.Services.AddSingleton(discordConfig);
 
 builder.Services.AddServices();
@@ -60,8 +65,11 @@ builder.Services.AddServices();
 builder.Services.AddSingleton<DbContext>(c =>
     new DbContext(c.GetRequiredService<IMongoCollection<DiscordServer>>()));
 
-builder.Services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
-
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    cfg.AddOpenBehavior(typeof(BotCommandBehaviour<,>));
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -93,7 +101,7 @@ var app = builder.Build();
 var client = app.Services.RegisterClientEvents();
 
 await app.Services.GetRequiredService<InteractionHandler>().InitializeAsync();
-await client.LoginAsync(TokenType.Bot, builder.Configuration["Discord:BotToken"]);
+await client.LoginAsync(TokenType.Bot, builder.Configuration["DiscordSettings:BotToken"]);
 await client.StartAsync();
-await client.SetGameAsync(builder.Configuration["Discord:GameStatus"]);
+await client.SetGameAsync(builder.Configuration["DiscordSettings:GameStatus"]);
 await app.RunAsync();

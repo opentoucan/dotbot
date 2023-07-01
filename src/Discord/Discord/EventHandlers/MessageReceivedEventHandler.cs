@@ -1,8 +1,8 @@
-﻿using Discord.DomainEvents.Events;
+﻿using Discord.Application.DomainEvents.Events;
 using Discord.WebSocket;
 using MediatR;
 
-namespace Discord.EventHandlers;
+namespace Discord.Discord.EventHandlers;
 
 public class MessageReceivedEventHandler
 {

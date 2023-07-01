@@ -6,9 +6,10 @@ namespace Dotbot.Infrastructure.GraphQL;
 
 public class Query
 {
+    [UsePaging]
     [UseProjection]
-    [UseFiltering]
     [UseSorting]
-    public IExecutable<BotCommand> GetBotCommands([Service] IMongoCollection<BotCommand> botCommands) =>
+    [UseFiltering]
+    public IExecutable<BotCommand> SearchBotCommands([Service] IMongoCollection<BotCommand> botCommands) =>
         botCommands.AsExecutable();
 }

@@ -25,6 +25,18 @@ public class BotCommandRepository : IBotCommandRepository
 
     public async Task SaveCommand(BotCommand botCommand)
     {
+        var existingBotCommand = _dbContext.BotCommands.AsQueryable().FirstOrDefault(x => x.Name == botCommand.Name);
+        if (existingBotCommand == null)
+        {
+            await _dbContext.BotCommands.InsertOneAsync(botCommand);
+        }
+        else
+        {
+            botCommand.Id = existingBotCommand.Id;
+            await _dbContext.BotCommands.ReplaceOneAsync(Builders<BotCommand>.Filter.Eq(x => x.Name, existingBotCommand.Name), botCommand);
+        }
+
+        
         await _dbContext.BotCommands.ReplaceOneAsync(Builders<BotCommand>.Filter
                 .Eq(x => x.Name, botCommand.Name),
                 botCommand,
