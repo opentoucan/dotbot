@@ -1,0 +1,156 @@
+﻿schema {
+  query: Query
+}
+
+type Query {
+  searchBotCommands("Returns the first _n_ elements from the list." first: Int "Returns the elements in the list that come after the specified cursor." after: String "Returns the last _n_ elements from the list." last: Int "Returns the elements in the list that come before the specified cursor." before: String order: [BotCommandSortInput!] where: BotCommandFilterInput): SearchBotCommandsConnection
+}
+
+input BotCommandSortInput {
+  serviceId: SortEnumType
+  name: SortEnumType
+  content: SortEnumType
+  type: BotCommandTypeSortInput
+  creatorId: SortEnumType
+  created: SortEnumType
+  id: SortEnumType
+}
+
+input BotCommandFilterInput {
+  and: [BotCommandFilterInput!]
+  or: [BotCommandFilterInput!]
+  serviceId: StringOperationFilterInput
+  name: StringOperationFilterInput
+  content: StringOperationFilterInput
+  type: BotCommandTypeFilterInput
+  creatorId: StringOperationFilterInput
+  created: DateTimeOperationFilterInput
+  id: UuidOperationFilterInput
+}
+
+"A connection to a list of items."
+type SearchBotCommandsConnection {
+  "Information to aid in pagination."
+  pageInfo: PageInfo!
+  "A list of edges."
+  edges: [SearchBotCommandsEdge!]
+  "A flattened list of the nodes."
+  nodes: [BotCommand!]
+}
+
+enum SortEnumType {
+  ASC
+  DESC
+}
+
+input BotCommandTypeSortInput {
+  name: SortEnumType
+  id: SortEnumType
+}
+
+input StringOperationFilterInput {
+  and: [StringOperationFilterInput!]
+  or: [StringOperationFilterInput!]
+  eq: String
+  neq: String
+  contains: String
+  ncontains: String
+  in: [String]
+  nin: [String]
+  startsWith: String
+  nstartsWith: String
+  endsWith: String
+  nendsWith: String
+}
+
+input BotCommandTypeFilterInput {
+  and: [BotCommandTypeFilterInput!]
+  or: [BotCommandTypeFilterInput!]
+  name: StringOperationFilterInput
+  id: IntOperationFilterInput
+}
+
+input DateTimeOperationFilterInput {
+  eq: DateTime
+  neq: DateTime
+  in: [DateTime]
+  nin: [DateTime]
+  gt: DateTime
+  ngt: DateTime
+  gte: DateTime
+  ngte: DateTime
+  lt: DateTime
+  nlt: DateTime
+  lte: DateTime
+  nlte: DateTime
+}
+
+input UuidOperationFilterInput {
+  eq: UUID
+  neq: UUID
+  in: [UUID]
+  nin: [UUID]
+  gt: UUID
+  ngt: UUID
+  gte: UUID
+  ngte: UUID
+  lt: UUID
+  nlt: UUID
+  lte: UUID
+  nlte: UUID
+}
+
+"Information about pagination in a connection."
+type PageInfo {
+  "Indicates whether more edges exist following the set defined by the clients arguments."
+  hasNextPage: Boolean!
+  "Indicates whether more edges exist prior the set defined by the clients arguments."
+  hasPreviousPage: Boolean!
+  "When paginating backwards, the cursor to continue."
+  startCursor: String
+  "When paginating forwards, the cursor to continue."
+  endCursor: String
+}
+
+type BotCommand {
+  serviceId: String!
+  name: String!
+  content: String!
+  type: BotCommandType!
+  creatorId: String
+  created: DateTime!
+  id: UUID!
+}
+
+"An edge in a connection."
+type SearchBotCommandsEdge {
+  "A cursor for use in pagination."
+  cursor: String!
+  "The item at the end of the edge."
+  node: BotCommand!
+}
+
+input IntOperationFilterInput {
+  eq: Int
+  neq: Int
+  in: [Int]
+  nin: [Int]
+  gt: Int
+  ngt: Int
+  gte: Int
+  ngte: Int
+  lt: Int
+  nlt: Int
+  lte: Int
+  nlte: Int
+}
+
+"The `DateTime` scalar represents an ISO-8601 compliant date time type."
+scalar DateTime
+
+scalar UUID
+
+type BotCommandType {
+  name: String!
+  id: Int!
+}
