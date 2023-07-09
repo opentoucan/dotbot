@@ -1,0 +1,7 @@
+architecture: replicaset
+auth:
+  existingSecret: mongodb-creds
+  usernames:
+    - dotbot
+  databases:
+    - test

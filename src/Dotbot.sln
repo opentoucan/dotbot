@@ -1,43 +1,69 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.API", "Dotbot.API\Dotbot.API.csproj", "{9DFF2272-E298-45A2-97B7-28E3C98A30BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.API", "Services\Dotbot.API\Dotbot.API.csproj", "{9DFF2272-E298-45A2-97B7-28E3C98A30BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord", "Discord\Discord.csproj", "{7536E5FF-8244-453C-B8E2-393B4E62C67A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A68539FC-CA19-4DFC-8DBB-7B4E2AE1C0E2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Database.Tests", "Dotbot.Database.Tests\Dotbot.Database.Tests.csproj", "{3FB16F49-F058-4109-96B1-024C3E7FDA07}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotbot.Discord.Tests", "Dotbot.Discord.Tests\Dotbot.Discord.Tests.csproj", "{785DF0C2-C38E-42A3-8FE4-F27F1434742F}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "localdev", "localdev", "{3906DFEB-2274-4D68-9DBB-F9C9D1EE72C6}"
-	ProjectSection(SolutionItems) = preProject
-		..\localdev\docker-compose.yml = ..\localdev\docker-compose.yml
-		..\localdev\Dockerfile = ..\localdev\Dockerfile
-		..\localdev\mongo-setup.js = ..\localdev\mongo-setup.js
-		..\localdev\.rabbitmq_env = ..\localdev\.rabbitmq_env
-		..\localdev\.envrc = ..\localdev\.envrc
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord", "Web\Discord\Discord.csproj", "{7536E5FF-8244-453C-B8E2-393B4E62C67A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CC37BA52-7578-490B-94DA-79A705D9B223}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Meme", "Meme", "{CBF3A0B3-0FD0-4D12-ACAE-38190C1BBCC3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meme.API", "Meme.API\Meme.API.csproj", "{762515A3-C5FF-47E2-A62A-62C2F9FFD67E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meme.API", "Services\Meme\Meme.API\Meme.API.csproj", "{762515A3-C5FF-47E2-A62A-62C2F9FFD67E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meme.Domain", "Meme.Domain\Meme.Domain.csproj", "{8750ED1B-C086-44A3-86FB-DF3CDEBF8E88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meme.Domain", "Services\Meme\Meme.Domain\Meme.Domain.csproj", "{8750ED1B-C086-44A3-86FB-DF3CDEBF8E88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meme.Infrastructure", "Meme.Infrastructure\Meme.Infrastructure.csproj", "{7A5D8C88-9936-4E63-ACA2-6CBB415FC997}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meme.Infrastructure", "Services\Meme\Meme.Infrastructure\Meme.Infrastructure.csproj", "{7A5D8C88-9936-4E63-ACA2-6CBB415FC997}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xkcd", "Xkcd", "{54DD622D-BEF2-4B1D-BE6F-72D99979F827}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkcd.API", "Xkcd.API\Xkcd.API.csproj", "{6F068FF8-060E-4ED2-904C-A3B3AAAD99B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkcd.API", "Services\Xkcd\Xkcd.API\Xkcd.API.csproj", "{6F068FF8-060E-4ED2-904C-A3B3AAAD99B3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{6A369009-7569-411F-B3AE-EDF4CA5944B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{21AC083F-7F4B-4F10-8788-49DCB4AF2A8A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dotbot", "Dotbot", "{23C26F50-20BB-408F-A20E-3261D084229D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dotbot.API", "Dotbot.API", "{23C26F50-20BB-408F-A20E-3261D084229D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{0EEAE36E-8CFF-4381-AEFC-E496A866DA7E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "k8s", "k8s", "{8D83B134-F09B-4169-942E-1B96212EDF86}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "localdev", "localdev", "{7A848A99-4B63-4A9F-AE55-7B387BB0D129}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{44650B63-904D-4F0E-B656-ECD8E6CCE723}"
+	ProjectSection(SolutionItems) = preProject
+		..\deploy\localdev\docker\docker-compose.yml = ..\deploy\localdev\docker\docker-compose.yml
+		..\deploy\localdev\docker\Dockerfile = ..\deploy\localdev\docker\Dockerfile
+		..\deploy\localdev\docker\mongo-setup.js = ..\deploy\localdev\docker\mongo-setup.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tilt", "tilt", "{4DD4B50F-8949-4662-A7AB-78A1098DF057}"
+	ProjectSection(SolutionItems) = preProject
+		..\deploy\localdev\tilt\kind-cluster.yaml = ..\deploy\localdev\tilt\kind-cluster.yaml
+		..\deploy\localdev\tilt\kind-with-registry.sh = ..\deploy\localdev\tilt\kind-with-registry.sh
+		..\deploy\localdev\tilt\teardown-kind-with-registry.sh = ..\deploy\localdev\tilt\teardown-kind-with-registry.sh
+		..\deploy\localdev\tilt\Tiltfile = ..\deploy\localdev\tilt\Tiltfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "discord", "discord", "{C88258A0-F1B0-4EDC-AB7E-221EE276EFC4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mongodb", "mongodb", "{354D7CFC-0F83-4B67-86A4-A86300B08C98}"
+	ProjectSection(SolutionItems) = preProject
+		..\deploy\localdev\tilt\mongodb\mongodb-values.yaml = ..\deploy\localdev\tilt\mongodb\mongodb-values.yaml
+		..\deploy\localdev\tilt\mongodb\mongodb-creds.yaml = ..\deploy\localdev\tilt\mongodb\mongodb-creds.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rabbitmq", "rabbitmq", "{25CEC587-DE50-4F28-9E0A-3C2E013DA630}"
+	ProjectSection(SolutionItems) = preProject
+		..\deploy\localdev\tilt\rabbitmq\rabbitmq-values.yaml = ..\deploy\localdev\tilt\rabbitmq\rabbitmq-values.yaml
+		..\deploy\localdev\tilt\rabbitmq\rabbitmq-credentials.yaml = ..\deploy\localdev\tilt\rabbitmq\rabbitmq-credentials.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotbot", "dotbot", "{52A26FF4-4F96-4D64-AB36-624F617874CE}"
+	ProjectSection(SolutionItems) = preProject
+		..\deploy\localdev\tilt\dotbot\dotbot-api-service.yaml = ..\deploy\localdev\tilt\dotbot\dotbot-api-service.yaml
+		..\deploy\localdev\tilt\dotbot\dotbot-api-deployment.yaml = ..\deploy\localdev\tilt\dotbot\dotbot-api-deployment.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,14 +79,6 @@ Global
 		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7536E5FF-8244-453C-B8E2-393B4E62C67A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3FB16F49-F058-4109-96B1-024C3E7FDA07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3FB16F49-F058-4109-96B1-024C3E7FDA07}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3FB16F49-F058-4109-96B1-024C3E7FDA07}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3FB16F49-F058-4109-96B1-024C3E7FDA07}.Release|Any CPU.Build.0 = Release|Any CPU
-		{785DF0C2-C38E-42A3-8FE4-F27F1434742F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{785DF0C2-C38E-42A3-8FE4-F27F1434742F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{785DF0C2-C38E-42A3-8FE4-F27F1434742F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{785DF0C2-C38E-42A3-8FE4-F27F1434742F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{762515A3-C5FF-47E2-A62A-62C2F9FFD67E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{762515A3-C5FF-47E2-A62A-62C2F9FFD67E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{762515A3-C5FF-47E2-A62A-62C2F9FFD67E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -79,8 +97,6 @@ Global
 		{6F068FF8-060E-4ED2-904C-A3B3AAAD99B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3FB16F49-F058-4109-96B1-024C3E7FDA07} = {A68539FC-CA19-4DFC-8DBB-7B4E2AE1C0E2}
-		{785DF0C2-C38E-42A3-8FE4-F27F1434742F} = {A68539FC-CA19-4DFC-8DBB-7B4E2AE1C0E2}
 		{762515A3-C5FF-47E2-A62A-62C2F9FFD67E} = {CBF3A0B3-0FD0-4D12-ACAE-38190C1BBCC3}
 		{8750ED1B-C086-44A3-86FB-DF3CDEBF8E88} = {CBF3A0B3-0FD0-4D12-ACAE-38190C1BBCC3}
 		{7A5D8C88-9936-4E63-ACA2-6CBB415FC997} = {CBF3A0B3-0FD0-4D12-ACAE-38190C1BBCC3}
@@ -92,5 +108,13 @@ Global
 		{54DD622D-BEF2-4B1D-BE6F-72D99979F827} = {21AC083F-7F4B-4F10-8788-49DCB4AF2A8A}
 		{23C26F50-20BB-408F-A20E-3261D084229D} = {21AC083F-7F4B-4F10-8788-49DCB4AF2A8A}
 		{9DFF2272-E298-45A2-97B7-28E3C98A30BE} = {23C26F50-20BB-408F-A20E-3261D084229D}
+		{8D83B134-F09B-4169-942E-1B96212EDF86} = {0EEAE36E-8CFF-4381-AEFC-E496A866DA7E}
+		{7A848A99-4B63-4A9F-AE55-7B387BB0D129} = {0EEAE36E-8CFF-4381-AEFC-E496A866DA7E}
+		{44650B63-904D-4F0E-B656-ECD8E6CCE723} = {7A848A99-4B63-4A9F-AE55-7B387BB0D129}
+		{4DD4B50F-8949-4662-A7AB-78A1098DF057} = {7A848A99-4B63-4A9F-AE55-7B387BB0D129}
+		{C88258A0-F1B0-4EDC-AB7E-221EE276EFC4} = {4DD4B50F-8949-4662-A7AB-78A1098DF057}
+		{354D7CFC-0F83-4B67-86A4-A86300B08C98} = {4DD4B50F-8949-4662-A7AB-78A1098DF057}
+		{25CEC587-DE50-4F28-9E0A-3C2E013DA630} = {4DD4B50F-8949-4662-A7AB-78A1098DF057}
+		{52A26FF4-4F96-4D64-AB36-624F617874CE} = {4DD4B50F-8949-4662-A7AB-78A1098DF057}
 	EndGlobalSection
 EndGlobal
