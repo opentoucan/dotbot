@@ -1,0 +1,18 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5292",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Discord__PublicKey": "9777f0e1984a5e974bc930dfad8313b4f4e41f879d6382ee3732598695a4710c",
+        "AWS_ACCESS_KEY_ID": "dev",
+        "AWS_SECRET_ACCESS_KEY": "dev"
+      }
+    }
+  }
+}

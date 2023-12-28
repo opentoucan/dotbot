@@ -1,3 +1,0 @@
-auth:
-  username: dotbot
-  existingPasswordSecret: rabbitmq-credentials

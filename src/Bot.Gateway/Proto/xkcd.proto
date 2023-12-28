@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "Discord";
+
+package XkcdApi;
+
+import "google/protobuf/timestamp.proto";
+
+message XkcdRequest {
+  int32 id = 1;
+}
+
+message XkcdResponse {
+  int32 id = 1;
+  string title = 2;
+  google.protobuf.Timestamp published_date = 3;
+  string alt_text = 4;
+  string image_url = 5;
+}
+
+service XkcdService {
+  rpc GetXkcd(XkcdRequest) returns (XkcdResponse);
+}

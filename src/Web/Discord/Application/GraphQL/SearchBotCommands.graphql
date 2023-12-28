@@ -1,7 +1,0 @@
-query searchBotCommand($pageMax: Int, $nameInput: BotCommandFilterInput!){
-  searchBotCommands(first: $pageMax, where: $nameInput){
-    nodes{
-      name
-    }
-  }
-}
