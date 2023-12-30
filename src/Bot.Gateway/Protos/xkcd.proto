@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Discord";
+option csharp_namespace = "Bot.Gateway";
 
 package XkcdApi;
 

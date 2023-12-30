@@ -43,7 +43,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="Proto\xkcd.proto" GrpcServices="Client" />
+        <Protobuf Include="Protos\xkcd.proto" GrpcServices="Client" />
     </ItemGroup>
 
     <ItemGroup>

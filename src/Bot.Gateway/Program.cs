@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Bot.Gateway;
 using Bot.Gateway.Apis;
 using Bot.Gateway.Extensions;
 using Bot.Gateway.Infrastructure;
