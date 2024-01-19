@@ -6,5 +6,6 @@ public enum BotCommandType
     Save = 1,
     Custom = 2,
     Avatar = 3,
-    Greet = 4
+    Greet = 4,
+    Xkcd
 }

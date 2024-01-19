@@ -2,6 +2,7 @@ using System.Text.Json;
 using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
 using Bot.Gateway.Infrastructure.Repositories;
+using Bot.Gateway.Model.Requests.Discord;
 using Bot.Gateway.Model.Responses.Discord;
 using Bot.Gateway.Services;
 using MediatR;
@@ -68,4 +69,10 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
 
         return new InteractionData("Command Custom");
     }
+}
+
+public class SaveCustomCommand : InteractionCommand
+{
+    public override BotCommandType CommandType => BotCommandType.Save;
+    public override InteractionRequest Data { get; set; } = null!;
 }

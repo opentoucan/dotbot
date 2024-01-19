@@ -22,6 +22,7 @@ public static class DiscordExtensions
         builder.Services.AddSingleton<InteractionCommand, GreetCommand>();
         builder.Services.AddSingleton<InteractionCommand, SaveCustomCommand>();
         builder.Services.AddSingleton<InteractionCommand, RetrieveCustomCommand>();
+        builder.Services.AddSingleton<InteractionCommand, XkcdCommand>();
         
         builder.Services.AddHttpClient(
             "discord",
@@ -92,6 +93,12 @@ public static class DiscordExtensions
             .AddOption("command", ApplicationCommandOptionType.String, "Name of the custom command", true, isAutocomplete: true, minLength:1)
             .Build();
 
+        yield return new SlashCommandBuilder()
+            .WithName("xkcd")
+            .WithDescription("Returns an XKCD comic by comic number")
+            .AddOption("number", ApplicationCommandOptionType.Integer, "Comic number", false)
+            .Build();
+        
         yield return new UserCommandBuilder()
             .WithName("userCmdTest")
             .Build();

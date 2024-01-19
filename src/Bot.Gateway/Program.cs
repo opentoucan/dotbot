@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
-using Bot.Gateway;
 using Bot.Gateway.Apis;
 using Bot.Gateway.Extensions;
 using Bot.Gateway.Infrastructure;
@@ -13,6 +12,9 @@ using MassTransit;
 using MassTransit.MongoDbIntegration;
 using Microsoft.AspNetCore.Http.Json;
 using MongoDB.Driver;
+using Polly;
+using Polly.Extensions.Http;
+using Xkcd.Sdk;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.ConfigureOpenTelemetry();
@@ -57,6 +59,18 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+builder.Services.AddHttpClient<XkcdService>(client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
+    })
+    .AddPolicyHandler(GetRetryPolicy());
+
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .RetryAsync(3);
+}
 
 var mongoClient = new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString"));
 builder.Services.AddSingleton<IMongoClient>(_ => mongoClient);
@@ -70,10 +84,7 @@ builder.Services.AddServices();
 builder.Services.AddScoped<DbContext>(c =>
     new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<BotCommand>>(), c.GetRequiredService<IMongoCollection<DiscordServer>>()));
 
-builder.Services.AddGrpcClient<XkcdService.XkcdServiceClient>(o =>
-{
-    o.Address = new Uri("http://localhost:5001");
-});
+
 
 builder.Services
     .AddGraphQL()

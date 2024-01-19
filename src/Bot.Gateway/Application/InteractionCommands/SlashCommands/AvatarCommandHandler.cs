@@ -1,4 +1,5 @@
-﻿using Bot.Gateway.Model.Responses.Discord;
+﻿using Bot.Gateway.Model.Requests.Discord;
+using Bot.Gateway.Model.Responses.Discord;
 using Discord;
 using MediatR;
 
@@ -18,4 +19,10 @@ public class AvatarCommandHandler : IRequestHandler<AvatarCommand, InteractionDa
         var interactionData = new InteractionData(embeds: [embedBuilder.Build()]);
         return Task.FromResult(interactionData);
     }
+}
+
+public class AvatarCommand : InteractionCommand
+{
+    public override BotCommandType CommandType => BotCommandType.Avatar;
+    public override InteractionRequest Data { get; set; } = null!;
 }

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Bot.Gateway.Infrastructure.Repositories;
+using Bot.Gateway.Model.Requests.Discord;
 using Bot.Gateway.Model.Responses.Discord;
 using Bot.Gateway.Services;
 using Discord;
@@ -39,4 +40,10 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
 
         return new InteractionData(botCommand?.Content, new List<Embed>(), discordFileAttachments);
     }
+}
+
+public class RetrieveCustomCommand : InteractionCommand
+{
+    public override BotCommandType CommandType => BotCommandType.Custom;
+    public override InteractionRequest Data { get; set; } = null!;
 }

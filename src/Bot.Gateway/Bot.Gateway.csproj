@@ -20,6 +20,7 @@
         <PackageReference Include="Discord.Net.Rest" />
         <PackageReference Include="Discord.Net.Webhook" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="HotChocolate.AspNetCore" />
@@ -43,12 +44,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\xkcd.proto" GrpcServices="Client" />
-    </ItemGroup>
-
-    <ItemGroup>
       <GraphQL Update="Infrastructure\GraphQL\SearchBotCommands.graphql">
         <Generator>MSBuild:GenerateGraphQLCode</Generator>
       </GraphQL>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Xkcd.Sdk\Xkcd.Sdk.csproj" />
     </ItemGroup>
 </Project>

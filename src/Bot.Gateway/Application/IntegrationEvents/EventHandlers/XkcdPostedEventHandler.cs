@@ -3,6 +3,7 @@ using Bot.Gateway.Infrastructure.HttpClient;
 using Bot.Gateway.Model.Responses;
 using Discord;
 using MassTransit;
+using Xkcd.Sdk;
 
 namespace Bot.Gateway.Application.IntegrationEvents.EventHandlers;
 
@@ -25,7 +26,7 @@ public class XkcdPostedEventHandler(IDiscordWebhookClientFactory discordWebhookC
         var titleFields = new EmbedFieldBuilder();
         titleFields.WithName("Title").WithValue(xkcdComic.Title).WithIsInline(true).Build();
         var publishedFields = new EmbedFieldBuilder();
-        publishedFields.WithName("Published").WithValue($"{xkcdComic.DatePosted.DateTime.ToShortDateString()}").WithIsInline(true).Build();
+        publishedFields.WithName("Published").WithValue($"{xkcdComic.DatePosted.ToShortDateString()}").WithIsInline(true).Build();
         var altTextFields = new EmbedFieldBuilder();
         altTextFields.WithName("Alt Text").WithValue(xkcdComic.AltText).WithIsInline(true).Build();
             
