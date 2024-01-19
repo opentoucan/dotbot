@@ -24,9 +24,9 @@ jobs:
     strategy:
       matrix: 
         include:
-          - image: ghcr.io/Xkcd.Job
+          - image: Xkcd.Job
             dockerfile: src/Xkcd.Job/Dockerfile
-          - image: ghcr.io/Bot.Gateway
+          - image: Bot.Gateway
             dockerfile: src/Bot.Gateway/Dockerfile
     permissions:
       contents: read
