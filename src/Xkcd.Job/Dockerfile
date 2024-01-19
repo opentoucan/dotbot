@@ -8,17 +8,17 @@ WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
-COPY ["src/Xkcd.API/Xkcd.API.csproj", "Xkcd.API/Xkcd.API.csproj"]
-WORKDIR "Xkcd.API/"
-RUN dotnet restore "Xkcd.API.csproj"
-COPY "src/Xkcd.API/" .
-RUN dotnet build "Xkcd.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+COPY ["src/Xkcd.Job/Xkcd.Job.csproj", "Xkcd.Job/Xkcd.Job.csproj"]
+WORKDIR "Xkcd.Job/"
+RUN dotnet restore "Xkcd.Job.csproj"
+COPY "src/Xkcd.Job/" .
+RUN dotnet build "Xkcd.Job.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "Xkcd.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Xkcd.Job.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Xkcd.API.dll"]
+ENTRYPOINT ["dotnet", "Xkcd.Job.dll"]
