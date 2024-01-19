@@ -24,9 +24,9 @@ jobs:
     strategy:
       matrix: 
         include:
-          - image: ${{ env.REGISTRY }}/Xkcd.Job
+          - image: ghcr.io/Xkcd.Job
             dockerfile: src/Xkcd.Job/Dockerfile
-          - image: ${{ env.REGISTRY }}/Bot.Gateway
+          - image: ghcr.io/Bot.Gateway
             dockerfile: src/Bot.Gateway/Dockerfile
     permissions:
       contents: read
