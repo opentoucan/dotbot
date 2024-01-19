@@ -1,4 +1,4 @@
-name: prod-ci
+name: ci
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -8,8 +8,6 @@ name: prod-ci
 on:
   push:
     branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
 
@@ -26,8 +24,8 @@ jobs:
     strategy:
       matrix: 
         include:
-          - image: ${{ env.REGISTRY }}/Xkcd.API
-            dockerfile: src/Xkcd.API/Dockerfile
+          - image: ${{ env.REGISTRY }}/Xkcd.Job
+            dockerfile: src/Xkcd.Job/Dockerfile
           - image: ${{ env.REGISTRY }}/Bot.Gateway
             dockerfile: src/Bot.Gateway/Dockerfile
     permissions:
