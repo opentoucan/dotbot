@@ -40,6 +40,7 @@ jobs:
               - 'src/Xkcd.Job/**'
             
   build:
+    needs: changes
     runs-on: ubuntu-latest
     if: ${{ needs.changes.outputs.directories != '[]' && needs.changes.outputs.directories != '' }}
     strategy:
