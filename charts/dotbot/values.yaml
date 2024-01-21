@@ -12,7 +12,7 @@ deployments:
       podLabels: {}
       
       podSecurityContext: {}
-      # fsGroup: 2000
+      # fsGroup: 2000 
       
       securityContext: {}
         # capabilities:
