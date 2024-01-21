@@ -23,8 +23,12 @@ jobs:
         id: filter
         with:
           filters: |
-            Bot.Gateway: 'src/Bot.Gateway/**'
-            Xkcd.Job: 'src/Xkcd.Job/**'
+            Bot.Gateway: 
+              - 'src/Bot.Gateway/**'
+              - 'src/Xkcd.Sdk/**'
+            Xkcd.Job: 
+              - 'src/Xkcd.Job/**'
+              - 'src/Xkcd.Sdk/**'
             
   build:
     needs: code-changes
@@ -77,4 +81,5 @@ jobs:
     steps:
       - uses: google-github-actions/release-please-action@v4.0.2
         with:
+          path: src
           release-type: simple
