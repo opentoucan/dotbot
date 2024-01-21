@@ -74,4 +74,5 @@ jobs:
     steps:
       - uses: google-github-actions/release-please-action@v4
         with:
+          path: charts/${{ github.repository }}
           release-type: helm
