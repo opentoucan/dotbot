@@ -69,6 +69,9 @@ jobs:
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       
+      - name: Test outputs
+        run: ${{ matrix.directory }}
+      
       - name: Get project name
         id: name
         run: echo "NAME=$(awk -F/ '{print $2}' <<< ${{ matrix.directory }})" >> $GITHUB_OUTPUT
