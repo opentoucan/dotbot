@@ -1,0 +1,85 @@
+{{- range $job := .Values.jobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: "{{- include "dotbot.fullname" $ }}-{{ $job.name }}"
+  labels:
+    {{- include "dotbot.labels" $ | nindent 4 }}
+spec:
+  concurrencyPolicy: {{ $job.concurrencyPolicy }}
+  failedJobsHistoryLimit: {{ $job.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ include "dotbot.fullname" $ }}
+            cron: {{ $job.name }}
+        spec:
+        {{- if hasKey $job "serviceAccount" }}
+        {{- if hasKey $job.serviceAccount "name" }}
+          serviceAccountName: {{ $job.serviceAccount.name }}
+        {{- else }}
+          serviceAccountName: {{ $job.name }}
+        {{- end }}
+        {{- end }}
+        {{- if hasKey $job "securityContext" }}
+          {{- if $job.securityContext.runAsUser }}
+          securityContext:
+            runAsUser: {{ $job.securityContext.runAsUser }}
+            {{- if $job.securityContext.runAsGroup }}
+            runAsGroup: {{ $job.securityContext.runAsGroup }}
+            {{- end }}
+            {{- if $job.securityContext.fsGroup }}
+            fsGroup: {{ $job.securityContext.fsGroup }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+          containers:
+            - image: "{{ $job.image.repository }}:{{ $job.image.tag }}"
+              imagePullPolicy: {{ $job.image.imagePullPolicy }}
+              name: {{ $job.name }}
+            {{- with $job.env }}
+              env:
+{{ toYaml . | indent 14 }}
+            {{- end }}
+            {{- with $job.envFrom }}
+              envFrom:
+{{ toYaml . | indent 14 }}
+            {{- end }}
+            {{- if $job.command }}
+              command: {{ $job.command }}
+            {{- end }}
+            {{- with $job.args }}
+              args:
+{{ toYaml . | indent 14 }}
+              {{- end }}
+            {{- with $job.resources }}
+              resources:
+{{ toYaml . | indent 16 }}
+            {{- end }}
+            {{- with $job.volumeMounts }}
+              volumeMounts:
+{{ toYaml . | indent 14 }}
+            {{- end }}
+          {{- with $job.nodeSelector }}
+          nodeSelector:
+{{ toYaml . | indent 14 }}
+          {{- end }}
+          {{- with $job.affinity }}
+          affinity:
+{{ toYaml . | indent 14 }}
+          {{- end }}
+          {{- with $job.tolerations }}
+          tolerations:
+{{ toYaml . | indent 14 }}
+          {{- end }}
+          restartPolicy: {{ $job.restartPolicy }}
+          {{- with $job.volumes }}
+          volumes:
+{{ toYaml . | indent 14 }}
+          {{- end }}
+  schedule: {{ $job.schedule | quote }}
+  successfulJobsHistoryLimit: {{ $job.successfulJobsHistoryLimit }}
+{{- end }}

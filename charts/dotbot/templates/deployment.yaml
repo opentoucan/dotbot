@@ -1,0 +1,77 @@
+{{- range $deployment := .Values.deployments }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{- include "dotbot.fullname" $ }}-{{ $deployment.name }}"
+  labels:
+    {{- include "dotbot.labels" $ | nindent 4 }}
+spec:
+  replicas: {{ $deployment.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "dotbot.selectorLabels" $ | nindent 6 }}
+  template:
+    metadata:
+      {{- with $deployment.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "dotbot.labels" $ | nindent 8 }}
+        {{- with $deployment.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "dotbot.serviceAccountName" $ }}
+      securityContext:
+        {{- toYaml $deployment.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $deployment.Name }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          image: "{{ $deployment.image.repository }}:{{ $deployment.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $deployment.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $deployment.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml $deployment.resources | nindent 12 }}
+          {{- with $deployment.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with $deployment.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $deployment.name }}
+  labels:
+    {{- include "dotbot.labels" $ | nindent 4 }}
+spec:
+  type: {{ $deployment.service.type }}
+  ports:
+    - port: {{ $deployment.service.port }}
+      targetPort: {{ $deployment.service.targetPort }}
+      protocol: {{ $deployment.service.protocol }}
+      name: {{ $deployment.service.name }}
+  selector:
+    {{- include "dotbot.selectorLabels" $ | nindent 4 }}
+{{- end }}

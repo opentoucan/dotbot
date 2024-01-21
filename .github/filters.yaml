@@ -1,0 +1,4 @@
+Bot.Gateway:
+  - 'src/Bot.Gateway/**'
+Xkcd.Job:
+  - 'src/Xkcd.Job/**'

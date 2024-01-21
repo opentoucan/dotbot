@@ -17,28 +17,43 @@ env:
 
 
 jobs:
+  
+  changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs:
+      # Expose matched filters as job 'packages' output variable
+      directories: ${{ steps.filter.outputs.changes }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            bot-gateway:
+              - 'src/Bot.Gateway/**'
+            xkcd-job:
+              - 'src/Xkcd.Job/**'
+            
   build:
     runs-on: ubuntu-latest
     strategy:
-      matrix: 
-        include:
-          - image: Xkcd.Job
-            dockerfile: src/Xkcd.Job/Dockerfile
-          - image: Bot.Gateway
-            dockerfile: src/Bot.Gateway/Dockerfile
+      matrix:
+        directory: ${{ fromJSON(needs.changes.outputs.directories) }}
     permissions:
-      contents: read
+      contents: write
       packages: write
       # This is used to complete the identity challenge
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
@@ -49,11 +64,16 @@ jobs:
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
+      
+      - name: Get project name
+        id: name
+        run: echo "NAME=$(awk -F/ '{print $2}' <<< ${{ matrix.directory }})" >> $GITHUB_OUTPUT
+      
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ steps.name.outputs.NAME }}
           tags: |
             type=sha,format=long
       # Build and push Docker image with Buildx (don't push on PR)
@@ -63,7 +83,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: ${{ matrix.directory }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
