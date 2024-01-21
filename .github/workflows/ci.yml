@@ -72,8 +72,7 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - run: ln -s charts/dotbot/Chart.yaml
       - uses: google-github-actions/release-please-action@v4
         with:
           path: ./charts/dotbot
-          release-type: helm
+          release-type: simple
