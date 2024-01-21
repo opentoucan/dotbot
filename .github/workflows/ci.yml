@@ -25,7 +25,7 @@ jobs:
       pull-requests: read
     outputs:
       # Expose matched filters as job 'packages' output variable
-      directories: ${{ steps.filter.outputs.changes }}
+      images: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -33,19 +33,18 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          list-files: shell
           filters: |
-            bot-gateway:
-              - 'src/Bot.Gateway/**'
-            xkcd-job:
-              - 'src/Xkcd.Job/**'
+            Bot.Gateway: 'src/Bot.Gateway/**'
+            Xkcd.Job: 'src/Xkcd.Job/**'
             
   build:
     needs: changes
     runs-on: ubuntu-latest
-    if: ${{ needs.changes.outputs.directories != '[]' && needs.changes.outputs.directories != '' }}
+    if: ${{ needs.changes.outputs.images != '[]' && needs.changes.outputs.images != '' }}
     strategy:
       matrix:
-        directory: ${{ fromJSON(needs.changes.outputs.directories) }}
+        image: ${{ fromJSON(needs.changes.outputs.images) }}
     permissions:
       contents: write
       packages: write
@@ -69,18 +68,15 @@ jobs:
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       
-      - name: Test outputs
-        run: ${{ matrix.directory }}
-      
       - name: Get project name
         id: name
-        run: echo "NAME=$(awk -F/ '{print $2}' <<< ${{ matrix.directory }})" >> $GITHUB_OUTPUT
+        run: echo "NAME=$(awk -F/ '{print $2}' <<< ${{ matrix.image }})" >> $GITHUB_OUTPUT
       
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ steps.name.outputs.NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
             type=sha,format=long
       # Build and push Docker image with Buildx (don't push on PR)
@@ -90,7 +86,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          file: ${{ matrix.directory }}/Dockerfile
+          file: ${{ format('{0}_files', matrix.image)}}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
