@@ -69,8 +69,7 @@ jobs:
       # https://github.com/docker/metadata-action
       
       - name: Get project name
-        id: name
-        run: echo "NAME=$(awk -F/ '{print $2}' <<< ${{ matrix.image }})" >> $GITHUB_OUTPUT
+        run: awk -F/ '{print $2}' <<< ${{ matrix.image }}
       
       - name: Extract Docker metadata
         id: meta
@@ -86,7 +85,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          file: ${{ format('{0}_files', matrix.image)}}/Dockerfile
+          file: src/${{ matrix.image }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
