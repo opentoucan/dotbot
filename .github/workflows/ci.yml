@@ -3,8 +3,6 @@ name: ci
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 env:
   REGISTRY: ghcr.io
@@ -81,5 +79,6 @@ jobs:
     steps:
       - uses: google-github-actions/release-please-action@v4.0.2
         with:
+          token: ${{ secrets.RELEASE_PLEASE }}
           path: src
           release-type: simple
