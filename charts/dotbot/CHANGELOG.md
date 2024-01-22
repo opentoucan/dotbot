@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Sillock-Inc/Dotbot/compare/dotbot-v0.1.1...dotbot-v0.1.2) (2024-01-22)
+
+
+### Bug Fixes
+
+* another helm bug (test) ([65cf9c4](https://github.com/Sillock-Inc/Dotbot/commit/65cf9c4ab10b6fdbe4a892168da27eff7e234d44))
+
 ## [0.1.1](https://github.com/Sillock-Inc/Dotbot/compare/dotbot-v0.1.0...dotbot-v0.1.1) (2024-01-22)
 
 
