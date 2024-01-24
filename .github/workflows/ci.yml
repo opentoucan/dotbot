@@ -27,11 +27,13 @@ jobs:
             Xkcd.Job: 
               - 'src/Xkcd.Job/**'
               - 'src/Xkcd.Sdk/**'
-            
+            Helm:
+              - 'charts/dotbot'
+
   build:
     needs: code-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.code-changes.outputs.images != '[]' && needs.code-changes.outputs.images != '' }}
+    if: ${{ needs.code-changes.outputs.images != '[]' && needs.code-changes.outputs.images != '' && needs.code-changes.outputs.images != 'Helm' }}
     strategy:
       matrix:
         image: ${{ fromJSON(needs.code-changes.outputs.images) }}
@@ -81,3 +83,14 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLEASE }}
           config-file: release-please-config.json
+
+      - name: Get version
+        id: get_version
+        run: |
+          echo "VERSION=$(cat charts/dotbot/Chart.yaml| ./yq -r  '.version')" >> $GITHUB_OUTPUT
+
+      - name: Commit Chart.yaml
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'chore(release) bump version to ${{ steps.get_version.outputs.VERSION }}'
+          file_pattern: 'Chart.yaml'
