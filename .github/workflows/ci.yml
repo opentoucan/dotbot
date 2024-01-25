@@ -13,7 +13,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      images: ${{ steps.filter.outputs.changes }}
+      directories: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -33,10 +33,11 @@ jobs:
   build:
     needs: code-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.code-changes.outputs.images != '[]' && needs.code-changes.outputs.images != '' && needs.code-changes.outputs.images != 'Helm' }}
+    if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' }}
     strategy:
       matrix:
-        image: ${{ fromJSON(needs.code-changes.outputs.images) }}
+        image: ${{ fromJSON(needs.code-changes.outputs.directories) }}
+        exclude: Helm
     permissions:
       contents: write
       packages: write
@@ -55,6 +56,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - name: Install dependencies
+        run: npm install
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+            
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -62,6 +74,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
             type=sha,format=long
+            type=semver,pattern={{version}},value=v${{ steps.next_semantic.outputs.new_release_version }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -72,25 +85,65 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-  release-please:
+          
+  bump-bot-gateway:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
-      - uses: google-github-actions/release-please-action@v4.0.2
-        with:
-          token: ${{ secrets.RELEASE_PLEASE }}
-          config-file: release-please-config.json
-
-      - name: Get version
-        id: get_version
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install yq
         run: |
-          echo "VERSION=$(cat charts/dotbot/Chart.yaml| ./yq -r  '.version')" >> $GITHUB_OUTPUT
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq &&\
+          chmod +x yq
+
+      - name: Bump Helm image version
+        id: image_version
+        run: |
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=v${{ steps.next_semantic.outputs.new_release_version }}' charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=${{ github.commit }}' charts/dotbot/values.yaml
 
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'chore(release) bump version to ${{ steps.get_version.outputs.VERSION }}'
+          commit_message: 'chore: bump Bot.Gateway version to ${{ steps.next_semantic.outputs.new_release_version }}'
+          file_pattern: 'Chart.yaml'
+  
+  release-chart:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ${{ fromJSON(needs.code-changes.outputs.directories) }}
+        exclude:
+          - Bot.Gateway
+          - Xkcd.Job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          extends: |
+            @semantic-release-monorepo@^8.0.1
+            
+      - name: Install yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq &&\
+          chmod +x yq
+          
+      - name: Bump Helm version
+        id: helm_version
+        run: |
+          yq e -i '.version=${{ steps.semantic.outputs.new_release_version }}' charts/dotbot/Chart.yaml
+          yq e -i '.appVersion=${{ steps.semantic.outputs.new_release_version }}' charts/dotbot/Chart.yaml
+          echo "VERSION=$(yq -r '.version' charts/dotbot/Chart.yaml)" >> $GITHUB_OUTPUT
+
+      - name: Commit Chart.yaml
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'chore: bump Chart version to ${{ steps.helm_version.outputs.VERSION }}'
           file_pattern: 'Chart.yaml'
