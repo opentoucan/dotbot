@@ -37,7 +37,8 @@ jobs:
     strategy:
       matrix:
         image: ${{ fromJSON(needs.code-changes.outputs.directories) }}
-        exclude: Helm
+        exclude: 
+          - image: Helm
     permissions:
       contents: write
       packages: write
@@ -109,26 +110,28 @@ jobs:
           commit_message: 'chore: bump Bot.Gateway version to ${{ steps.next_semantic.outputs.new_release_version }}'
           file_pattern: 'Chart.yaml'
   
-  release-chart:
+  bump-chart:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         directory: ${{ fromJSON(needs.code-changes.outputs.directories) }}
         exclude:
-          - Bot.Gateway
-          - Xkcd.Job
+          - directory: Bot.Gateway
+          - directory: Xkcd.Job
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
-        id: semantic
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - name: Install dependencies
+        run: npm install
+      - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          extends: |
-            @semantic-release-monorepo@^8.0.1
+        run: npx semantic-release -e semantic-release-monorepo
             
       - name: Install yq
         run: |
@@ -147,3 +150,26 @@ jobs:
         with:
           commit_message: 'chore: bump Chart version to ${{ steps.helm_version.outputs.VERSION }}'
           file_pattern: 'Chart.yaml'
+          
+  release-chart:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
