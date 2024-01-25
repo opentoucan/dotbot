@@ -101,14 +101,16 @@ jobs:
       - name: Bump Helm image version
         id: image_version
         run: |
-          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=v${{ steps.next_semantic.outputs.new_release_version }}' charts/dotbot/values.yaml
-          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=${{ github.commit }}' charts/dotbot/values.yaml
+          echo "VERSION=${{ steps.next_semantic.outputs.new_release_version }}"
+          echo "DIGEST=${{ github.commit }}"
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=\"v$VERSION\"' charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=\"$DIGEST\"' charts/dotbot/values.yaml
 
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 'chore: bump Bot.Gateway version to ${{ steps.next_semantic.outputs.new_release_version }}'
-          file_pattern: 'Chart.yaml'
+          file_pattern: 'values.yaml'
   
   bump-chart:
     runs-on: ubuntu-latest
@@ -141,10 +143,9 @@ jobs:
       - name: Bump Helm version
         id: helm_version
         run: |
-          yq e -i '.version=${{ steps.semantic.outputs.new_release_version }}' charts/dotbot/Chart.yaml
-          yq e -i '.appVersion=${{ steps.semantic.outputs.new_release_version }}' charts/dotbot/Chart.yaml
-          echo "VERSION=$(yq -r '.version' charts/dotbot/Chart.yaml)" >> $GITHUB_OUTPUT
-
+          echo "VERSION=${{ steps.semantic.outputs.new_release_version }}"
+          yq e -i ".version=\"$VERSION\"" charts/dotbot/Chart.yaml
+          yq e -i ".appVersion="$VERSION\"" charts/dotbot/Chart.yaml
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
