@@ -108,6 +108,7 @@ jobs:
     outputs:
       releases: ${{ steps.release.outputs.paths_released }}
       prs: ${{ steps.release.outputs.prs }}
+      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
       
   bump-image:
     needs: release
@@ -115,8 +116,8 @@ jobs:
     permissions:
       contents: write
     env:
-      VERSION: "${{ needs.release.outputs.major }}.${{ needs.release.outputs.minor }}.${{ needs.release.outputs.patch }}"
-      DIGEST: "${{ github.commit }}"
+      VERSION: "${{ needs.release.outputs.version }}"
+      DIGEST: "${{ github.sha }}"
     strategy:
       matrix:
         pr: ${{ fromJson(needs.release.outputs.prs) }}
@@ -136,7 +137,7 @@ jobs:
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
 
-      - name: Commit Chart.yaml
+      - name: Commit values.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
         if: contains(matrix.pr.labels, 'Helm') == false
         env:
