@@ -142,10 +142,10 @@ jobs:
         env:
           VERSION: ${{steps.extract_version.outputs.version}}
         run: |
-          cat charts/values.yaml
+          cat charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
-          cat charts/values.yaml
+          cat charts/dotbot/values.yaml
 
       - name: Commit values.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
