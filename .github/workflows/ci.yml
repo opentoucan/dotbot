@@ -141,8 +141,10 @@ jobs:
         env:
           VERSION: ${{steps.extract_version.outputs.version}}
         run: |
+          cat charts/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
+          cat charts/values.yaml
 
       - name: Commit values.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -154,6 +156,7 @@ jobs:
           commit_message: 'chore: bump $PR_NAME. version to $VERSION'
           file_pattern: 'values.yaml'
           branch: '${{ matrix.pr.headBranchName }}'
+          
 #  release-chart:
 #    permissions:
 #      contents: write
