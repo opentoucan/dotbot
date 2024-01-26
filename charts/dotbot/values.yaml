@@ -6,6 +6,7 @@ deployments:
     image:
       repository: "ghcr.io/sillock-inc/bot.gateway"
       tag: "0.1.1"
+      digest: ""
       pullPolicy: IfNotPresent
       podAnnotations: {}
       podLabels: {}
@@ -39,7 +40,6 @@ deployments:
       #   mountPath: "/etc/foo"
       #   readOnly: true
 
-      digest: 9339d69f8b60f5ff768a4966bfbad76586d9ce34
     service:
       name: http
       type: LoadBalancer
@@ -55,6 +55,7 @@ jobs:
     image:
       repository: "ghcr.io/sillock-inc/xkcd.job"
       tag: ""
+      digest: ""
       imagePullPolicy: Always
     env:
       - name: ECHO_VAR

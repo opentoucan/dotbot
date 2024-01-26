@@ -33,23 +33,6 @@ jobs:
               - 'charts/dotbot'
               - '!CHANGELOG.md'
 
-  next-semver:
-    runs-on: ubuntu-latest
-    needs: code-changes
-    steps:
-      - name: release-please
-        id: release-please
-        uses: google-github-actions/release-please-action@v4
-        with:
-          token: ${{ secrets.PAT }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-          path: src/${{ matrix.image }}
-          skip-github-release: true
-          skip-github-pull-request: true
-    outputs:
-      releases: ${{ steps.release-please.outputs.paths_released }}
-
   build:
     needs: code-changes
     runs-on: ubuntu-latest
@@ -66,9 +49,21 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
 
+      - name: next-semver
+        id: next-semver
+        uses: google-github-actions/release-please-action@v4
+        with:
+          token: ${{ secrets.PAT }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          skip-github-release: true
+          skip-github-pull-request: true
+          
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
@@ -76,6 +71,12 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract release version
+        id: extract_version
+        run: |
+          VERSION=$(${{ steps.next-semver.outputs.src/${{ matrix.image }}.major }}.${{ steps.next-semver.outputs.src/${{ matrix.image }}.minor }}.${{ steps.next-semver.outputs.src/${{ matrix.image }}.patch }})
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Extract Docker metadata
         id: meta
@@ -83,8 +84,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
-            type=sha,format=long
-            type=semver,pattern={{version}},value=${{ needs.next-semver.outputs.major }}.${{ needs.next-semver.outputs.minor }}.${{ needs.next-semver.outputs.patch }}
+            type=semver,pattern={{version}},value=${{ steps.extract_version.outputs.version }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -96,12 +96,65 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.PAT }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          path: src/${{ matrix.image }}
+          
+      - name: Install yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq &&\
+          chmod +x yq
+
+      - name: Extract branch name
+        id: extract_branch
+        run: |
+          PR_NAME=$("${{ steps.release.outputs.pr.headBranchName }} | awk -F-- '{print $NF}'")
+          echo "pr_name=$PR_NAME" >> $GITHUB_OUTPUT
+
+      - name: Bump Bot.Gateway Helm image version
+        if: contains(steps.release.outputs.headBranchName, 'bot.gateway')
+        env:
+          VERSION: ${{ steps.extract_version.outputs.version }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        run: |
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
+
+      - name: Bump Xkcd.Job Helm image version
+        if: contains(steps.release.outputs.pr.headBranchName, 'xkcd.job')
+        env:
+          VERSION: ${{ steps.extract_version.outputs.version }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        run: |
+          yq -i -e '(.jobs[] | select(.name == "xkcd.job").image.tag)=env(VERSION)' charts/dotbot/values.yaml
+          yq -i -e '(.jobs[] | select(.name == "xkcd.job").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
+
+      - name: Commit values.yaml
+        uses: stefanzweifel/git-auto-commit-action@v5
+        if: contains(steps.release.outputs.pr.labels, 'helm') == false
+        env:
+          PR_NAME: "${{ steps.release.outputs.pr.headBranchName }} | awk -F-- '{print $NF}'"
+          VERSION: ${{steps.extract_version.outputs.version}}
+        with:
+          commit_message: 'chore: bump ${{ steps.extract_branch.outputs.pr_name }}. version to ${{ steps.extract_version.outputs.version }}'
+          file_pattern: 'charts/dotbot/values.yaml'
+          branch: '${{ steps.release.outputs.pr.headBranchName }}'
+          
   release:
     runs-on: ubuntu-latest
-    needs: next-semver
     permissions:
       contents: write
       pull-requests: write
+    strategy:
+      matrix:
+        path: ${{ fromJSON(needs.code-changes.outputs.directories) }}
+        include:
+          - exclude: Bot.Gateway
+          - exclude: Xkcd.Job
     steps:
       - uses: google-github-actions/release-please-action@v4
         id: release
@@ -109,61 +162,5 @@ jobs:
           token: ${{ secrets.PAT }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-    outputs:
-      releases: ${{ steps.release.outputs.paths_released }}
-      prs: ${{ steps.release.outputs.prs }}
-      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
-      
-  bump-image:
-    needs: release
-    runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.prs != '' }}
-    permissions:
-      contents: write
-    env:
-      DIGEST: "${{ github.sha }}"
-    strategy:
-      matrix:
-        pr: ${{ fromJson(needs.release.outputs.prs) }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT }}
-      - name: Install yq
-        run: |
-          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq &&\
-          chmod +x yq
-
-      - name: Extract release version
-        id: extract_version
-        run: |
-          VERSION=$(echo '${{ matrix.pr.title }}' | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Extract branch name
-        id: extract_branch
-        run: |
-          PR_NAME=$("${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'")
-          echo "pr_name=PR_NAME" >> $GITHUB_OUTPUT
-
-
-      - name: Bump Bot.Gateway Helm image version
-        id: image-version
-        if: contains(matrix.pr.headBranchName, 'Bot.Gateway')
-        env:
-          VERSION: ${{steps.extract_version.outputs.version}}
-        run: |
-          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
-          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
-
-      - name: Commit values.yaml
-        uses: stefanzweifel/git-auto-commit-action@v5
-        if: contains(matrix.pr.labels, 'helm') == false
-        env:
-          PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
-          VERSION: ${{steps.extract_version.outputs.version}}
-        with:
-          commit_message: 'chore: bump ${{ steps.extract_branch.outputs.pr_name }}. version to ${{ steps.extract_version.outputs.version }}'
-          file_pattern: 'charts/dotbot/values.yaml'
-          branch: '${{ matrix.pr.headBranchName }}'
+          path: charts/dotbot
+ 
