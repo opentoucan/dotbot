@@ -60,7 +60,7 @@ jobs:
       - name: next-semantic-release
         uses: google-github-actions/release-please-action@v4
         with:
-          token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+          token: ${{ secrets.RELEASE_PLEASE }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           path: src/${{ matrix.image }}
@@ -164,18 +164,12 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    strategy:
-      matrix:
-        image: ${{ fromJSON(needs.code-changes.outputs.directories) }}
-        exclude:
-          - image: Helm
     steps:
       - uses: google-github-actions/release-please-action@v4
         with:
-          token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+          token: ${{ secrets.RELEASE_PLEASE }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          path: src/${{ matrix.image }}
           
 #  release-chart:
 #    permissions:
