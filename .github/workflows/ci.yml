@@ -117,7 +117,7 @@ jobs:
       DIGEST: "${{ github.commit }}"
     strategy:
       matrix:
-        pr: ${{ fromJson(needs.release.outputs.prs).headBranchName }}
+        pr: ${{ fromJson(needs.release.outputs.prs) }}
         exclude:
           - image: Helm
     steps:
@@ -131,9 +131,7 @@ jobs:
 
       - name: Bump Bot.Gateway Helm image version
         id: image-version
-        env:
-          PR_NAME: "${{ matrix.pr }} | awk -F-- '{print $NF}'"
-        if: contains(${{ matrix.pr }}, Bot.Gateway)
+        if: contains(${{ matrix.pr.headBranchName }}, Bot.Gateway)
         run: |
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=\"v$VERSION\"' charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=\"$DIGEST\"' charts/dotbot/values.yaml
@@ -141,11 +139,11 @@ jobs:
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v4
         env:
-          PR_NAME: "${{ matrix.pr }} | awk -F-- '{print $NF}'"
+          PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
         with:
           commit_message: 'chore: bump $PR_NAME. version to $VERSION'
           file_pattern: 'values.yaml'
-          branch: '${{ matrix.pr }}'
+          branch: '${{ matrix.pr.headBranchName }}'
 #  release-chart:
 #    permissions:
 #      contents: write
