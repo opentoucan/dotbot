@@ -63,6 +63,7 @@ jobs:
           manifest-file: .release-please-manifest.json
           skip-github-release: true
           skip-github-pull-request: true
+          path: src/${{ matrix.image }}
           
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
