@@ -76,8 +76,8 @@ jobs:
       - name: Extract release version
         id: extract_version
         run: |
-          echo "Bot.Gateway major ver:  ${{ steps.next-semver.outputs.src/Bot.Gateway--major }}"
-          VERSION=$(${{ steps.next-semver.outputs[format('src/{0}--major', matrix.image)] }}.${{ steps.next-semver.outputs[format('src/{0}--minor', matrix.image)] }}.${{ steps.next-semver.outputs[format('src/{0}--patch', matrix.image)] }} )
+          echo "Bot.Gateway major ver:  ${{ steps.next-semver.outputs.bot.gateway--major }}"
+          VERSION=$(${{ steps.next-semver.outputs[format('{0}--major', matrix.image)] }}.${{ steps.next-semver.outputs[format('{0}--minor', matrix.image)] }}.${{ steps.next-semver.outputs[format('{0}--patch', matrix.image)] }} )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Extract Docker metadata
