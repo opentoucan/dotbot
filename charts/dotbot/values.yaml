@@ -4,7 +4,7 @@ deployments:
   - name: bot.gateway
     replicaCount: 1
     image:
-      repository: ""
+      repository: "ghcr.io/sillock-inc/bot.gateway"
       tag: "0.1.1"
       pullPolicy: IfNotPresent
       podAnnotations: {}
@@ -53,8 +53,8 @@ jobs:
       runAsGroup: 1000
       fsGroup: 2000
     image:
-      repository:
-      tag:
+      repository: "ghcr.io/sillock-inc/xkcd.job"
+      tag: ""
       imagePullPolicy: Always
     env:
       - name: ECHO_VAR

@@ -111,7 +111,6 @@ jobs:
           manifest-file: .release-please-manifest.json
     outputs:
       releases: ${{ steps.release.outputs.paths_released }}
-      prs_created: ${{ steps.release.outputs.prs_created }}
       prs: ${{ steps.release.outputs.prs }}
       version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
       
@@ -160,7 +159,7 @@ jobs:
 
       - name: Commit values.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
-        if: contains(matrix.pr.labels, 'Helm') == false
+        if: contains(matrix.pr.labels, 'helm') == false
         env:
           PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
           VERSION: ${{steps.extract_version.outputs.version}}
