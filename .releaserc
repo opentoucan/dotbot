@@ -3,7 +3,7 @@
   "branches": "main",
   {
     "extends": "semantic-release-monorepo"
-  }
+  },
   "debug": "false",
   "plugins": [
     "@semantic-release/commit-analyzer",
