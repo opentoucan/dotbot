@@ -132,7 +132,7 @@ jobs:
       - name: Extract release version
         id: extract_version
         run: |
-          VERSION=$(echo '${{ matrix.pr }}' | jq -r '.title' | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
+          VERSION=$(echo '${{ matrix.pr.title }}' | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Bump Bot.Gateway Helm image version
