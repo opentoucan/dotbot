@@ -104,9 +104,10 @@ jobs:
 
       - name: Bump Helm image version
         id: image_version
+        env:
+          VERSION: "${{ steps.next_semantic.outputs.new_release_version }}"
+          DIGEST: "${{ github.commit }}"
         run: |
-          echo "VERSION=${{ steps.next_semantic.outputs.new_release_version }}"
-          echo "DIGEST=${{ github.commit }}"
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=\"v$VERSION\"' charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=\"$DIGEST\"' charts/dotbot/values.yaml
 
@@ -150,8 +151,9 @@ jobs:
           
       - name: Bump Helm version
         id: helm_version
+        env:
+          VERSION: "${{ steps.semantic.outputs.new_release_version }}"
         run: |
-          echo "VERSION=${{ steps.semantic.outputs.new_release_version }}"
           yq e -i ".version=\"$VERSION\"" charts/dotbot/Chart.yaml
           yq e -i ".appVersion="$VERSION\"" charts/dotbot/Chart.yaml
       - name: Commit Chart.yaml
