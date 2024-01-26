@@ -37,7 +37,7 @@ jobs:
         id: release-please
         uses: google-github-actions/release-please-action@v4
         with:
-          token: ${{ secrets.RELEASE_PLEASE }}
+          token: ${{ secrets.PAT }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           path: src/${{ matrix.image }}
@@ -102,7 +102,7 @@ jobs:
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
-          token: ${{ secrets.RELEASE_PLEASE }}
+          token: ${{ secrets.PAT }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
     outputs:
@@ -124,7 +124,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+        with:
+          token: ${{ secrets.PAT }}
       - name: Install yq
         run: |
           wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq &&\
