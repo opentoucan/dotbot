@@ -133,12 +133,12 @@ jobs:
         id: image-version
         if: contains(matrix.pr.headBranchName, 'Bot.Gateway')
         run: |
-          yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.tag)=env(VERSION)" charts/dotbot/values.yaml
-          yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.digest)=env(DIGEST)" charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
 
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
-        if: !contains(matrix.pr.labels, 'Helm')
+        if: contains(matrix.pr.labels, 'Helm') == false
         env:
           PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
         with:
