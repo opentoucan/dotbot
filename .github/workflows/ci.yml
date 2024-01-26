@@ -113,7 +113,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     env:
-      VERSION: "v${{ needs.release.outputs.major }}.${{ needs.release.outputs.minor }}.${{ needs.release.outputs.patch }}"
+      VERSION: "${{ needs.release.outputs.major }}.${{ needs.release.outputs.minor }}.${{ needs.release.outputs.patch }}"
       DIGEST: "${{ github.commit }}"
     strategy:
       matrix:
@@ -131,8 +131,8 @@ jobs:
         id: image-version
         if: "contains(${{ matrix.pr.headBranchName }}, 'Bot.Gateway')"
         run: |
-          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=\"v$VERSION\"' charts/dotbot/values.yaml
-          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=\"$DIGEST\"' charts/dotbot/values.yaml
+          yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.tag)=\"v$VERSION\"" charts/dotbot/values.yaml
+          yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.digest)=\"$DIGEST\"" charts/dotbot/values.yaml
 
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -140,7 +140,7 @@ jobs:
         env:
           PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
         with:
-          commit_message: 'chore: bump $PR_NAME. version to $VERSION'
+          commit_message: 'chore: bump $PR_NAME. version to v$VERSION'
           file_pattern: 'values.yaml'
           branch: '${{ matrix.pr.headBranchName }}'
 #  release-chart:
