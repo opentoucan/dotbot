@@ -9,17 +9,17 @@
     "src/Bot.Gateway": {
       "package-name": "bot.gateway",
       "release-type": "simple",
-      "label": "code"
+      "extra-label": "code"
     },
     "src/Xkcd.Job": {
       "package-name": "xkcd.job",
       "release-type": "simple",
-      "label": "code"
+      "extra-label": "code"
     },
     "charts/dotbot": {
       "package-name": "dotbot-helm",
       "release-type": "helm",
-      "label": "helm"
+      "extra-label": "helm"
     }
   }
 }
