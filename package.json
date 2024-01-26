@@ -4,6 +4,7 @@
     "semantic-release": "^23.0.0"
   },
   "release": {
+    "branches": ["main"],
     "monorepo":{
       "analyzeCommits": {
         "format": "angular" 
