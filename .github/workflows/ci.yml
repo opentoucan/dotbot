@@ -75,7 +75,7 @@ jobs:
       - name: Extract release version
         id: extract_version
         run: |
-          VERSION=$([format('steps.next-semver.outputs.src/{0}.major', matrix.image)].[format('steps.next-semver.outputs.src/{0}.minor', matrix.image)].[format('steps.next-semver.outputs.src/{0}.patch', matrix.image)]})
+          VERSION=$(${{ steps.next-semver.outputs[format('src/{0}.major', matrix.image)] }}.${{ steps.next-semver.outputs[format('src/{0}.minor', matrix.image)] }}.${{ steps.next-semver.outputs[format('src/{0}.patch', matrix.image)] }} )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Extract Docker metadata
@@ -149,6 +149,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' }}
     strategy:
       matrix:
         path: ${{ fromJSON(needs.code-changes.outputs.directories) }}
