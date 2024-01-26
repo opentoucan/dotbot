@@ -80,7 +80,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
             type=sha,format=long
-            type=semver,pattern={{version}},value=v${{ needs.next-semver.outputs.major }}.${{ needs.next-semver.outputs.minor }}.${{ needs.next-semver.outputs.patch }}
+            type=semver,pattern={{version}},value=${{ needs.next-semver.outputs.major }}.${{ needs.next-semver.outputs.minor }}.${{ needs.next-semver.outputs.patch }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -133,15 +133,15 @@ jobs:
         id: image-version
         if: contains(matrix.pr.headBranchName, 'Bot.Gateway')
         run: |
-          yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.tag)=\"v$VERSION\"" charts/dotbot/values.yaml
-          yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.digest)=\"$DIGEST\"" charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
+          yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
         if: !contains(matrix.pr.labels, 'Helm')
         env:
           PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
         with:
-          commit_message: 'chore: bump $PR_NAME. version to v$VERSION'
+          commit_message: 'chore: bump $PR_NAME. version to $VERSION'
           file_pattern: 'values.yaml'
           branch: '${{ matrix.pr.headBranchName }}'
 #  release-chart:
