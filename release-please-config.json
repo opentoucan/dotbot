@@ -5,6 +5,7 @@
   "include-v-in-tag": true,
   "separate-pull-requests": true,
   "sequential-calls": true,
+  "skip-github-release": true,
   "packages": {
     "src/Bot.Gateway": {
       "package-name": "bot.gateway",

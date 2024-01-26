@@ -24,11 +24,14 @@ jobs:
             Bot.Gateway: 
               - 'src/Bot.Gateway/**'
               - 'src/Xkcd.Sdk/**'
+              - '!CHANGELOG.md'
             Xkcd.Job: 
               - 'src/Xkcd.Job/**'
               - 'src/Xkcd.Sdk/**'
+              - '!CHANGELOG.md'
             Helm:
               - 'charts/dotbot'
+              - '!CHANGELOG.md'
 
   next-semver:
     runs-on: ubuntu-latest
@@ -137,6 +140,13 @@ jobs:
           VERSION=$(echo '${{ matrix.pr.title }}' | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Extract branch name
+        id: extract_branch
+        run: |
+          PR_NAME=$("${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'")
+          echo "pr_name=PR_NAME" >> $GITHUB_OUTPUT
+
+
       - name: Bump Bot.Gateway Helm image version
         id: image-version
         if: contains(matrix.pr.headBranchName, 'Bot.Gateway')
@@ -153,30 +163,6 @@ jobs:
           PR_NAME: "${{ matrix.pr.headBranchName }} | awk -F-- '{print $NF}'"
           VERSION: ${{steps.extract_version.outputs.version}}
         with:
-          commit_message: 'chore: bump $PR_NAME. version to $VERSION'
+          commit_message: 'chore: bump ${{ steps.extract_branch.outputs.pr_name }}. version to ${{ steps.extract_version.outputs.version }}'
           file_pattern: 'charts/dotbot/values.yaml'
           branch: '${{ matrix.pr.headBranchName }}'
-          
-#  release-chart:
-#    permissions:
-#      contents: write
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
-#
-#      - name: Configure Git
-#        run: |
-#          git config user.name "$GITHUB_ACTOR"
-#          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-#
-#      - name: Install Helm
-#        uses: azure/setup-helm@v3
-#
-#      - name: Run chart-releaser
-#        uses: helm/chart-releaser-action@v1.6.0
-#        env:
-#          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-#          CR_SKIP_EXISTING: true
