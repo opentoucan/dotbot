@@ -132,7 +132,7 @@ jobs:
         id: image-version
         env:
           PR_NAME: "${{ matrix.pr }} | awk -F-- '{print $NF}'"
-        if: "contains($PR_NAME, Bot.Gateway)"
+        if: contains(${{ matrix.pr }}, Bot.Gateway)
         run: |
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=\"v$VERSION\"' charts/dotbot/values.yaml
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=\"$DIGEST\"' charts/dotbot/values.yaml
