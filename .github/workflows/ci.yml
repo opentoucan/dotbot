@@ -76,7 +76,11 @@ jobs:
       - name: Extract release version
         id: extract_version
         run: |
+          echo "root major ver:  ${{ steps.next-semver.outputs.major }}"
           echo "Bot.Gateway major ver:  ${{ steps.next-semver.outputs.Bot.Gateway--major }}"
+          echo "src/Bot.Gateway major ver:  ${{ steps.next-semver.outputs.src\/Bot.Gateway--major }}"
+          echo "bot.gateway major ver:  ${{ steps.next-semver.outputs.bot.gateway--major }}"
+          echo "src/bot.gateway major ver:  ${{ steps.next-semver.outputs.src\/bot.gateway--major }}"
           VERSION=$(${{ steps.next-semver.outputs[format('{0}--major', matrix.image)] }}.${{ steps.next-semver.outputs[format('{0}--minor', matrix.image)] }}.${{ steps.next-semver.outputs[format('{0}--patch', matrix.image)] }} )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       
