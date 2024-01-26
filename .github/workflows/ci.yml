@@ -135,7 +135,6 @@ jobs:
         run: |
           yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.tag)=\"v$VERSION\"" charts/dotbot/values.yaml
           yq -i -e "(.deployments[] | select(.name == \"bot.gateway\").image.digest)=\"$DIGEST\"" charts/dotbot/values.yaml
-
       - name: Commit Chart.yaml
         uses: stefanzweifel/git-auto-commit-action@v5
         if: !contains(matrix.pr.labels, 'Helm')
