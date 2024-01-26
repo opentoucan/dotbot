@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -63,7 +63,7 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
-        run: npm install -D semantic-release semantic-release-monorepo
+        run: npm install
 
       - name: Release
         env:
