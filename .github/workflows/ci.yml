@@ -113,6 +113,7 @@ jobs:
   bump-image:
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ needs.release.outputs.prs }} != '[]' && ${{ needs.release.outputs.prs }} != ''
     permissions:
       contents: write
     env:
