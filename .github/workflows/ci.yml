@@ -117,7 +117,7 @@ jobs:
       DIGEST: "${{ github.commit }}"
     strategy:
       matrix:
-        pr: ${{ fromJson(needs.release.outputs.prs.headBranchName) }}
+        pr: ${{ fromJson(needs.release.outputs.prs).headBranchName }}
         exclude:
           - image: Helm
     steps:
