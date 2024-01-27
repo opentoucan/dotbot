@@ -78,19 +78,11 @@ jobs:
           config-file: src/${{ matrix.image }}/release-please-config.json
           manifest-file: src/${{ matrix.image }}/release-please-manifest.json
           
-      - name: Dump output
-        env:
-          OUTPUT: ${{ toJson(steps.release.outputs) }}
+      - name: Extract Semver release
+        id: next_semver
         run: |
-          echo "$OUTPUT"
-          echo "Root releases created: ${{ steps.release.outputs.release_created }}
-          echo "Folder releases created: ${{ steps.release.outputs['src/${{ matrix.image }}--release_created'] }}
-          echo "No caps: ${{ steps.release.outputs['src/bot.gateway--minor'] }}
-          echo "Single dash: ${{ steps.release.outputs['src-bot.gateway--minor'] }}
-          echo "Double dash: ${{ steps.release.outputs['src--bot.gateway--minor'] }}
-          echo "No src: ${{ steps.release.outputs['bot.gateway--minor'] }}
-          echo "Caps and src ${{ steps.release.outputs['src/${{ matrix.image }}--minor'] }}"
-          echo "Global ${{ steps.release.outputs['minor'] }}"
+           SEMVER=$("${{ steps.release.outputs.pr.title }} | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
+            echo "semver=$SEMVER" >> $GITHUB_OUTPUT
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -106,7 +98,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.release.outputs['src/${{ matrix.image }}--major'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--minor'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--patch']}}
+            type=semver,pattern={{version}},value=${{ steps.next_semver.outputs.semver }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -132,7 +124,7 @@ jobs:
       - name: Bump Bot.Gateway Helm image version
         if: contains(steps.release.outputs.headBranchName, 'bot.gateway')
         env:
-          VERSION: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+          VERSION: ${{ steps.next_semver.outputs.semver }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         run: |
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
@@ -141,7 +133,7 @@ jobs:
       - name: Bump Xkcd.Job Helm image version
         if: contains(steps.release.outputs.pr.headBranchName, 'xkcd.job')
         env:
-          VERSION: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+          VERSION: ${{ steps.next_semver.outputs.semver }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         run: |
           yq -i -e '(.jobs[] | select(.name == "xkcd.job").image.tag)=env(VERSION)' charts/dotbot/values.yaml
@@ -152,9 +144,8 @@ jobs:
         if: contains(steps.release.outputs.pr.labels, 'helm') == false
         env:
           PR_NAME: "${{ steps.release.outputs.pr.headBranchName }} | awk -F-- '{print $NF}'"
-          VERSION: ${{steps.extract_version.outputs.version}}
         with:
-          commit_message: "chore: bump ${{ steps.extract_branch.outputs.pr_name }}. version to ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
+          commit_message: "chore: bump ${{ steps.next_semver.outputs.semver }}"
           file_pattern: 'charts/dotbot/values.yaml'
           branch: '${{ steps.release.outputs.pr.headBranchName }}'
           
