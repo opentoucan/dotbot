@@ -25,10 +25,12 @@ jobs:
               - 'src/Bot.Gateway/**'
               - 'src/Xkcd.Sdk/**'
               - '!CHANGELOG.md'
+              - '!release-please-manifest.json'
             Xkcd.Job: 
               - 'src/Xkcd.Job/**'
               - 'src/Xkcd.Sdk/**'
               - '!CHANGELOG.md'
+              - '!release-please-manifest.json'
             Helm:
               - 'charts/dotbot'
               - '!CHANGELOG.md'
@@ -77,8 +79,14 @@ jobs:
           manifest-file: src/${{ matrix.image }}/release-please-manifest.json
           
       - run: |
-          echo "Outputs: src/${{ matrix.image }} <>  ${{ steps.release.outputs['src/${{ matrix.image }}--major'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--minor'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--patch']}}"
-          echo "${{ steps.release.outputs['major'] }}"
+          echo "Root releases created: ${{ steps.release.outputs.release_created }}
+          echo "Folder releases created: ${{ steps.release.outputs['src/${{ matrix.image }}--release_created'] }}
+          echo "No caps: ${{ steps.release.outputs['src/bot.gateway--minor'] }}
+          echo "Single dash: ${{ steps.release.outputs['src-bot.gateway--minor'] }}
+          echo "Double dash: ${{ steps.release.outputs['src--bot.gateway--minor'] }}
+          echo "No src: ${{ steps.release.outputs['bot.gateway--minor'] }}
+          echo "Caps and src ${{ steps.release.outputs['src/${{ matrix.image }}--minor'] }}"
+          echo "Global ${{ steps.release.outputs['minor'] }}"
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
