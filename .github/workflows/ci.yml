@@ -78,7 +78,11 @@ jobs:
           config-file: src/${{ matrix.image }}/release-please-config.json
           manifest-file: src/${{ matrix.image }}/release-please-manifest.json
           
-      - run: |
+      - name: Dump output
+        env:
+          OUTPUT: ${{ toJson(steps.release.outputs) }}
+        run: |
+          echo "$OUTPUT"
           echo "Root releases created: ${{ steps.release.outputs.release_created }}
           echo "Folder releases created: ${{ steps.release.outputs['src/${{ matrix.image }}--release_created'] }}
           echo "No caps: ${{ steps.release.outputs['src/bot.gateway--minor'] }}
