@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/Sillock-Inc/Dotbot/compare/dotbot-helm-v0.2.0...dotbot-helm-v0.3.0) (2024-01-27)
+
+
+### Features
+
+* refactored CI, lets see how it goes ([5cfeb41](https://github.com/Sillock-Inc/Dotbot/commit/5cfeb4164e050f5381bf36cdc42029b82808b304))
+
+
+### Bug Fixes
+
+* release-pr only runs on merges to main ([4f0db71](https://github.com/Sillock-Inc/Dotbot/commit/4f0db7137cb1a613f90f442a0674363df9dff0ad))
+
 ## [0.2.0](https://github.com/Sillock-Inc/Dotbot/compare/dotbot-helm-v0.1.0...dotbot-helm-v0.2.0) (2024-01-26)
 
 
