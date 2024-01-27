@@ -16,8 +16,8 @@ jobs:
       directories: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
+        uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -33,7 +33,7 @@ jobs:
               - 'charts/dotbot'
               - '!CHANGELOG.md'
 
-  build:
+  ci:
     needs: code-changes
     runs-on: ubuntu-latest
     if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' }}
@@ -53,16 +53,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT }}
-
-      - name: next-semver
-        id: next-semver
-        uses: google-github-actions/release-please-action@v4
+          
+      - name: Setup dotnet ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Test with dotnet
+        run: dotnet test --logger trx --results-directory "TestResults"
+      - name: Upload dotnet test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-results
+          path: TestResults
+        if: ${{ always() }}
+      - uses: google-github-actions/release-please-action@v4
+        id: release
         with:
           token: ${{ secrets.PAT }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          skip-github-release: true
-          skip-github-pull-request: true
           path: src/${{ matrix.image }}
           
       - name: Log into registry ${{ env.REGISTRY }}
@@ -76,10 +87,7 @@ jobs:
       - name: Extract release version
         id: extract_version
         run: |
-          echo "Outputs ${{ steps.next-semver.outputs }}"
-          echo "Bot.Gateway major ver:  ${{ steps.next-semver.outputs['src/Bot.Gateway--major'] }}"
-          echo "bot.gateway major ver:  ${{ steps.next-semver.outputs['src/bot.gateway--major'] }}"
-          VERSION=$(${{ steps.next-semver.outputs[format('src/{0}--major', matrix.image)] }}.${{ steps.next-semver.outputs[format('src/{0}--minor', matrix.image)] }}.${{ steps.next-semver.outputs[format('src/{0}--patch', matrix.image)] }} )
+          VERSION=$(${{ steps.release.outputs[format('src/{0}--major', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--minor', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--patch', matrix.image)] }} )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Extract Docker metadata
@@ -99,14 +107,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          
-      - uses: google-github-actions/release-please-action@v4
-        id: release
-        with:
-          token: ${{ secrets.PAT }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-          path: src/${{ matrix.image }}
           
       - name: Install yq
         run: |
@@ -148,7 +148,7 @@ jobs:
           file_pattern: 'charts/dotbot/values.yaml'
           branch: '${{ steps.release.outputs.pr.headBranchName }}'
           
-  release:
+  helm-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
