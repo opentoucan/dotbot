@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.2](https://github.com/Sillock-Inc/Dotbot/compare/bot.gateway-v0.1.1...bot.gateway-v0.1.2) (2024-01-27)
+
+
+### Bug Fixes
+
+* bump Bot.Gateway test ([2401d2c](https://github.com/Sillock-Inc/Dotbot/commit/2401d2c688b3f91fcd0b75c98bf8788900c3cf9b))
+* refactored release-please file structure ([099862a](https://github.com/Sillock-Inc/Dotbot/commit/099862a01c29f586ebaf90baf1067054286da455))
+* trigger docker build pipeline ([5a201d6](https://github.com/Sillock-Inc/Dotbot/commit/5a201d61dc5cec58d8af24f7ab48caa20a154b50))
+
 ## [0.1.1](https://github.com/Sillock-Inc/Dotbot/compare/bot.gateway-v0.1.0...bot.gateway-v0.1.1) (2024-01-26)
 
 
