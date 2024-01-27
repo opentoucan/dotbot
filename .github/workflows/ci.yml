@@ -142,7 +142,7 @@ jobs:
           file_pattern: 'charts/dotbot/values.yaml'
           branch: '${{ fromJson(steps.release.outputs.pr).headBranchName }}'
           
-  helm-release:
+  bump-chart:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -154,4 +154,28 @@ jobs:
           token: ${{ secrets.PAT }}
           config-file: release-please-config.json
           manifest-file: release-please-manifest.json
- 
+  
+  release-chart:
+    needs: bump-chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_SKIP_EXISTING: true
