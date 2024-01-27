@@ -7,16 +7,6 @@
   "sequential-calls": true,
   "skip-github-release": true,
   "packages": {
-    "src/Bot.Gateway": {
-      "package-name": "bot.gateway",
-      "release-type": "simple",
-      "extra-label": "code"
-    },
-    "src/Xkcd.Job": {
-      "package-name": "xkcd.job",
-      "release-type": "simple",
-      "extra-label": "code"
-    },
     "charts/dotbot": {
       "package-name": "dotbot-helm",
       "release-type": "helm",

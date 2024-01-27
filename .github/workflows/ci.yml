@@ -68,13 +68,15 @@ jobs:
           name: dotnet-results
           path: TestResults
         if: ${{ always() }}
+        
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.PAT }}
-          config-file: release-please-config.json
+          config-file: code-release-please-config.json
           manifest-file: .release-please-manifest.json
           path: src/${{ matrix.image }}
+          release-type: simple
           
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -153,19 +155,11 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' }}
-    strategy:
-      matrix:
-        path: ${{ fromJSON(needs.code-changes.outputs.directories) }}
-        include:
-          - exclude: Bot.Gateway
-          - exclude: Xkcd.Job
     steps:
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.PAT }}
-          config-file: release-please-config.json
+          config-file: helm-release-please-config.json
           manifest-file: .release-please-manifest.json
-          path: charts/dotbot
  
