@@ -22,18 +22,13 @@ jobs:
         with:
           filters: |
             Bot.Gateway: 
-              - 'src/Bot.Gateway/**'
+              - 'src/Bot.Gateway/**/!(CHANGELOG.md|release-please-manifest.json)'
               - 'src/Xkcd.Sdk/**'
-              - '!CHANGELOG.md'
-              - '!release-please-manifest.json'
             Xkcd.Job: 
-              - 'src/Xkcd.Job/**'
+              - 'src/Xkcd.Job/**/!(CHANGELOG.md|release-please-manifest.json)'
               - 'src/Xkcd.Sdk/**'
-              - '!CHANGELOG.md'
-              - '!release-please-manifest.json'
             Helm:
-              - 'charts/dotbot'
-              - '!CHANGELOG.md'
+              - 'charts/dotbot/**/!(CHANGELOG.md)'
 
   ci:
     needs: code-changes
@@ -81,7 +76,7 @@ jobs:
       - name: Extract Semver release
         id: next_semver
         run: |
-           SEMVER=$("${{ fromJson(steps.release.outputs.pr).title }} | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
+           SEMVER=$("${{ fromJson(steps.release.outputs.pr).title }}" | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
            echo "semver=$SEMVER" >> $GITHUB_OUTPUT
 
       - name: Log into registry ${{ env.REGISTRY }}
@@ -143,7 +138,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         if: contains(steps.release.outputs.pr.labels, 'helm') == false
         env:
-          PR_NAME: "${{ fromJson(steps.release.outputs.pr).headBranchName }} | awk -F-- '{print $NF}'"
+          PR_NAME: ${{ fromJson(steps.release.outputs.pr).headBranchName }} | awk -F-- '{print $NF}'
         with:
           commit_message: "chore: bump ${{ steps.next_semver.outputs.semver }}"
           file_pattern: 'charts/dotbot/values.yaml'
