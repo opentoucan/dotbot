@@ -61,7 +61,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test with dotnet
-        run: dotnet test --logger trx --results-directory "TestResults"
+        run: dotnet test src/${{matrix.image}} --logger trx --results-directory "TestResults"
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
@@ -76,6 +76,10 @@ jobs:
           config-file: src/${{ matrix.image }}/release-please-config.json
           manifest-file: src/${{ matrix.image }}/release-please-manifest.json
           
+      - run: |
+          echo "Outputs: src/${{ matrix.image }} <>  ${{ steps.release.outputs['src/${{ matrix.image }}--major'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--minor'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--patch']}}"
+          echo "${{ steps.release.outputs['major'] }}"
+
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
@@ -90,7 +94,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+            type=semver,pattern={{version}},value=${{ steps.release.outputs['src/${{ matrix.image }}--major'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--minor'] }}.${{ steps.release.outputs['src/${{ matrix.image }}--patch']}}
 
       - name: Build and push Docker image
         id: build-and-push
