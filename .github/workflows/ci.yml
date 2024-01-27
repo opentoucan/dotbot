@@ -81,8 +81,8 @@ jobs:
       - name: Extract Semver release
         id: next_semver
         run: |
-           SEMVER=$("${{ steps.release.outputs.pr.title }} | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
-            echo "semver=$SEMVER" >> $GITHUB_OUTPUT
+           SEMVER=$("${{ fromJson(steps.release.outputs.pr).title }} | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')
+           echo "semver=$SEMVER" >> $GITHUB_OUTPUT
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -122,7 +122,7 @@ jobs:
           echo "pr_name=$PR_NAME" >> $GITHUB_OUTPUT
 
       - name: Bump Bot.Gateway Helm image version
-        if: contains(steps.release.outputs.headBranchName, 'bot.gateway')
+        if: contains(fromJson(steps.release.outputs.pr).headBranchName, 'bot.gateway')
         env:
           VERSION: ${{ steps.next_semver.outputs.semver }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
@@ -131,7 +131,7 @@ jobs:
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.digest)=env(DIGEST)' charts/dotbot/values.yaml
 
       - name: Bump Xkcd.Job Helm image version
-        if: contains(steps.release.outputs.pr.headBranchName, 'xkcd.job')
+        if: contains(fromJson(steps.release.outputs.pr).headBranchName, 'xkcd.job')
         env:
           VERSION: ${{ steps.next_semver.outputs.semver }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
@@ -143,11 +143,11 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         if: contains(steps.release.outputs.pr.labels, 'helm') == false
         env:
-          PR_NAME: "${{ steps.release.outputs.pr.headBranchName }} | awk -F-- '{print $NF}'"
+          PR_NAME: "${{ fromJson(steps.release.outputs.pr).headBranchName }} | awk -F-- '{print $NF}'"
         with:
           commit_message: "chore: bump ${{ steps.next_semver.outputs.semver }}"
           file_pattern: 'charts/dotbot/values.yaml'
-          branch: '${{ steps.release.outputs.pr.headBranchName }}'
+          branch: '${{ fromJson(steps.release.outputs.pr).headBranchName }}'
           
   helm-release:
     runs-on: ubuntu-latest
