@@ -73,10 +73,8 @@ jobs:
         id: release
         with:
           token: ${{ secrets.PAT }}
-          config-file: code-release-please-config.json
-          manifest-file: .release-please-manifest.json
-          path: src/${{ matrix.image }}
-          release-type: simple
+          config-file: src/${{ matrix.image }}/release-please-config.json
+          manifest-file: src/${{ matrix.image }}/release-please-manifest.json
           
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -154,6 +152,6 @@ jobs:
         id: release
         with:
           token: ${{ secrets.PAT }}
-          config-file: helm-release-please-config.json
-          manifest-file: .release-please-manifest.json
+          config-file: release-please-config.json
+          manifest-file: release-please-manifest.json
  

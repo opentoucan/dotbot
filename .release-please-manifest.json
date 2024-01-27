@@ -1,5 +1,0 @@
-{
-  "charts/dotbot": "0.2.0",
-  "src/Bot.Gateway": "0.1.1",
-  "src/Xkcd.Job": "0.1.0"
-}
