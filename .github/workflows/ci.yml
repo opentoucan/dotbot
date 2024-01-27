@@ -33,12 +33,10 @@ jobs:
   ci:
     needs: code-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' }}
+    if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' && needs.code-changes.outputs.directories != '[Helm]' }}
     strategy:
       matrix:
         image: ${{ fromJSON(needs.code-changes.outputs.directories) }}
-        exclude: 
-          - image: Helm
     permissions:
       contents: write
       packages: write
