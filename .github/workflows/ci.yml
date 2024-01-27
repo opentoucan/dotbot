@@ -90,7 +90,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.release.outputs[format('src/{0}--major', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--minor', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--patch', matrix.image)] }}
+            type=semver,pattern={{version}},value=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -116,7 +116,7 @@ jobs:
       - name: Bump Bot.Gateway Helm image version
         if: contains(steps.release.outputs.headBranchName, 'bot.gateway')
         env:
-          VERSION: ${{ steps.extract_version.outputs.version }}
+          VERSION: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         run: |
           yq -i -e '(.deployments[] | select(.name == "bot.gateway").image.tag)=env(VERSION)' charts/dotbot/values.yaml
@@ -125,7 +125,7 @@ jobs:
       - name: Bump Xkcd.Job Helm image version
         if: contains(steps.release.outputs.pr.headBranchName, 'xkcd.job')
         env:
-          VERSION: ${{ steps.release.outputs[format('src/{0}--major', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--minor', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--patch', matrix.image)] }}
+          VERSION: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         run: |
           yq -i -e '(.jobs[] | select(.name == "xkcd.job").image.tag)=env(VERSION)' charts/dotbot/values.yaml
@@ -138,7 +138,7 @@ jobs:
           PR_NAME: "${{ steps.release.outputs.pr.headBranchName }} | awk -F-- '{print $NF}'"
           VERSION: ${{steps.extract_version.outputs.version}}
         with:
-          commit_message: "chore: bump ${{ steps.extract_branch.outputs.pr_name }}. version to ${{ steps.release.outputs[format('src/{0}--major', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--minor', matrix.image)] }}.${{ steps.release.outputs[format('src/{0}--patch', matrix.image)] }}"
+          commit_message: "chore: bump ${{ steps.extract_branch.outputs.pr_name }}. version to ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
           file_pattern: 'charts/dotbot/values.yaml'
           branch: '${{ steps.release.outputs.pr.headBranchName }}'
           
