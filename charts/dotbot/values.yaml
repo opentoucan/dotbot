@@ -5,8 +5,8 @@ deployments:
     replicaCount: 1
     image:
       repository: "ghcr.io/sillock-inc/bot.gateway"
-      tag: "0.1.1"
-      digest: ""
+      tag: "0.1.4"
+      digest: "sha256:b1a2a734d2e01ebd84f8527e5c85f31fd89731e309a7b838617f83fe1342d86e"
       pullPolicy: IfNotPresent
       podAnnotations: {}
       podLabels: {}
