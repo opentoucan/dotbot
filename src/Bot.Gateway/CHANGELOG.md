@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/Sillock-Inc/Dotbot/compare/bot.gateway-v0.1.3...bot.gateway-v0.1.4) (2024-01-28)
+
+
+### Bug Fixes
+
+* test bump changes for Bot.Gateway and Xkcd.Job ([30642e9](https://github.com/Sillock-Inc/Dotbot/commit/30642e933ec3dfb93f09e2d5297801bf7112776c))
+
 ## [0.1.3](https://github.com/Sillock-Inc/Dotbot/compare/bot.gateway-v0.1.2...bot.gateway-v0.1.3) (2024-01-28)
 
 
