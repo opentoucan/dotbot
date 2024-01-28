@@ -107,8 +107,7 @@ jobs:
       - name: Extract branch name
         id: extract_branch
         run: |
-          PR_NAME=$("${{ steps.release.outputs.pr.headBranchName }} | awk -F-- '{print $NF}'")
-          echo "pr_name=$PR_NAME" >> $GITHUB_OUTPUT
+          echo "pr_name=$(echo '${{ steps.release.outputs.pr.headBranchName }}' | awk -F-- '{print $NF}')" >> $GITHUB_OUTPUT
 
       - name: Bump Bot.Gateway Helm image version
         if: contains(fromJson(steps.release.outputs.pr).headBranchName, 'bot.gateway')
