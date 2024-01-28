@@ -71,7 +71,7 @@ jobs:
       - name: Extract Semver release
         id: next_semver
         run: |
-           echo "semver=$('${{ fromJson(steps.release.outputs.pr).title }}' | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')" >> $GITHUB_OUTPUT
+           echo "semver=$(echo '${{ fromJson(steps.release.outputs.pr).title }}' | grep -o -P '\d+(\.\d+)+(-[a-z]+[0-9]*)?')" >> $GITHUB_OUTPUT
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
