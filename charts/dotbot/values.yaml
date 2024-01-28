@@ -39,7 +39,6 @@ deployments:
       # - name: foo
       #   mountPath: "/etc/foo"
       #   readOnly: true
-
     service:
       name: http
       type: LoadBalancer
@@ -54,8 +53,8 @@ jobs:
       fsGroup: 2000
     image:
       repository: "ghcr.io/sillock-inc/xkcd.job"
-      tag: ""
-      digest: ""
+      tag: "0.1.1"
+      digest: "sha256:ce77d0f2ed61f4384f1cfd6109be7ec87a026af741abad58e2d5f87aa7384e77"
       imagePullPolicy: Always
     env:
       - name: ECHO_VAR
