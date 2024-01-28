@@ -37,7 +37,7 @@ spec:
           {{- end }}
         {{- end }}
           containers:
-            - image: "{{ $job.image.repository }}:{{ $job.image.tag }}"
+            - image: {{ $job.image.repository }}:{{ $job.image.tag | default $.Chart.AppVersion }}{{ include "xkcd-job.imageDigest" . }}
               imagePullPolicy: {{ $job.image.imagePullPolicy }}
               name: {{ $job.name }}
             {{- with $job.env }}

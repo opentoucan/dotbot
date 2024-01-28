@@ -34,7 +34,7 @@ spec:
         - name: {{ $deployment.Name }}
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          image: "{{ $deployment.image.repository }}:{{ $deployment.image.tag | default $.Chart.AppVersion }}"
+          image: {{ $deployment.image.repository }}:{{ $deployment.image.tag | default $.Chart.AppVersion }}{{ include "bot-gateway.imageDigest" . }}
           imagePullPolicy: {{ $deployment.image.pullPolicy }}
           ports:
             - name: http
