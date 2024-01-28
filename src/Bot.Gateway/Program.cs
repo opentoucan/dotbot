@@ -31,7 +31,6 @@ builder.Services.Configure<JsonOptions>(options =>
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
-
 var rabbitMqConfig = new RabbitMQConfig();
 builder.Configuration.GetSection("RabbitMQ").Bind(rabbitMqConfig);
 builder.Services.AddMassTransit(x =>

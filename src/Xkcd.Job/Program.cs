@@ -49,7 +49,6 @@ builder.Services.AddMassTransit(x =>
         o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
 
         o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
-
         o.UseBusOutbox();
     });
     
