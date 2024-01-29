@@ -22,9 +22,9 @@ jobs:
       - name: Prep
         id: prep
         run: |
-          echo "SEMVER=$(echo '${{ github.event.inputs.tag }}' | grep -o -P '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?')" >> $GITHUB_OUTPUT
+          echo "SEMVER=$(echo '${{ github.ref }}' | grep -o -P '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?')" >> $GITHUB_OUTPUT
       
       - uses: imjasonh/setup-crane@v0.3
       - run: |
-          crane tag "ghcr.io/sillock-inc/bot.gateway:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
-          crane tag "ghcr.io/sillock-inc/xkcd.job:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
+          crane tag "ghcr.io/sillock-inc/bot.gateway:sha-${{ github.sha }}" "${{ github.ref_name }}"
+          crane tag "ghcr.io/sillock-inc/xkcd.job:sha-${{ github.sha }}" "${{ github.ref_name }}"
