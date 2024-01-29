@@ -26,5 +26,5 @@ jobs:
       
       - uses: imjasonh/setup-crane@v0.3
       - run: |
-          crane tag "ghcr.io/sillock-inc/bot.gateway:${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
-          crane tag "ghcr.io/sillock-inc/xkcd.job:${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
+          crane tag "ghcr.io/sillock-inc/bot.gateway:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
+          crane tag "ghcr.io/sillock-inc/xkcd.job:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
