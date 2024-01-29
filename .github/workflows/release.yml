@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  release-bot-gateway:
+  release-images:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -25,19 +25,3 @@ jobs:
         run: |
           dotnet tool install --global dotnet-releaser
           dotnet-releaser run --github-token "${{secrets.GITHUB_TOKEN}}" dotnet-releaser.toml
-
-
-
-  release-xkcd-job:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
-    permissions:
-      contents: write
-      packages: write
-    steps:
-      - uses: google-github-actions/release-please-action@v4
-        id: release
-        with:
-          token: ${{ secrets.PAT }}
-          config-file: src/Xkcd.Job/release-please-config.json
-          manifest-file: src/Xkcd.Job/release-please-manifest.json
