@@ -1,4 +1,4 @@
-name: helm.yaml
+name: Release Helm Chart
 on:
   push:
     tags:
