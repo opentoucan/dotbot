@@ -1,0 +1,6 @@
+# configuration file for dotnet-releaser
+[msbuild]
+project = "Dotbot.sln"
+[github]
+user = "Sillock-Inc"
+repo = "Dotbot"
