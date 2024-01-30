@@ -1,44 +1,45 @@
-{{- range $deployment := .Values.deployments }}
+{{- with .Values.gateway }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{- include "dotbot.fullname" $ }}-{{ $deployment.name }}"
+  name: "{{- include "dotbot.fullname" $ }}"
   labels:
     {{- include "dotbot.labels" $ | nindent 4 }}
 spec:
-  replicas: {{ $deployment.replicaCount }}
+  replicas: {{ .replicaCount }}
   selector:
     matchLabels:
       {{- include "dotbot.selectorLabels" $ | nindent 6 }}
   template:
     metadata:
-      {{- with $deployment.podAnnotations }}
+      {{- with .podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "dotbot.labels" $ | nindent 8 }}
-        {{- with $deployment.podLabels }}
+        {{- with .podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with $deployment.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- if $.Values.serviceAccount.create }}
+      serviceAccountName: "{{- include "dotbot.name" $ }}"
       {{- end }}
-      serviceAccountName: {{ include "dotbot.serviceAccountName" $ }}
       securityContext:
-        {{- toYaml $deployment.podSecurityContext | nindent 8 }}
+        {{- toYaml .podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ $deployment.Name }}
+        - name: "{{- include "dotbot.name" $ }}"
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          image: {{ $deployment.image.repository }}:{{ $deployment.image.tag | default $.Chart.AppVersion }}{{ include "bot-gateway.imageDigest" . }}
-          imagePullPolicy: {{ $deployment.image.pullPolicy }}
+          image: {{ .image.repository }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ .secretName }}
           ports:
             - name: http
-              containerPort: {{ $deployment.service.port }}
+              containerPort: {{ $.Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -49,29 +50,13 @@ spec:
               path: /
               port: http
           resources:
-            {{- toYaml $deployment.resources | nindent 12 }}
-          {{- with $deployment.volumeMounts }}
+            {{- toYaml .resources | nindent 12 }}
+          {{- with .volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with $deployment.volumes }}
+      {{- with .volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ $deployment.name }}
-  labels:
-    {{- include "dotbot.labels" $ | nindent 4 }}
-spec:
-  type: {{ $deployment.service.type }}
-  ports:
-    - port: {{ $deployment.service.port }}
-      targetPort: {{ $deployment.service.targetPort }}
-      protocol: {{ $deployment.service.protocol }}
-      name: {{ $deployment.service.name }}
-  selector:
-    {{- include "dotbot.selectorLabels" $ | nindent 4 }}
 {{- end }}
