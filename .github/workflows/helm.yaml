@@ -92,4 +92,4 @@ jobs:
 
       - name: Push charts to GHCR
         run: |
-          helm push "dotbot-${{ steps.prep.outputs.SEMVER }}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/charts"
+          helm push ".cr-release-packages/dotbot-${{ steps.prep.outputs.SEMVER }}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/charts"
