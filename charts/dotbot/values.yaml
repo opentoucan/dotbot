@@ -5,8 +5,8 @@ deployments:
     replicaCount: 1
     image:
       repository: "ghcr.io/sillock-inc/bot.gateway"
-      tag: "0.1.4"
-      digest: "sha256:b1a2a734d2e01ebd84f8527e5c85f31fd89731e309a7b838617f83fe1342d86e"
+      tag: "0.3.5"
+      digest: "sha256:c1ed61d158b9d70758154551b38d39b903653c234aace22f0eb3714bc23cb374"
       pullPolicy: IfNotPresent
       podAnnotations: {}
       podLabels: {}
@@ -53,8 +53,8 @@ jobs:
       fsGroup: 2000
     image:
       repository: "ghcr.io/sillock-inc/xkcd.job"
-      tag: "0.1.2"
-      digest: "sha256:fbba5d889baa4ed46134134ab28227a3077b21c0edb09639e2003fcc5a23c509"
+      tag: "0.3.5"
+      digest: "sha256:4824a7a0024923f01770d7c69c9dcb65f7a500ecb25f03e480248c3388bac74e"
       imagePullPolicy: Always
     env:
       - name: ECHO_VAR
