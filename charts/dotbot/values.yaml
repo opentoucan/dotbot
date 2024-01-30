@@ -46,6 +46,7 @@ ingress:
   pathType: Prefix
   hosts:
     - dotbot.local
+  tls: []
 
 jobs:
   - name: xkcd.job
