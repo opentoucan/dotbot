@@ -94,6 +94,8 @@ builder.Services
     .AddMongoDbProjections()
     .AddMongoDbPagingProviders();
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -111,7 +113,9 @@ app.Use((context, next) =>
     context.Request.EnableBuffering();
     return next();
 });
+
 app.MapGraphQL();
+app.MapHealthChecks("/healthz");
 app.MapGroup("/")
     .MapDiscordInteractionApi();
 app.Run();
