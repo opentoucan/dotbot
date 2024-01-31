@@ -52,7 +52,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
             {
                 var stream = await client.GetStreamAsync(new Uri(item.value.Value.Url), cancellationToken);
                 var extension = Path.GetExtension(item.value.Value.Url);
-                await _fileUploadService.UploadFile(request.Data.GuildId!, $"{botCommand.Name}_{item.i}{extension.Split("?")[0]}", stream);
+                await _fileUploadService.UploadFile($"discord-{request.Data.GuildId!}", $"{botCommand.Name}_{item.i}{extension.Split("?")[0]}", stream);
             }
 
             await _dbContext.CommitTransactionAsync();

@@ -11,7 +11,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Discord__PublicKey": "",
         "AWS_ACCESS_KEY_ID": "dev",
-        "AWS_SECRET_ACCESS_KEY": "dev"
+        "AWS_SECRET_ACCESS_KEY": "dev",
+        "AWS_PROFILE": "dev"
       }
     }
   }

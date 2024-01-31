@@ -28,7 +28,8 @@ public class FileUploadService : IFileUploadService
             BucketName = parentName,
             InputStream = content,
             ContentType = MimeTypes.GetMimeType(attachmentName),
-            Key = attachmentName
+            Key = attachmentName,
+            DisablePayloadSigning = true
         };
         await fileTransferUtility.UploadAsync(transferRequest);
     }

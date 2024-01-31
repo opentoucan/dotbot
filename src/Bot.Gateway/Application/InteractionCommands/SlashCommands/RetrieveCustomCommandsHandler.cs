@@ -31,7 +31,7 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
         {
             foreach (var attachmentId in botCommand.AttachmentIds)
             {
-                var file = await _fileUploadService.GetFile(request.Data.GuildId!, attachmentId);
+                var file = await _fileUploadService.GetFile($"discord-{request.Data.GuildId!}", attachmentId);
                 using var memoryStream = new MemoryStream();
                 await file.FileContent.CopyToAsync(memoryStream, cancellationToken);
                 discordFileAttachments.Add(new DiscordFileAttachment(file.Filename, "Custom command", false, memoryStream.ToArray()));   

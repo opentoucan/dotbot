@@ -11,8 +11,6 @@ public static class Extensions
 {
     public static IHostApplicationBuilder ConfigureFileStorage(this IHostApplicationBuilder builder)
     {
-        var awsOptions = builder.Configuration.GetAWSOptions("S3");
-        builder.Services.AddDefaultAWSOptions(awsOptions);
         builder.Services.AddAWSService<IAmazonS3>();
         builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
         return builder;

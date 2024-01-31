@@ -3,37 +3,20 @@ name: ci
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'src/Bot.Gateway/**/!(CHANGELOG.md)'
+      - 'src/Xkcd.Job/**/!(CHANGELOG.md)'
+      - 'src/Xkcd.Sdk/**'
 
 env:
   REGISTRY: ghcr.io
   
 jobs:
-  code-changes:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    outputs:
-      directories: ${{ steps.filter.outputs.changes }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            Bot.Gateway: 
-              - 'src/Bot.Gateway/**/!(CHANGELOG.md)'
-              - 'src/Xkcd.Sdk/**'
-            Xkcd.Job: 
-              - 'src/Xkcd.Job/**/!(CHANGELOG.md)'
-              - 'src/Xkcd.Sdk/**'
   ci:
-    needs: code-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.code-changes.outputs.directories != '[]' && needs.code-changes.outputs.directories != '' }}
     strategy:
       matrix:
-        image: ${{ fromJSON(needs.code-changes.outputs.directories) }}
+        image: ["Bot.Gateway", "Xkcd.Job"]
     permissions:
       contents: write
       packages: write
@@ -53,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test with dotnet
-        run: dotnet test src/${{matrix.image}} --logger trx --results-directory "TestResults"
+        run: dotnet test src/${{ matrix.image }} --logger trx --results-directory "TestResults"
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
