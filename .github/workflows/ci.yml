@@ -4,9 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'src/Bot.Gateway/**/!(CHANGELOG.md)'
-      - 'src/Xkcd.Job/**/!(CHANGELOG.md)'
+      - 'src/Bot.Gateway/**'
+      - 'src/Xkcd.Job/**'
       - 'src/Xkcd.Sdk/**'
+      - '!src/Bot.Gateway/CHANGELOG.md'
+      - '!src/Xkcd.Job/CHANGELOG.md'
 
 env:
   REGISTRY: ghcr.io
