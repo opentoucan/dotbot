@@ -17,6 +17,7 @@ spec:
             app: {{ include "dotbot.fullname" $ }}
             cron: {{ $job.name }}
         spec:
+          restartPolicy: OnFailure
         {{- if hasKey $job "serviceAccount" }}
         {{- if hasKey $job.serviceAccount "name" }}
           serviceAccountName: {{ $job.serviceAccount.name }}

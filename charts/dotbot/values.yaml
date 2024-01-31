@@ -49,7 +49,7 @@ ingress:
   tls: []
 
 jobs:
-  - name: xkcd.job
+  - name: xkcd-job
     securityContext:
       runAsUser: 1000
       runAsGroup: 1000
