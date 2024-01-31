@@ -35,7 +35,7 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 }
 
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));
-builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(builder.Configuration.GetValue<string>("MongoSettings:DatabaseName")));
+builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(builder.Configuration.GetValue<string>("MongoDbSettings:DatabaseName")));
 
 builder.Services.AddMongoDbCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>();
 var rabbitMqConfig = new RabbitMQConfig();
