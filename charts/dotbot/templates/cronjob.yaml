@@ -18,13 +18,6 @@ spec:
             cron: {{ $job.name }}
         spec:
           restartPolicy: OnFailure
-        {{- if hasKey $job "serviceAccount" }}
-        {{- if hasKey $job.serviceAccount "name" }}
-          serviceAccountName: {{ $job.serviceAccount.name }}
-        {{- else }}
-          serviceAccountName: {{ $job.name }}
-        {{- end }}
-        {{- end }}
         {{- if hasKey $job "securityContext" }}
           {{- if $job.securityContext.runAsUser }}
           securityContext:
