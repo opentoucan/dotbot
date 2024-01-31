@@ -22,5 +22,6 @@ RUN dotnet publish "Bot.Gateway/Bot.Gateway.csproj" -c $BUILD_CONFIGURATION -o /
 
 FROM base AS final
 WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:80
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Bot.Gateway.dll"]

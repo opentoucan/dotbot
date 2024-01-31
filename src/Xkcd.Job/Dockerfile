@@ -22,5 +22,6 @@ RUN dotnet publish "Xkcd.Job/Xkcd.Job.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 
 FROM base AS final
 WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:80
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Xkcd.Job.dll"]
