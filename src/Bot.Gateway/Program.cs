@@ -114,6 +114,7 @@ app.Use((context, next) =>
     return next();
 });
 
+app.MapPrometheusScrapingEndpoint();
 app.MapGraphQL();
 app.MapHealthChecks("/healthz");
 app.MapGroup("/")

@@ -2,6 +2,7 @@ using Amazon.S3;
 using Bot.Gateway.Services;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Bot.Gateway.Extensions;
@@ -22,6 +23,7 @@ public static class Extensions
     
     public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
     {
+        var tracingOtlpEndpoint = builder.Configuration["OTLP_ENDPOINT_URL"];
         builder.Logging.AddConsole();
         builder.Logging.AddOpenTelemetry(logging =>
         {
@@ -29,24 +31,41 @@ public static class Extensions
             logging.IncludeScopes = true;
         });
 
-        builder.Services.AddOpenTelemetry()
-            .WithMetrics(metrics =>
-            {
-                metrics.AddRuntimeInstrumentation()
-                    .AddBuiltInMeters();
-            })
-            .WithTracing(tracing =>
-            {
-                if (builder.Environment.IsDevelopment())
-                {
-                    // We want to view all traces in development
-                    tracing.SetSampler(new AlwaysOnSampler());
-                }
+        var otel = builder.Services.AddOpenTelemetry();
 
-                tracing.AddAspNetCoreInstrumentation()
-                    .AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
-            });
+        // Configure OpenTelemetry Resources with the application name
+        otel.ConfigureResource(resource => resource
+            .AddService(serviceName: builder.Environment.ApplicationName));
+
+        // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
+        otel.WithMetrics(metrics => metrics
+            .AddRuntimeInstrumentation()
+            .AddBuiltInMeters()
+            // Metrics provider from OpenTelemetry
+            .AddAspNetCoreInstrumentation()
+            // Metrics provides by ASP.NET Core in .NET 8
+            .AddMeter("Microsoft.AspNetCore.Hosting")
+            .AddMeter("Microsoft.AspNetCore.Server.Kestrel"));
+        
+        // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
+        otel.WithTracing(tracing =>
+        {
+            tracing.AddAspNetCoreInstrumentation();
+            tracing.AddHttpClientInstrumentation();
+            //Add sources here
+            //tracing.AddSource();
+            if (tracingOtlpEndpoint != null)
+            {
+                tracing.AddOtlpExporter(otlpOptions =>
+                {
+                    otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint);
+                });
+            }
+            else
+            {
+                tracing.AddConsoleExporter();
+            }
+        });
 
         builder.AddOpenTelemetryExporters();
 

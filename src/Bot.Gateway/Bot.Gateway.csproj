@@ -35,6 +35,8 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+        <PackageReference Include="OpenTelemetry.Exporter.Console" />
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
         <PackageReference Include="Grpc.Tools">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
