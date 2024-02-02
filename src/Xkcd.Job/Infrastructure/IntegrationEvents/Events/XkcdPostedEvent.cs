@@ -1,3 +1,4 @@
+// ReSharper disable once CheckNamespace
 namespace Contracts.MessageBus;
 
 public class XkcdPostedEvent

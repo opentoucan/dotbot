@@ -1,5 +1,5 @@
-namespace Bot.Gateway.Application.IntegrationEvents.Events;
-
+// ReSharper disable once CheckNamespace
+namespace Contracts.MessageBus;
 public class XkcdPostedEvent
 {
     public XkcdPostedEvent(int comicNumber, DateTime datePosted, string altText, string imageUrl, string title)

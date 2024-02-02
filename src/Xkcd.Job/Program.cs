@@ -1,7 +1,6 @@
-using System.Reflection;
+using Contracts.MessageBus;
 using MassTransit;
 using MassTransit.MongoDbIntegration;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,16 +8,12 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Polly;
 using Polly.Extensions.Http;
-using Xkcd.Job.Behaviours;
-using Xkcd.Job.Commands;
 using Xkcd.Job.Config;
 using Xkcd.Job.Extensions;
 using Xkcd.Job.Infrastructure;
 using Xkcd.Sdk;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Environment.ContentRootPath = Directory.GetCurrentDirectory();
-
 
 builder.Services.AddLogging();
 builder.Services.AddHttpClient<XkcdService>(client =>
@@ -67,29 +62,19 @@ builder.Services.AddMassTransit(x =>
 builder.Services.AddScoped<DbContext>(c =>
     new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>>()));
 
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-    cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
-});
-
 
 using IHost host = builder.Build();
-host.Start();
-var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
 using var scope = host.Services.CreateScope();
 var dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
 var client = host.Services.GetRequiredService<XkcdService>();
-var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
 logger.LogInformation("Checking for new XKCD comic");
 
 var existingXkcd = dbContext.XkcdLatest.AsQueryable().OrderBy(x => x.ComicNumber).FirstOrDefault();
-
 var latestXkcd = await client.GetXkcdComicAsync(null, CancellationToken.None);
-
 if (latestXkcd == null)
 {
     logger.LogError("Failed to get latest XKCD comic");
@@ -104,9 +89,21 @@ if (existingXkcd?.ComicNumber >= latestXkcd.ComicNumber)
 
 logger.LogInformation("Current comic is {}, last checked was {}",  existingXkcd?.ComicNumber, latestXkcd.ComicNumber);
 
-var setXkcdCommand = new SetXkcdCommand(latestXkcd.ComicNumber, latestXkcd.ImageUrl, latestXkcd.Title, latestXkcd.AltText, latestXkcd.DatePosted);
-        
-await mediatr.Send(setXkcdCommand);
+await dbContext.BeginTransactionAsync();
+var newXkcd = new Xkcd.Job.Infrastructure.Entities.Xkcd(latestXkcd.ComicNumber, latestXkcd.DatePosted);
+if (existingXkcd == null)
+{
+    await dbContext.XkcdLatest.InsertOneAsync(dbContext.Session, newXkcd, cancellationToken: CancellationToken.None);
+}
+else
+{
 
-lifetime.StopApplication();
-await host.WaitForShutdownAsync();
+    newXkcd.Id = existingXkcd.Id;
+    await dbContext.XkcdLatest.ReplaceOneAsync(dbContext.Session,
+        Builders<Xkcd.Job.Infrastructure.Entities.Xkcd>.Filter.Eq(x => x.ComicNumber, existingXkcd.ComicNumber),
+        newXkcd, cancellationToken: CancellationToken.None);
+}
+        
+var xkcdPostedEvent = new XkcdPostedEvent(latestXkcd.ComicNumber, latestXkcd.DatePosted, latestXkcd.AltText, latestXkcd.ImageUrl, latestXkcd.Title);
+await publishEndpoint.Publish(xkcdPostedEvent, CancellationToken.None);
+await dbContext.CommitTransactionAsync();

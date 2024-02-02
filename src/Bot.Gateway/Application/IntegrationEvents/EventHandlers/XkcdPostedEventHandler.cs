@@ -1,6 +1,5 @@
-using Bot.Gateway.Application.IntegrationEvents.Events;
 using Bot.Gateway.Infrastructure.HttpClient;
-using Bot.Gateway.Model.Responses;
+using Contracts.MessageBus;
 using Discord;
 using MassTransit;
 using Xkcd.Sdk;
