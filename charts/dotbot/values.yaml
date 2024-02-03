@@ -72,3 +72,4 @@ jobs:
     successfulJobsHistoryLimit: 3
     concurrencyPolicy: Forbid
     restartPolicy: Never
+    ttlSecondsAfterFinished: 2400
