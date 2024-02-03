@@ -135,7 +135,7 @@ app.Use((context, next) =>
 });
 
 app.MapGraphQL();
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz").AllowAnonymous();
 app.MapGroup("/api/interactions")
     .MapDiscordInteractionApi()
     .RequireAuthorization("DiscordSignature");
