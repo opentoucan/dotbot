@@ -31,10 +31,13 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 });
-builder.Services.AddSingleton<IAuthorizationHandler, DiscordSignatureRequirementHandler>();
 
 builder.Services.AddAuthentication()
-    .AddScheme<DiscordSignatureAuthenticationSchemeOptions, DiscordSignatureAuthenticationHandler>("DiscordSignature",null);
+    .AddScheme<DiscordSignatureAuthenticationSchemeOptions, DiscordSignatureAuthenticationHandler>("DiscordSignature",
+        options =>
+        {
+            builder.Configuration.GetSection("DiscordSettings").Bind(options);
+        });
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("DiscordSignature", policyBuilder =>

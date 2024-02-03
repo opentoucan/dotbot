@@ -14,9 +14,10 @@ public class DiscordSignatureAuthenticationHandler : AuthenticationHandler<Disco
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {            
+        Request.EnableBuffering();
         var signature = Request.Headers["X-Signature-Ed25519"].FirstOrDefault();
         var timestamp = Request.Headers["X-Signature-Timestamp"].FirstOrDefault();
-        var key = Environment.GetEnvironmentVariable("Discord__PublicKey");
+        var key = Options.PublicKey;
         var json = await new StreamReader(Request.Body).ReadToEndAsync();
         
         if (signature is null 
@@ -26,7 +27,7 @@ public class DiscordSignatureAuthenticationHandler : AuthenticationHandler<Disco
         {
             return AuthenticateResult.Fail("Invalid Authorization Header");
         }
-        
+        Request.Body.Seek(0, SeekOrigin.Begin);
         var claims = new[] { new Claim(ClaimTypes.Name, "service") }; 
         var identity = new ClaimsIdentity(claims, Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
@@ -35,4 +36,7 @@ public class DiscordSignatureAuthenticationHandler : AuthenticationHandler<Disco
     }
 }
 
-public class DiscordSignatureAuthenticationSchemeOptions : AuthenticationSchemeOptions;
+public class DiscordSignatureAuthenticationSchemeOptions : AuthenticationSchemeOptions
+{
+    public string? PublicKey { get; set; }
+}
