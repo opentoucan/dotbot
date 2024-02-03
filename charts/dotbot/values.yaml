@@ -4,8 +4,8 @@ gateway:
   replicaCount: 1
   image:
     repository: "ghcr.io/sillock-inc/bot.gateway"
-    tag: "0.3.15"
-    digest: "sha256:15f19e01d99f7f1d5c24552000737af027b4f5c78de292cc8037dc88df15adee"
+    tag: "0.3.16"
+    digest: "sha256:6e0c57fd672c78746d2b8cdcb29a525fdbe9268dc6d230a4f9bfaad4f5d3aacd"
     pullPolicy: IfNotPresent
   secretName: dotbot-secret
   podAnnotations: { }
@@ -56,8 +56,8 @@ jobs:
       fsGroup: 2000
     image:
       repository: "ghcr.io/sillock-inc/xkcd.job"
-      tag: "0.3.15"
-      digest: "sha256:2286c2e3643a96af9e3221c583c1c6c65659a8da3e7e7e814e589715911765c8"
+      tag: "0.3.16"
+      digest: "sha256:44fe13f95cdd8778fe1a16a940d5c35e66eac7aeef2722b4879b541116a0d125"
       imagePullPolicy: Always
     env: []
     secretName: dotbot-secret
