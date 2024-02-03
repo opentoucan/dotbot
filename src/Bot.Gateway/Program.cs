@@ -1,6 +1,8 @@
 using System.Reflection;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Bot.Gateway.Apis;
+using Bot.Gateway.Apis.Auth;
 using Bot.Gateway.Extensions;
 using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
@@ -10,6 +12,9 @@ using Discord;
 using Discord.Rest;
 using MassTransit;
 using MassTransit.MongoDbIntegration;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;
 using MongoDB.Driver;
 using Polly;
@@ -25,6 +30,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+});
+builder.Services.AddSingleton<IAuthorizationHandler, DiscordSignatureRequirementHandler>();
+
+builder.Services.AddAuthentication()
+    .AddScheme<DiscordSignatureAuthenticationSchemeOptions, DiscordSignatureAuthenticationHandler>("DiscordSignature",null);
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("DiscordSignature", policyBuilder =>
+    {
+        policyBuilder.AddAuthenticationSchemes("DiscordSignature");
+        policyBuilder.RequireClaim(ClaimTypes.Name, ["service"]);
+    });
 });
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -116,6 +133,7 @@ app.Use((context, next) =>
 
 app.MapGraphQL();
 app.MapHealthChecks("/healthz");
-app.MapGroup("/")
-    .MapDiscordInteractionApi();
+app.MapGroup("/api/interactions")
+    .MapDiscordInteractionApi()
+    .RequireAuthorization("DiscordSignature");
 app.Run();

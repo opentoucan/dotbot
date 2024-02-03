@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Bot.Gateway.Apis.Filters;
 using Bot.Gateway.Application.InteractionCommands;
 using Bot.Gateway.Model.Requests.Discord;
 using Bot.Gateway.Model.Responses.Discord;
@@ -15,8 +14,7 @@ public static class DiscordInteractionApi
     public static RouteGroupBuilder MapDiscordInteractionApi(this RouteGroupBuilder app)
     {
         app
-            .MapPost("/api/interactions", Interaction)
-            .AddEndpointFilter<DiscordAuthFilter>();
+            .MapPost("/", Interaction);
         return app;
     }
     
