@@ -1,0 +1,11 @@
+gateway:
+  image:
+    repository: "gateway"
+    tag: "latest"
+    digest: ""
+jobs:
+  - name: xkcd-job
+    image:
+      repository: "xkcd-job"
+      tag: "latest"
+      digest: ""
