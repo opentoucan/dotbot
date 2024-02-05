@@ -5,7 +5,25 @@ gateway:
     digest: ""
 jobs:
   - name: xkcd-job
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 2000
     image:
       repository: "xkcd-job"
       tag: "latest"
       digest: ""
+      imagePullPolicy: Always
+    secretName: dotbot-secret
+    schedule: "0 * * * 1,3,5"
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    restartPolicy: Never
+    ttlSecondsAfterFinished: 2400
