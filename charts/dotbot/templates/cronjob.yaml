@@ -35,13 +35,9 @@ spec:
             - image: {{ $job.image.repository }}:{{ $job.image.tag | default $.Chart.AppVersion }}{{ if $job.image.digest }}@{{ $job.image.digest }}{{ end }}
               imagePullPolicy: {{ $job.image.imagePullPolicy }}
               name: {{ $job.name }}
-            {{- with $job.env }}
-              env:
-{{ toYaml . | indent 14 }}
-            {{- end }}
               envFrom:
-              - secretRef:
-                  name: {{ $job.secretName }}
+                - secretRef:
+                    name: {{ $job.secretName }}
             {{- if $job.command }}
               command: {{ $job.command }}
             {{- end }}
