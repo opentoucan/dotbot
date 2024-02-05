@@ -29,6 +29,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
 
     public async Task<InteractionData> Handle(SaveCustomCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Creating HTTP Client in {handler}", nameof(SaveCustomCommandHandler));
         var client = _httpClientFactory.CreateClient();
         var filesList = request.Data.Data?.Resolved?.Attachments?.Select((value, i) => (value, i)).ToList() ?? [];
 
@@ -37,6 +38,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
         var textJson = (JsonElement?)commandOptions.FirstOrDefault(o => o.Name == "text")?.Value;
         var customCommandName = nameJson.GetString();
         var customCommandText = textJson?.GetString() ?? null;
+        _logger.LogInformation("Saving custom command {command} with {files} files", customCommandName, filesList.Count);
         var botCommand = new BotCommand(request.Data.GuildId!,
             customCommandName!,
                 request.Data.Member!.User.Id!,
@@ -45,7 +47,9 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
 
         try
         {
+            _logger.LogDebug("Opening transaction for bot command {botCommand}", botCommand.Name);
             await _dbContext.BeginTransactionAsync();
+            _logger.LogDebug("Saving bot command {botCommand}", botCommand.Name);
             await _botCommandRepository.SaveCommand(botCommand);
 
             foreach (var item in filesList)
@@ -54,7 +58,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
                 var extension = Path.GetExtension(item.value.Value.Url);
                 await _fileUploadService.UploadFile($"discord-{request.Data.GuildId!}", $"{botCommand.Name}_{item.i}{extension.Split("?")[0]}", stream);
             }
-
+            _logger.LogDebug("Committing transaction for bot command {botCommand}", botCommand.Name);
             await _dbContext.CommitTransactionAsync();
         }
         catch (Exception ex)

@@ -1,6 +1,5 @@
 using Amazon.S3;
 using Bot.Gateway.Services;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -12,6 +11,8 @@ public static class Extensions
 {
     public static IHostApplicationBuilder ConfigureFileStorage(this IHostApplicationBuilder builder)
     {
+        var awsOptions = builder.Configuration.GetAWSOptions<AmazonS3Config>("S3");
+        builder.Services.AddDefaultAWSOptions(awsOptions);
         builder.Services.AddAWSService<IAmazonS3>();
         builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
         return builder;

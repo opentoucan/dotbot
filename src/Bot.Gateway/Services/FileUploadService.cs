@@ -14,24 +14,33 @@ public interface IFileUploadService
 public class FileUploadService : IFileUploadService
 {
     private readonly IAmazonS3 _amazonS3Client;
-
-    public FileUploadService(IAmazonS3 amazonS3Client)
+    private readonly ILogger<FileUploadService> _logger;
+    public FileUploadService(IAmazonS3 amazonS3Client, ILogger<FileUploadService> logger)
     {
         _amazonS3Client = amazonS3Client;
+        _logger = logger;
     }
 
     public async Task UploadFile(string parentName, string attachmentName, Stream content)
     {
-        using var fileTransferUtility = new TransferUtility(_amazonS3Client);
-        var transferRequest = new TransferUtilityUploadRequest
+        try
         {
-            BucketName = parentName,
-            InputStream = content,
-            ContentType = MimeTypes.GetMimeType(attachmentName),
-            Key = attachmentName,
-            DisablePayloadSigning = true
-        };
-        await fileTransferUtility.UploadAsync(transferRequest);
+            _logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
+            using var fileTransferUtility = new TransferUtility(_amazonS3Client);
+            var transferRequest = new TransferUtilityUploadRequest
+            {
+                BucketName = parentName,
+                InputStream = content,
+                ContentType = MimeTypes.GetMimeType(attachmentName),
+                Key = attachmentName,
+                DisablePayloadSigning = _amazonS3Client.Config.ServiceURL.StartsWith("https")
+            };
+            await fileTransferUtility.UploadAsync(transferRequest);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save attachment into bucket");
+        }
     }
     
     public async Task<FileDetails> GetFile(string parentName, string filename)
