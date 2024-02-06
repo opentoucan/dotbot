@@ -6,7 +6,6 @@ using OpenTelemetry.Trace;
 
 namespace Bot.Gateway.Extensions;
 
-
 public static class Extensions
 {
     public static IHostApplicationBuilder ConfigureFileStorage(this IHostApplicationBuilder builder)
