@@ -12,7 +12,8 @@
         "Discord__PublicKey": "",
         "AWS_ACCESS_KEY_ID": "dev",
         "AWS_SECRET_ACCESS_KEY": "dev",
-        "AWS_PROFILE": "dev"
+        "AWS_PROFILE": "dev",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://127.0.0.1:4317"
       }
     }
   }

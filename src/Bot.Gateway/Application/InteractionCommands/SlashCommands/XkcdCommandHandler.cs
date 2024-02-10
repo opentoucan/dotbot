@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Bot.Gateway.Model.Requests.Discord;
 using Bot.Gateway.Model.Responses.Discord;
-using Bot.Gateway.Services;
 using Discord;
 using MediatR;
 using Xkcd.Sdk;
@@ -31,7 +30,6 @@ public class XkcdCommandHandler(ILogger<XkcdCommandHandler> logger, XkcdService 
         embedBuilder.AddField("Title", xkcdComic.Title, true)
                     .AddField("Published", xkcdComic.DatePosted.Date.ToShortDateString(), true)
                     .AddField("Alt text", xkcdComic.AltText, true);
-        embedBuilder.WithDescription("Avatar");
         return new InteractionData(embeds: [embedBuilder.Build()]);
     }
 }

@@ -1,70 +1,64 @@
+using System.Reflection;
 using Amazon.S3;
+using Bot.Gateway.Infrastructure;
+using Bot.Gateway.Infrastructure.Entities;
+using Bot.Gateway.Infrastructure.GraphQL;
+using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
+using MassTransit.MongoDbIntegration;
+using MongoDB.Driver;
+using Polly;
+using Polly.Extensions.Http;
+using ServiceDefaults;
+using Xkcd.Sdk;
 
 namespace Bot.Gateway.Extensions;
 
-public static class Extensions
+public static partial class Extensions
 {
-    public static IHostApplicationBuilder ConfigureFileStorage(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
-        var awsOptions = builder.Configuration.GetAWSOptions<AmazonS3Config>("S3");
-        builder.Services.AddDefaultAWSOptions(awsOptions);
-        builder.Services.AddAWSService<IAmazonS3>();
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+        });
         builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
+        builder.Services.AddScoped<IBotCommandRepository, BotCommandRepository>();
+        builder.Services.AddHttpClient<XkcdService>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
+            })
+            .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
+
+        builder.AddDatabase();
+        builder.AddMassTransit();
+        builder.ConfigureDiscordServices();
+        builder.ConfigureAWS();
+        builder.AddDiscordInteractionAuth();
+        builder.AddGraphQL();
         return builder;
     }
-    public static IServiceCollection AddServices(this IServiceCollection services)
+
+    private static IHostApplicationBuilder AddDatabase(this IHostApplicationBuilder builder)
     {
-        return services;
+        builder.AddMongoDbDefaults();
+        builder.Services.AddMongoDbCollection<BotCommand>();
+        builder.Services.AddMongoDbCollection<DiscordServer>();
+        builder.Services.AddScoped<DbContext>(c =>
+            new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<BotCommand>>(), c.GetRequiredService<IMongoCollection<DiscordServer>>()));
+        return builder;
     }
-    
-    public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
+
+    private static IHostApplicationBuilder AddGraphQL(this IHostApplicationBuilder builder)
     {
-        var tracingOtlpEndpoint = builder.Configuration["OTLP_ENDPOINT_URL"];
-        builder.Logging.AddConsole();
-        builder.Logging.AddOpenTelemetry(logging =>
-        {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-        });
-
-        var otel = builder.Services.AddOpenTelemetry();
-
-        // Configure OpenTelemetry Resources with the application name
-        otel.ConfigureResource(resource => resource
-            .AddService(serviceName: builder.Environment.ApplicationName));
-
-        // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
-        otel.WithMetrics(metrics => metrics
-            .AddRuntimeInstrumentation()
-            // Metrics provider from OpenTelemetry
-            .AddAspNetCoreInstrumentation()
-            // Metrics provides by ASP.NET Core in .NET 8
-            .AddMeter("Microsoft.AspNetCore.Hosting")
-            .AddMeter("Microsoft.AspNetCore.Server.Kestrel"));
-        
-        // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
-        otel.WithTracing(tracing =>
-        {
-            tracing.AddAspNetCoreInstrumentation();
-            tracing.AddHttpClientInstrumentation();
-            //Add sources here
-            //tracing.AddSource();
-            if (tracingOtlpEndpoint != null)
-            {
-                tracing.AddOtlpExporter(otlpOptions =>
-                {
-                    otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint);
-                });
-            }
-            else
-            {
-                tracing.AddConsoleExporter();
-            }
-        });
+        builder.Services
+            .AddGraphQL()
+            .AddGraphQLServer()
+            .AddQueryType<Query>()
+            .AddMongoDbSorting()
+            .AddMongoDbFiltering()
+            .AddMongoDbProjections()
+            .AddMongoDbPagingProviders();
         
         return builder;
     }

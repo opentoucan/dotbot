@@ -14,7 +14,6 @@ public static class DiscordExtensions
 {
     public static IHostApplicationBuilder ConfigureDiscordServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IBotCommandRepository, BotCommandRepository>();
         builder.Services.AddSingleton<IDiscordWebhookClientFactory, DiscordWebhookClientFactory>();
         builder.Services.AddSingleton<IBotCommandFactory, SlashCommandFactory>();
         builder.Services.AddSingleton<InteractionCommand, PingCommand>();

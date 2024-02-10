@@ -49,8 +49,6 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
         {
             _logger.LogDebug("Opening transaction for bot command {botCommand}", botCommand.Name);
             await _dbContext.BeginTransactionAsync();
-            _logger.LogDebug("Saving bot command {botCommand}", botCommand.Name);
-            await _botCommandRepository.SaveCommand(botCommand);
 
             foreach (var item in filesList)
             {
@@ -58,6 +56,8 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
                 var extension = Path.GetExtension(item.value.Value.Url);
                 await _fileUploadService.UploadFile($"discord-{request.Data.GuildId!}", $"{botCommand.Name}_{item.i}{extension.Split("?")[0]}", stream);
             }
+            _logger.LogDebug("Saving bot command {botCommand}", botCommand.Name);
+            await _botCommandRepository.SaveCommand(botCommand);
             _logger.LogDebug("Committing transaction for bot command {botCommand}", botCommand.Name);
             await _dbContext.CommitTransactionAsync();
         }
