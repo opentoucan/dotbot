@@ -19,8 +19,6 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" />
         <PackageReference Include="MongoDB.Driver" />
-        <PackageReference Include="Quartz.AspNetCore" />
-        <PackageReference Include="Quartz.Extensions.DependencyInjection" />
     </ItemGroup>
 
     <ItemGroup>
