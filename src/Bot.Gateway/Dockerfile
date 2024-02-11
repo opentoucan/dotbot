@@ -10,9 +10,11 @@ COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["src/Bot.Gateway/Bot.Gateway.csproj", "Bot.Gateway/Bot.Gateway.csproj"]
 COPY ["src/Xkcd.Sdk/Xkcd.Sdk.csproj", "Xkcd.Sdk/Xkcd.Sdk.csproj"]
+COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefaults.csproj"]
 
 COPY "src/Bot.Gateway/" "Bot.Gateway"
 COPY "src/Xkcd.Sdk/" "Xkcd.Sdk"
+COPY "src/ServiceDefaults/" "ServiceDefaults"
 RUN dotnet restore "Bot.Gateway/Bot.Gateway.csproj"
 RUN dotnet build "Bot.Gateway/Bot.Gateway.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
