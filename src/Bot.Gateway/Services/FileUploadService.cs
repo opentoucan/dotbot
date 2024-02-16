@@ -8,7 +8,7 @@ namespace Bot.Gateway.Services;
 public interface IFileUploadService
 {
     Task UploadFile(string parentName, string attachmentName, Stream content);
-    Task<FileDetails> GetFile(string parentName, string filename);
+    Task<FileDetails?> GetFile(string parentName, string filename);
 }
 
 public class FileUploadService : IFileUploadService
@@ -27,6 +27,10 @@ public class FileUploadService : IFileUploadService
         {
             _logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
             using var fileTransferUtility = new TransferUtility(_amazonS3Client);
+            var bucketsResponse = await _amazonS3Client.ListBucketsAsync();
+            if(bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
+                await _amazonS3Client.PutBucketAsync(parentName);
+            
             var transferRequest = new TransferUtilityUploadRequest
             {
                 BucketName = parentName,
@@ -43,14 +47,23 @@ public class FileUploadService : IFileUploadService
         }
     }
     
-    public async Task<FileDetails> GetFile(string parentName, string filename)
+    public async Task<FileDetails?> GetFile(string parentName, string filename)
     {
-        var response = await _amazonS3Client.GetObjectAsync(new GetObjectRequest
+        try
         {
-            BucketName = parentName,
-            Key = filename
-        });
-        
-        return new FileDetails(response.ResponseStream, response.Key, response.BucketName);
+            var response = await _amazonS3Client.GetObjectAsync(new GetObjectRequest
+            {
+                BucketName = parentName,
+                Key = filename
+            });
+
+            return new FileDetails(response.ResponseStream, response.Key, response.BucketName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve image");
+        }
+
+        return null;
     }
 }

@@ -17,9 +17,10 @@ public class XkcdNotificationService(
     public async Task CheckAndNotify()
     {
         logger.LogInformation("Checking for new XKCD comic");
-        
+        var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var cancellationToken = cancellationSource.Token;
         var existingXkcd = dbContext.XkcdLatest.AsQueryable().OrderBy(x => x.ComicNumber).FirstOrDefault();
-        var latestXkcd = await client.GetXkcdComicAsync(null, CancellationToken.None);
+        var latestXkcd = await client.GetXkcdComicAsync(null, cancellationToken);
         if (latestXkcd == null)
         {
             logger.LogError("Failed to get latest XKCD comic");
@@ -34,23 +35,23 @@ public class XkcdNotificationService(
 
         logger.LogInformation("Current comic is {existingComicNumber}, last checked was {latestComicNumber}",  existingXkcd?.ComicNumber, latestXkcd.ComicNumber);
 
-        await dbContext.BeginTransactionAsync();
+        await dbContext.BeginTransactionAsync(cancellationToken);
         
         var newXkcd = new Xkcd.Job.Infrastructure.Entities.Xkcd(latestXkcd.ComicNumber, latestXkcd.DatePosted);
         if (existingXkcd == null)
         {
-            await dbContext.XkcdLatest.InsertOneAsync(dbContext.Session, newXkcd, cancellationToken: CancellationToken.None);
+            await dbContext.XkcdLatest.InsertOneAsync(dbContext.Session, newXkcd, cancellationToken: cancellationToken);
         }
         else
         {
             newXkcd.Id = existingXkcd.Id;
             await dbContext.XkcdLatest.ReplaceOneAsync(dbContext.Session,
                 Builders<Xkcd.Job.Infrastructure.Entities.Xkcd>.Filter.Eq(x => x.ComicNumber, existingXkcd.ComicNumber),
-                newXkcd, cancellationToken: CancellationToken.None);
+                newXkcd, cancellationToken: cancellationToken);
         }
         
         var xkcdPostedEvent = new XkcdPostedEvent(latestXkcd.ComicNumber, latestXkcd.DatePosted, latestXkcd.AltText, latestXkcd.ImageUrl, latestXkcd.Title);
-        await bus.Publish(xkcdPostedEvent, CancellationToken.None);
-        await dbContext.CommitTransactionAsync();
+        await bus.Publish(xkcdPostedEvent, cancellationToken);
+        await dbContext.CommitTransactionAsync(cancellationToken);
     }
 }

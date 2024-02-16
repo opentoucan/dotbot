@@ -26,16 +26,17 @@ public class BotCommandRepository : IBotCommandRepository
         var existingBotCommand = _dbContext.BotCommands.AsQueryable().FirstOrDefault(x => x.Name == botCommand.Name);
         if (existingBotCommand == null)
         {
-            await _dbContext.BotCommands.InsertOneAsync(botCommand);
+            await _dbContext.BotCommands.InsertOneAsync(_dbContext.Session, botCommand);
         }
         else
         {
             botCommand.Id = existingBotCommand.Id;
-            await _dbContext.BotCommands.ReplaceOneAsync(Builders<BotCommand>.Filter.Eq(x => x.Name, existingBotCommand.Name), botCommand);
+            await _dbContext.BotCommands.ReplaceOneAsync(_dbContext.Session, Builders<BotCommand>.Filter.Eq(x => x.Name, existingBotCommand.Name), botCommand);
         }
 
         
-        await _dbContext.BotCommands.ReplaceOneAsync(Builders<BotCommand>.Filter
+        await _dbContext.BotCommands.ReplaceOneAsync(_dbContext.Session,
+            Builders<BotCommand>.Filter
                 .Eq(x => x.Name, botCommand.Name),
                 botCommand,
             new ReplaceOptions { IsUpsert = true });

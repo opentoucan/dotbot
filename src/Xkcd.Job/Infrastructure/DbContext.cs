@@ -6,10 +6,8 @@ namespace Xkcd.Job.Infrastructure;
 public class DbContext
 {
     private readonly MongoDbContext _mongoDbContext;
-    private CancellationTokenSource _cancellationTokenSource = null!;
     
     public IClientSessionHandle? Session { get; private set; }
-    public Guid? TransactionId { get; private set; }
     public IMongoCollection<Entities.Xkcd> XkcdLatest { get; }
     
     public DbContext(MongoDbContext mongoDbContext, IMongoCollection<Entities.Xkcd> xkcdLatest)
@@ -18,34 +16,30 @@ public class DbContext
         XkcdLatest = xkcdLatest;
     }
 
-    public async Task BeginTransactionAsync()
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken)
     {
-        _cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        await _mongoDbContext.BeginTransaction(_cancellationTokenSource.Token);
-        TransactionId = _mongoDbContext.TransactionId;
+        await _mongoDbContext.BeginTransaction(cancellationToken);
         Session = _mongoDbContext.Session;
     }
 
-    public async Task CommitTransactionAsync()
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken)
     {
         try
         {
-            await _mongoDbContext.CommitTransaction(_cancellationTokenSource.Token);
+            await _mongoDbContext.CommitTransaction(cancellationToken);
+            Session = null;
         }
         catch
         {
-            RollbackTransaction();
-            throw;
-        }
-        finally
-        {
-            TransactionId = null;
+            RollbackTransaction(cancellationToken);
             Session = null;
+            throw;
         }
     }
 
-    public void RollbackTransaction()
+    public void RollbackTransaction(CancellationToken cancellationToken)
     {
-        _mongoDbContext.AbortTransaction(_cancellationTokenSource.Token);
+        _mongoDbContext.AbortTransaction(cancellationToken);
+        Session = null;
     }
 }

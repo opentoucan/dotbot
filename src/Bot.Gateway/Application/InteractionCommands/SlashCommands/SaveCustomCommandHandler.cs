@@ -48,7 +48,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
         try
         {
             _logger.LogDebug("Opening transaction for bot command {botCommand}", botCommand.Name);
-            await _dbContext.BeginTransactionAsync();
+            await _dbContext.BeginTransactionAsync(cancellationToken);
 
             foreach (var item in filesList)
             {
@@ -59,19 +59,18 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
             _logger.LogDebug("Saving bot command {botCommand}", botCommand.Name);
             await _botCommandRepository.SaveCommand(botCommand);
             _logger.LogDebug("Committing transaction for bot command {botCommand}", botCommand.Name);
-            await _dbContext.CommitTransactionAsync();
+            await _dbContext.CommitTransactionAsync(cancellationToken);
+            return new InteractionData("Saved command");
         }
         catch (Exception ex)
         {
             _logger.LogError("{0}", ex.Message);
-            throw;
+            return new InteractionData("Failed to save command");
         }
         finally
         {
-            _dbContext.RollbackTransaction();
+            _dbContext.RollbackTransaction(cancellationToken);
         }
-
-        return new InteractionData("Command Custom");
     }
 }
 

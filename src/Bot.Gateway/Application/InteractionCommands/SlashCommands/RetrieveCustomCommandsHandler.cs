@@ -27,15 +27,17 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
         if (botCommand is null)
             return new InteractionData($"No custom command exists matching '{customCommandName}'");
         var discordFileAttachments = new List<DiscordFileAttachment>();
-        if (botCommand?.AttachmentIds?.Count > 0)
+        if (!(botCommand?.AttachmentIds?.Count > 0))
+            return new InteractionData(botCommand?.Content, new List<Embed>(), discordFileAttachments);
+        
+        foreach (var attachmentId in botCommand.AttachmentIds)
         {
-            foreach (var attachmentId in botCommand.AttachmentIds)
-            {
-                var file = await _fileUploadService.GetFile($"discord-{request.Data.GuildId!}", attachmentId);
-                using var memoryStream = new MemoryStream();
-                await file.FileContent.CopyToAsync(memoryStream, cancellationToken);
-                discordFileAttachments.Add(new DiscordFileAttachment(file.Filename, "Custom command", false, memoryStream.ToArray()));   
-            }
+            var file = await _fileUploadService.GetFile($"discord-{request.Data.GuildId!}", attachmentId);
+            if (file == null) return new InteractionData("Failed to retrieve the file for this command");
+            using var memoryStream = new MemoryStream();
+            await file.FileContent.CopyToAsync(memoryStream, cancellationToken);
+            discordFileAttachments.Add(new DiscordFileAttachment(file.Filename, "Custom command", false,
+                memoryStream.ToArray()));
         }
 
         return new InteractionData(botCommand?.Content, new List<Embed>(), discordFileAttachments);
