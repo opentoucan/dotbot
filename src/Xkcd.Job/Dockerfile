@@ -10,9 +10,11 @@ COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["src/Xkcd.Job/Xkcd.Job.csproj", "Xkcd.Job/Xkcd.Job.csproj"]
 COPY ["src/Xkcd.Sdk/Xkcd.Sdk.csproj", "Xkcd.Sdk/Xkcd.Sdk.csproj"]
+COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefaults.csproj"]
 
 COPY "src/Xkcd.Job/" "Xkcd.Job"
 COPY "src/Xkcd.Sdk/" "Xkcd.Sdk"
+COPY "src/ServiceDefaults/" "ServiceDefaults"
 RUN dotnet restore "Xkcd.Job/Xkcd.Job.csproj"
 RUN dotnet build "Xkcd.Job/Xkcd.Job.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
