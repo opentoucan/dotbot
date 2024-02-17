@@ -43,11 +43,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /health
               port: http
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /health
               port: http
           resources:
             {{- toYaml .resources | nindent 12 }}
