@@ -3,9 +3,9 @@ fullnameOverride: ""
 gateway:
   replicaCount: 1
   image:
-    repository: "ghcr.io/sillock-inc/bot.gateway"
-    tag: "0.3.18"
-    digest: "sha256:0d94998ce68610b923ffccabe9ff2b278f4e41f03d2212150b7fdbde7809610e"
+    repository: "ghcr.io/opentoucan/bot.gateway"
+    tag: "0.3.19"
+    digest: "sha256:39a594faa72674e0109d36b0f8bc0291d0c6bb028cd8e8398f678801fda34c39"
     pullPolicy: IfNotPresent
   secretName: dotbot-secret
   podAnnotations: { }
@@ -56,9 +56,9 @@ jobs:
       runAsGroup: 1000
       fsGroup: 2000
     image:
-      repository: "ghcr.io/sillock-inc/xkcd.job"
-      tag: "0.3.18"
-      digest: "sha256:a3c47899896730adbb33a90cbe990cc9c5cba650e38f955dbdcfd46ebf4cbf05"
+      repository: "ghcr.io/opentoucan/xkcd.job"
+      tag: "0.3.19"
+      digest: "sha256:8b59b903cfa9369fbc0d2ceba54bd81469ec448646f9d1efd6ca8e76ecc07c1b"
       imagePullPolicy: Always
     secretName: dotbot-secret
     schedule: "0 * * * 1,3,5"
