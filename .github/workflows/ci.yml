@@ -7,7 +7,7 @@ on:
       - 'src/Bot.Gateway/**'
       - 'src/Xkcd.Job/**'
       - 'src/Xkcd.Sdk/**'
-      - 'src/Service.Defaults'
+      - 'src/Service.Defaults/**'
       - '!src/Bot.Gateway/CHANGELOG.md'
       - '!src/Xkcd.Job/CHANGELOG.md'
 
