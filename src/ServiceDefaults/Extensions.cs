@@ -200,4 +200,5 @@ public static partial class Extensions
         builder.Services.AddAWSService<IAmazonS3>();
         return builder;
     }
+    
 }
