@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test with dotnet
-        run: dotnet test src/${{ matrix.image }} --logger trx --results-directory "TestResults"
+        run: dotnet test tests/${{ matrix.image }}.* --logger trx --results-directory "TestResults"
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
