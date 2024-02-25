@@ -15,9 +15,21 @@ public static class DiscordInteractionApi
 {
     public static RouteGroupBuilder MapDiscordInteractionApi(this RouteGroupBuilder app)
     {
-        app
-            .MapPost("/", Interaction);
+        app.MapGet("/test", Test).AllowAnonymous();
+        app.MapPost("/", Interaction);
         return app;
+    }
+
+    public async static Task<IResult> Test([AsParameters] DiscordInteractionService service)
+    {
+        var meter = service.MeterFactory.Create("Dotbot");
+        var counter = meter.CreateCounter<int>("test.endpoint", unit: "calls", description:"Test counter for hitting test endpoint");
+        counter.Add(1, new KeyValuePair<string, object?>("testKey", "testValue"));
+        
+        using var activity = DiscordInteractionService.ActivitySource.StartActivity("test endpoint", ActivityKind.Producer);
+        activity?.SetTag("dotbot.test_endpoint", "value1");
+       await Task.Delay(1);
+       return TypedResults.Ok();
     }
     
     public async static Task<IResult> Interaction([AsParameters] DiscordInteractionService service, [FromBody]InteractionRequest request, CancellationToken token)

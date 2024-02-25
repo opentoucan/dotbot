@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
-using Xkcd.Sdk;
 
 namespace Xkcd.Sdk;
 
