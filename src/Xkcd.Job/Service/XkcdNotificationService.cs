@@ -3,55 +3,58 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Xkcd.Job.Infrastructure;
+using Xkcd.Job.Infrastructure.Repositories;
 using Xkcd.Sdk;
 
 namespace Xkcd.Job.Service;
 
-public class XkcdNotificationService(
-    DbContext dbContext,
-    XkcdService client,
-    IPublishEndpoint bus, 
-    ILogger<XkcdNotificationService> logger)
-    : IXkcdNotificationService
+public class XkcdNotificationService : IXkcdNotificationService
 {
+    private readonly IXkcdRepository _xkcdRepository;
+    private readonly IXkcdService _client;
+    private readonly IPublishEndpoint _bus;
+    private readonly ILogger<XkcdNotificationService> _logger;
+
+    public XkcdNotificationService(
+        IXkcdRepository xkcdRepository,
+        IXkcdService client,
+        IPublishEndpoint bus, 
+        ILogger<XkcdNotificationService> logger)
+    {
+        _xkcdRepository = xkcdRepository;
+        _client = client;
+        _bus = bus;
+        _logger = logger;
+    }
+
     public async Task CheckAndNotify()
     {
-        logger.LogInformation("Checking for new XKCD comic");
+        _logger.LogInformation("Checking for new XKCD comic");
         var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         var cancellationToken = cancellationSource.Token;
-        var existingXkcd = dbContext.XkcdLatest.AsQueryable().OrderBy(x => x.ComicNumber).FirstOrDefault();
-        var latestXkcd = await client.GetXkcdComicAsync(null, cancellationToken);
+        var existingXkcd = _xkcdRepository.FindLatest();
+        var latestXkcd = await _client.GetXkcdComicAsync(cancellationToken: cancellationToken);
         if (latestXkcd == null)
         {
-            logger.LogError("Failed to get latest XKCD comic");
+            _logger.LogError("Failed to get latest XKCD comic");
             return;
         }
 
         if (existingXkcd?.ComicNumber >= latestXkcd.ComicNumber)
         {
-            logger.LogInformation("Retrieved comic is not newer than existing comic: {comicNumber}", existingXkcd.ComicNumber);
+            _logger.LogInformation("Retrieved comic is not newer than existing comic: {comicNumber}", existingXkcd.ComicNumber);
             return;
         }
 
-        logger.LogInformation("Current comic is {existingComicNumber}, last checked was {latestComicNumber}",  existingXkcd?.ComicNumber, latestXkcd.ComicNumber);
+        _logger.LogInformation("Current comic is {existingComicNumber}, last checked was {latestComicNumber}",  existingXkcd?.ComicNumber, latestXkcd.ComicNumber);
 
-        await dbContext.BeginTransactionAsync(cancellationToken);
+        await _xkcdRepository.UnitOfWork.BeginTransactionAsync(cancellationToken);
         
         var newXkcd = new Xkcd.Job.Infrastructure.Entities.Xkcd(latestXkcd.ComicNumber, latestXkcd.DatePosted);
-        if (existingXkcd == null)
-        {
-            await dbContext.XkcdLatest.InsertOneAsync(dbContext.Session, newXkcd, cancellationToken: cancellationToken);
-        }
-        else
-        {
-            newXkcd.Id = existingXkcd.Id;
-            await dbContext.XkcdLatest.ReplaceOneAsync(dbContext.Session,
-                Builders<Xkcd.Job.Infrastructure.Entities.Xkcd>.Filter.Eq(x => x.ComicNumber, existingXkcd.ComicNumber),
-                newXkcd, cancellationToken: cancellationToken);
-        }
+        await _xkcdRepository.Upsert(newXkcd);
         
         var xkcdPostedEvent = new XkcdPostedEvent(latestXkcd.ComicNumber, latestXkcd.DatePosted, latestXkcd.AltText, latestXkcd.ImageUrl, latestXkcd.Title);
-        await bus.Publish(xkcdPostedEvent, cancellationToken);
-        await dbContext.CommitTransactionAsync(cancellationToken);
+        await _bus.Publish(xkcdPostedEvent, cancellationToken);
+        await _xkcdRepository.UnitOfWork.CommitTransactionAsync(cancellationToken);
     }
 }

@@ -36,8 +36,8 @@ public static class Extensions
     {
         builder.AddMongoDbDefaults();
         builder.Services.AddMongoDbCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>();
-        builder.Services.AddScoped<DbContext>(c =>
-            new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>>()));
+        builder.Services.AddScoped<XkcdContext>(c =>
+            new XkcdContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>>()));
         return builder;
     }
 }

@@ -3,14 +3,14 @@ using MongoDB.Driver;
 
 namespace Xkcd.Job.Infrastructure;
 
-public class DbContext
+public class XkcdContext : IUnitOfWork
 {
     private readonly MongoDbContext _mongoDbContext;
     
     public IClientSessionHandle? Session { get; private set; }
     public IMongoCollection<Entities.Xkcd> XkcdLatest { get; }
     
-    public DbContext(MongoDbContext mongoDbContext, IMongoCollection<Entities.Xkcd> xkcdLatest)
+    public XkcdContext(MongoDbContext mongoDbContext, IMongoCollection<Entities.Xkcd> xkcdLatest)
     {
         _mongoDbContext = mongoDbContext;
         XkcdLatest = xkcdLatest;

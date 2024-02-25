@@ -7,4 +7,10 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+        <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\8.0.1\ref\net8.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

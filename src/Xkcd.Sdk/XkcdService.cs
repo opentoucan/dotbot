@@ -1,34 +1,50 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 using Xkcd.Sdk;
 
 namespace Xkcd.Sdk;
 
-public class XkcdService
+public interface IXkcdService
+{
+    Task<XkcdComic?> GetXkcdComicAsync(int? comicNumber = null, CancellationToken cancellationToken = default);
+}
+
+public class XkcdService : IXkcdService
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<XkcdService> _logger;
 
-    public XkcdService(HttpClient httpClient)
+    public XkcdService(HttpClient httpClient, ILogger<XkcdService> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
-    public async Task<XkcdComic?> GetXkcdComicAsync(int? comicNumber, CancellationToken cancellationToken)
+    public async Task<XkcdComic?> GetXkcdComicAsync(int? comicNumber = null, CancellationToken cancellationToken = default)
     {
         var url = comicNumber is null ? "info.0.json" : $"{comicNumber}/info.0.json";
-        
-        var httpResponse = await _httpClient.GetAsync(url, cancellationToken);
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            var xkcdContent = await JsonSerializer.DeserializeAsync<XkcdContent>(
-                await httpResponse.Content.ReadAsStreamAsync(cancellationToken), new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString
-                }, cancellationToken);
-            return MapFromXkcdContent(xkcdContent!);
+            var httpResponse = await _httpClient.GetAsync(url, cancellationToken);
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var xkcdContent = await JsonSerializer.DeserializeAsync<XkcdContent>(
+                    await httpResponse.Content.ReadAsStreamAsync(cancellationToken), new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        NumberHandling = JsonNumberHandling.AllowReadingFromString
+                    }, cancellationToken);
+                return MapFromXkcdContent(xkcdContent!);
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to fetch XKCD from endpoint: {url} with error: {exception}", url, ex);
+            return null;
+        }
+
         return null;
     }
     
