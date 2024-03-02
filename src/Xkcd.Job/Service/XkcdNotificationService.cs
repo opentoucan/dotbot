@@ -30,10 +30,10 @@ public class XkcdNotificationService : IXkcdNotificationService
     public async Task CheckAndNotify()
     {
         _logger.LogInformation("Checking for new XKCD comic");
-        var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var cancellationToken = cancellationSource.Token;
         var existingXkcd = _xkcdRepository.FindLatest();
-        var latestXkcd = await _client.GetXkcdComicAsync(cancellationToken: cancellationToken);
+        var latestXkcd =  await _client.GetXkcdComicAsync(cancellationToken: cancellationToken);
         if (latestXkcd == null)
         {
             _logger.LogError("Failed to get latest XKCD comic");
@@ -51,8 +51,15 @@ public class XkcdNotificationService : IXkcdNotificationService
         await _xkcdRepository.UnitOfWork.BeginTransactionAsync(cancellationToken);
         
         var newXkcd = new Xkcd.Job.Infrastructure.Entities.Xkcd(latestXkcd.ComicNumber, latestXkcd.DatePosted);
-        await _xkcdRepository.Upsert(newXkcd);
-        
+        try
+        {
+            await _xkcdRepository.Upsert(newXkcd);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+        }
+
         var xkcdPostedEvent = new XkcdPostedEvent(latestXkcd.ComicNumber, latestXkcd.DatePosted, latestXkcd.AltText, latestXkcd.ImageUrl, latestXkcd.Title);
         await _bus.Publish(xkcdPostedEvent, cancellationToken);
         await _xkcdRepository.UnitOfWork.CommitTransactionAsync(cancellationToken);

@@ -27,3 +27,5 @@ app.MapGroup("/api/interactions")
     .MapDiscordInteractionApi()
     .RequireAuthorization("DiscordSignature");
 app.Run();
+
+public partial class Program { }

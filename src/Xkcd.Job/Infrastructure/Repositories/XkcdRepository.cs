@@ -24,13 +24,19 @@ public class XkcdRepository : IXkcdRepository
         return _dbContext.XkcdLatest.AsQueryable().OrderByDescending(x => x.ComicNumber).FirstOrDefault();
     }
 
-    public Task Upsert(Entities.Xkcd xkcd)
+    public async Task Upsert(Entities.Xkcd xkcd)
     {
-        _dbContext.XkcdLatest.ReplaceOne(
+        var updateDefinition = Builders<Entities.Xkcd>.Update.Combine(
+            Builders<Entities.Xkcd>.Update.Set(x => x.ComicNumber, xkcd.ComicNumber),
+            Builders<Entities.Xkcd>.Update.Set(x => x.Posted, xkcd.Posted));
+        
+        var replaced = await _dbContext.XkcdLatest.FindOneAndUpdateAsync(
             session: _dbContext.Session,
-            filter: Builders<Entities.Xkcd>.Filter.Eq(x => x.ComicNumber, xkcd.ComicNumber),
-            replacement: xkcd,
-            options: new ReplaceOptions { IsUpsert = true });
-        return Task.CompletedTask;
+            filter: Builders<Entities.Xkcd>.Filter.Lte(x => x.ComicNumber, xkcd.ComicNumber),
+            update: updateDefinition);
+        if (replaced is null)
+            await _dbContext.XkcdLatest.InsertOneAsync(
+                session: _dbContext.Session,
+                document: xkcd);
     }
 }

@@ -8,6 +8,7 @@ using Polly;
 using Polly.Extensions.Http;
 using ServiceDefaults;
 using Xkcd.Job.Infrastructure;
+using Xkcd.Job.Infrastructure.Repositories;
 using Xkcd.Job.Service;
 using Xkcd.Sdk;
 
@@ -18,12 +19,13 @@ public static class Extensions
     public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddTransient<IXkcdNotificationService, XkcdNotificationService>();
+        builder.Services.AddTransient<IXkcdRepository, XkcdRepository>();
         return builder;
     }
   
     public static IHostApplicationBuilder AddHttpClient(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddHttpClient<XkcdService>(client => 
+        builder.Services.AddHttpClient<IXkcdService, XkcdService>(client => 
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
             })
