@@ -10,15 +10,13 @@ public class DbContext
    
     public IClientSessionHandle? Session { get; private set; }
     
-    public DbContext(MongoDbContext mongoDbContext, IMongoCollection<BotCommand> botCommands, IMongoCollection<DiscordServer> discordServers)
+    public DbContext(MongoDbContext mongoDbContext, IMongoCollection<BotCommand> botCommands)
     {
         _mongoDbContext = mongoDbContext;
         BotCommands = botCommands;
-        DiscordServers = discordServers;
     }
 
     public IMongoCollection<BotCommand> BotCommands { get; }
-    public IMongoCollection<DiscordServer> DiscordServers { get; }
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken)
     {

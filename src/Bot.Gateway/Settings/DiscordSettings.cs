@@ -2,5 +2,7 @@ namespace Bot.Gateway.Settings;
 
 public class DiscordSettings
 {
-    public IDictionary<string, string> Webhooks { get; set; } = null!;
+    public string BotToken { get; init; } = null!;
+    public IDictionary<string, string> Webhooks { get; init; } = null!;
+    public ulong? TestGuild { get; init; }
 }

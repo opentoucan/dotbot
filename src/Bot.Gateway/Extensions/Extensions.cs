@@ -1,8 +1,6 @@
 using System.Reflection;
-using Amazon.S3;
 using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
-using Bot.Gateway.Infrastructure.GraphQL;
 using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
 using MassTransit.MongoDbIntegration;
@@ -35,7 +33,6 @@ public static partial class Extensions
         builder.ConfigureDiscordServices();
         builder.ConfigureAWS();
         builder.AddDiscordInteractionAuth();
-        builder.AddGraphQL();
         return builder;
     }
 
@@ -43,23 +40,8 @@ public static partial class Extensions
     {
         builder.AddMongoDbDefaults();
         builder.Services.AddMongoDbCollection<BotCommand>();
-        builder.Services.AddMongoDbCollection<DiscordServer>();
         builder.Services.AddScoped<DbContext>(c =>
-            new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<BotCommand>>(), c.GetRequiredService<IMongoCollection<DiscordServer>>()));
-        return builder;
-    }
-
-    private static IHostApplicationBuilder AddGraphQL(this IHostApplicationBuilder builder)
-    {
-        builder.Services
-            .AddGraphQL()
-            .AddGraphQLServer()
-            .AddQueryType<Query>()
-            .AddMongoDbSorting()
-            .AddMongoDbFiltering()
-            .AddMongoDbProjections()
-            .AddMongoDbPagingProviders();
-        
+            new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<BotCommand>>()));
         return builder;
     }
 }

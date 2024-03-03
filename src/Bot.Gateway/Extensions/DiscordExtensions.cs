@@ -34,17 +34,15 @@ public static class DiscordExtensions
             .AddSingleton<DiscordRestClient>()
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordRestClient>()));
 
-        builder.Services.AddOptions<DiscordSettings>();
-        builder.Services.Configure<DiscordSettings>(builder.Configuration.GetSection("DiscordSettings"));
+        builder.Services.AddOptions<DiscordSettings>().Bind(builder.Configuration.GetSection("DiscordSettings"));
         builder.Services.AddTransient<IDiscordHttpRequestHelper, DiscordHttpRequestHelper>();
         
         return builder;
     }
-    public static async Task RegisterCommands(this DiscordRestClient client, IHostApplicationBuilder builder)
+    public static async Task RegisterCommands(this DiscordRestClient client, bool isProduction, DiscordSettings discordSettings)
     {
-        if (builder.Environment.IsDevelopment())
-            await client.BulkOverwriteGuildCommands(GetCommands().ToArray(),
-                builder.Configuration.GetValue<ulong>("DiscordSettings:TestGuild"));
+        if (!isProduction)
+            await client.BulkOverwriteGuildCommands(GetCommands().ToArray(), (ulong)discordSettings.TestGuild!);
         else
             await client.BulkOverwriteGlobalCommands(GetCommands().ToArray());
     }
