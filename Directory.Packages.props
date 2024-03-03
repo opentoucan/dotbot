@@ -72,7 +72,6 @@
     <PackageVersion Include="Discord.Net.Rest" Version="3.13.0" />
     <PackageVersion Include="Discord.Net.Webhook" Version="3.13.0" />
     <!-- Testing -->
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(RuntimeVersion)" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
     <PackageVersion Include="Testcontainers.MongoDb" Version="3.7.0" />
