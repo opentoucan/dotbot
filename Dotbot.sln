@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkcd.Job.FunctionalTests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Gateway.UnitTests", "tests\Bot.Gateway.UnitTests\Bot.Gateway.UnitTests.csproj", "{3DB9E98D-953A-44D7-A32A-2B8FB76AEFDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Gateway.FunctionalTests", "tests\Bot.Gateway.FunctionalTests\Bot.Gateway.FunctionalTests.csproj", "{72F7744A-C4D6-487A-905F-8A0C817E7E97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{3DB9E98D-953A-44D7-A32A-2B8FB76AEFDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DB9E98D-953A-44D7-A32A-2B8FB76AEFDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DB9E98D-953A-44D7-A32A-2B8FB76AEFDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72F7744A-C4D6-487A-905F-8A0C817E7E97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72F7744A-C4D6-487A-905F-8A0C817E7E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72F7744A-C4D6-487A-905F-8A0C817E7E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72F7744A-C4D6-487A-905F-8A0C817E7E97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6F068FF8-060E-4ED2-904C-A3B3AAAD99B3} = {CC37BA52-7578-490B-94DA-79A705D9B223}
@@ -61,5 +67,6 @@ Global
 		{0364378B-3A4B-4993-9D85-153124F5A5B7} = {8378DB18-9725-4D55-BA59-7EED997FBC0B}
 		{549E349F-A9B9-4C1E-A5A6-8966EFDD4C3F} = {8378DB18-9725-4D55-BA59-7EED997FBC0B}
 		{3DB9E98D-953A-44D7-A32A-2B8FB76AEFDA} = {8378DB18-9725-4D55-BA59-7EED997FBC0B}
+		{72F7744A-C4D6-487A-905F-8A0C817E7E97} = {8378DB18-9725-4D55-BA59-7EED997FBC0B}
 	EndGlobalSection
 EndGlobal
