@@ -44,7 +44,7 @@ jobs:
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-results
+          name: ${{ matrix.project }}.${{ matrix.test }}-dotnet-results
           path: TestResults
         if: ${{ always() }}
         
