@@ -7,20 +7,19 @@ using Xkcd.Job.Infrastructure.Repositories;
 
 namespace Xkcd.Job.FunctionalTests;
 
-public class XkcdJobTests : IClassFixture<CustomWebApplicationFactory<Program>>
+public class XkcdJobTests : IClassFixture<XkcdJobFixture>
 {
-    private readonly CustomWebApplicationFactory<Program> _factory;
-    public XkcdJobTests(CustomWebApplicationFactory<Program> factory)
+    private readonly XkcdJobFixture _fixture;
+    public XkcdJobTests(XkcdJobFixture fixture)
     {
-        _factory = factory;
+        _fixture = fixture;
     }
 
     [Fact]
     public async Task NewComic_PublishesNewXkcd_WhenNoneExistInDatabase()
     {
-        using var scope = _factory.Services.CreateScope();
-        var testHarness = scope.ServiceProvider.GetTestHarness();
-        await testHarness.Start();
+        using var scope = _fixture.Services.CreateScope();
+        var testHarness = _fixture.Services.GetTestHarness();
         var consumerHarness = testHarness.GetConsumerHarness<XkcdPostedConsumer>();
         var repository = scope.ServiceProvider.GetRequiredService<IXkcdRepository>();
         var xkcdInserted = repository.FindLatest();
