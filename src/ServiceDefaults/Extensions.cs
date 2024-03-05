@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 using Amazon.S3;
 using MassTransit;
@@ -162,6 +163,8 @@ public static partial class Extensions
         var rabbitMqSection = builder.Configuration.GetSection("RabbitMQ");
         builder.Services.AddMassTransit(x =>
         {
+            x.AddConsumers(Assembly.GetExecutingAssembly());
+            
             x.AddMongoDbOutbox(o =>
             {
                 o.QueryDelay = TimeSpan.FromSeconds(1);
