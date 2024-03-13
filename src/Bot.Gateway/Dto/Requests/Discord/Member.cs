@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
 
-namespace Bot.Gateway.Model.Requests.Discord;
+namespace Bot.Gateway.Dto.Requests.Discord;
 
-public class BotUser
+public class Member
 {
+    [JsonPropertyName("user")]
+    public User User { get; set; } = null!;
+
     [JsonPropertyName("avatar")]
     public object? Avatar { get; set; }
 

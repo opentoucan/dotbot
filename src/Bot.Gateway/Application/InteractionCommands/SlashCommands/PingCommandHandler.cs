@@ -1,5 +1,6 @@
-﻿using Bot.Gateway.Model.Requests.Discord;
-using Bot.Gateway.Model.Responses.Discord;
+﻿using Bot.Gateway.Dto.Requests.Discord;
+using Bot.Gateway.Dto.Responses.Discord;
+using Bot.Gateway.Infrastructure.HttpClient;
 using MediatR;
 
 namespace Bot.Gateway.Application.InteractionCommands.SlashCommands;
@@ -14,6 +15,9 @@ public class PingCommandHandler : IRequestHandler<PingCommand, InteractionData>
 
 public class PingCommand : InteractionCommand
 {
-    public override BotCommandType CommandType => BotCommandType.Ping;
-    public override InteractionRequest Data { get; set; } = null!;
+    public override string InteractionCommandName => "ping";
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        
+    }
 }

@@ -45,6 +45,7 @@ kubectl create secret generic dotbot-secret \
   --from-literal=DiscordSettings__Webhooks__xkcd=$WEBHOOKURL \
   --from-literal=DiscordSettings__BotToken=$BOTTOKEN \
   --from-literal=DiscordSettings__PublicKey=$BOTPUBKEY \
+  --from-literal=DiscordSettings__TestGuild=$TESTGUILD \
   --from-literal=MongoDbSettings__DatabaseName="localdev" \
   --from-literal=MongoDbSettings__ConnectionString="mongodb+srv://root:root@mongodb-headless.default.svc.cluster.local?tls=false&ssl=false&replicaSet=rs0" \
   --from-literal=RabbitMQ__Endpoint="rabbitmq.default.svc.cluster.local" \

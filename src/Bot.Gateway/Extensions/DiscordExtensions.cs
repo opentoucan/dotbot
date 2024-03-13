@@ -1,8 +1,6 @@
 using Bot.Gateway.Application.InteractionCommands;
 using Bot.Gateway.Application.InteractionCommands.SlashCommands;
-using Bot.Gateway.Application.InteractionCommands.UserCommands;
 using Bot.Gateway.Infrastructure.HttpClient;
-using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Settings;
 using Discord;
 using Discord.Interactions;
@@ -15,19 +13,19 @@ public static class DiscordExtensions
     public static IHostApplicationBuilder ConfigureDiscordServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddSingleton<IDiscordWebhookClientFactory, DiscordWebhookClientFactory>();
-        builder.Services.AddSingleton<IBotCommandFactory, SlashCommandFactory>();
-        builder.Services.AddSingleton<InteractionCommand, PingCommand>();
-        builder.Services.AddSingleton<InteractionCommand, AvatarCommand>();
-        builder.Services.AddSingleton<InteractionCommand, GreetCommand>();
-        builder.Services.AddSingleton<InteractionCommand, SaveCustomCommand>();
-        builder.Services.AddSingleton<InteractionCommand, RetrieveCustomCommand>();
-        builder.Services.AddSingleton<InteractionCommand, XkcdCommand>();
+        builder.Services.AddScoped<IInteractionCommandFactory, InteractionCommandFactory>();
+        builder.Services.AddScoped<InteractionCommand, PingCommand>();
+        builder.Services.AddScoped<InteractionCommand, AvatarCommand>();
+        builder.Services.AddScoped<InteractionCommand, SaveCustomCommand>();
+        builder.Services.AddScoped<InteractionCommand, RetrieveCustomCommand>();
+        builder.Services.AddScoped<InteractionCommand, XkcdCommand>();
         
         builder.Services.AddHttpClient(
             "discord",
             client =>
             {
                 client.BaseAddress = new Uri("https://discord.com");
+                client.Timeout = TimeSpan.FromSeconds(30);
             });
         builder.Services
             .AddSingleton(new DiscordRestConfig())
@@ -42,12 +40,12 @@ public static class DiscordExtensions
     public static async Task RegisterCommands(this DiscordRestClient client, bool isProduction, DiscordSettings discordSettings)
     {
         if (!isProduction)
-            await client.BulkOverwriteGuildCommands(GetCommands().ToArray(), (ulong)discordSettings.TestGuild!);
+            await client.BulkOverwriteGuildCommands(GetInteractionCommands().ToArray(), (ulong)discordSettings.TestGuild!);
         else
-            await client.BulkOverwriteGlobalCommands(GetCommands().ToArray());
+            await client.BulkOverwriteGlobalCommands(GetInteractionCommands().ToArray());
     }
     
-    private static IEnumerable<ApplicationCommandProperties> GetCommands()
+    public static IEnumerable<ApplicationCommandProperties> GetInteractionCommands()
     {
         yield return new SlashCommandBuilder()
             .WithName("avatar")

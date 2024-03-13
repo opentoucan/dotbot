@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Bot.Gateway.Model.Requests.Discord;
+namespace Bot.Gateway.Dto.Requests.Discord;
 
 public class Attachment
 {
@@ -15,4 +15,7 @@ public class Attachment
     
     [JsonPropertyName("content_type")]
     public string ContentType { get; set; } = null!;
+    
+    [JsonPropertyName("size")]
+    public int Size { get; set; }
 }

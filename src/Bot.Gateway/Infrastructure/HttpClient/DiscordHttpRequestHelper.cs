@@ -1,14 +1,15 @@
 using System.Text;
 using System.Text.Json;
-using Bot.Gateway.Model.Responses.Discord;
 using System.Net.Http.Headers;
+using Bot.Gateway.Dto.Responses.Discord;
 using Discord;
 
 namespace Bot.Gateway.Infrastructure.HttpClient;
 
-public class DiscordHttpRequestHelper(IHttpClientFactory httpClientFactory, IDiscordWebhookClientFactory discordWebhookClientFactory, ILogger<DiscordHttpRequestHelper> logger) : IDiscordHttpRequestHelper
+public class DiscordHttpRequestHelper(IHttpClientFactory httpClientFactory, IDiscordWebhookClientFactory discordWebhookClientFactory, ILogger<DiscordHttpRequestHelper> logger) 
+    : IDiscordHttpRequestHelper
 {
-    public async Task SendFollowupMessageAsync(ulong applicationId, string token, InteractionData data, CancellationToken cancellationToken)
+    public async Task SendFollowupMessageAsync(string applicationId, string token, InteractionData data, CancellationToken cancellationToken)
     {
         var httpClient = httpClientFactory.CreateClient("discord");
         var jsonString = JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });

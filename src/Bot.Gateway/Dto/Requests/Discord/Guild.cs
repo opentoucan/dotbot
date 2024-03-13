@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Bot.Gateway.Model.Requests.Discord;
+namespace Bot.Gateway.Dto.Requests.Discord;
 
 public class Guild
 {

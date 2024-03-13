@@ -136,9 +136,7 @@ public static partial class Extensions
     
     public static IHostApplicationBuilder AddDefaultHealthChecks(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddHealthChecks()
-            // Add a default liveness check to ensure app is responsive
-            .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
+        builder.Services.AddHealthChecks();
 
         return builder;
     }
@@ -148,47 +146,10 @@ public static partial class Extensions
         // All health checks must pass for app to be considered ready to accept traffic after starting
         app.MapHealthChecks("/health")
             .AllowAnonymous();
-
-        // Only health checks tagged with the "live" tag must pass for app to be considered alive
-        app.MapHealthChecks("/liveness", new HealthCheckOptions
-        {
-            Predicate = r => r.Tags.Contains("live")
-        }).AllowAnonymous();
-
+        
         return app;
     }
-
-    public static IHostApplicationBuilder AddMassTransit(this IHostApplicationBuilder builder)
-    {
-        var rabbitMqSection = builder.Configuration.GetSection("RabbitMQ");
-        builder.Services.AddMassTransit(x =>
-        {
-            x.AddConsumers(Assembly.GetExecutingAssembly());
-            
-            x.AddMongoDbOutbox(o =>
-            {
-                o.QueryDelay = TimeSpan.FromSeconds(1);
-                o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
-                o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
-
-                o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
-                o.UseBusOutbox();
-            });
     
-            x.UsingRabbitMq((context,cfg) =>
-            {
-                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),  h => {
-                    h.Username(rabbitMqSection.GetValue<string>("User"));
-                    h.Password(rabbitMqSection.GetValue<string>("Password"));
-                });
-
-                cfg.ConfigureEndpoints(context);
-            });
-        });
-
-        return builder;
-    }
-
     public static IHostApplicationBuilder AddMongoDbDefaults(this IHostApplicationBuilder builder)
     {
         builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));

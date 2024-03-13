@@ -1,7 +1,9 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
-using Bot.Gateway.Model.Responses;
+using Bot.Gateway.Dto.Responses;
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Bindings;
 
 namespace Bot.Gateway.Services;
 
@@ -44,6 +46,7 @@ public class FileUploadService : IFileUploadService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save attachment into bucket");
+            throw;
         }
     }
     

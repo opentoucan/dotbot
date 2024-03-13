@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Bot.Gateway.Model.Requests.Discord;
+namespace Bot.Gateway.Dto.Requests.Discord;
 
 public class InteractionRequest
 {
@@ -15,6 +15,9 @@ public class InteractionRequest
 
     [JsonPropertyName("channel_id")]
     public string? ChannelId { get; set; }
+    
+    [JsonPropertyName("user")]
+    public User? User { get; set; }
 
     [JsonPropertyName("data")]
     public Data? Data { get; set; }

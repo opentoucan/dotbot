@@ -1,13 +1,12 @@
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Bot.Gateway.Application.InteractionCommands;
-using Bot.Gateway.Model.Requests.Discord;
-using Bot.Gateway.Model.Responses.Discord;
+using Bot.Gateway.Dto.Requests.Discord;
+using Bot.Gateway.Dto.Responses.Discord;
+using Bot.Gateway.Extensions;
+using Contracts.MessageBus;
 using Discord;
 using Microsoft.AspNetCore.Mvc;
-using InteractionResponseType = Bot.Gateway.Model.Responses.Discord.InteractionResponseType;
+using InteractionResponseType = Bot.Gateway.Dto.Responses.Discord.InteractionResponseType;
 
 namespace Bot.Gateway.Apis;
 
@@ -19,7 +18,7 @@ public static class DiscordInteractionApi
         return app;
     }
     
-    public async static Task<IResult> Interaction([AsParameters] DiscordInteractionService service, [FromBody]InteractionRequest request, CancellationToken token)
+    public static async Task<IResult> Interaction([AsParameters] DiscordInteractionService service, [FromBody]InteractionRequest request, CancellationToken cancellationToken)
     {
         var serializerSettings = new JsonSerializerOptions
         {
@@ -34,12 +33,14 @@ public static class DiscordInteractionApi
         }
         
         //Check if there is an interaction command that matches the endpoint
-        var canParse = Enum.TryParse<BotCommandType>(request.Data?.Name!, true, out var botCommandType);
-        if(!canParse)
+        var interactionType =
+            DiscordExtensions.GetInteractionCommands().FirstOrDefault(x => x.Name.Value == request.Data?.Name)?.Name.Value;
+        if(string.IsNullOrWhiteSpace(interactionType))
             return TypedResults.NotFound($"Command not found for {request.Data?.Name!}");
         
+        
         //If the interaction is an autocomplete request then handle it here
-        if (request.Type == (int)InteractionType.ApplicationCommandAutocomplete && botCommandType == BotCommandType.Custom)
+        if (request.Type == (int)InteractionType.ApplicationCommandAutocomplete && interactionType == "custom")
         {
             //This needs refactoring into some kind of polymorphic handler
             var commandJson = (JsonElement?)request.Data!.Options!.FirstOrDefault()?.Value;
@@ -52,14 +53,9 @@ public static class DiscordInteractionApi
                 Data = new InteractionData(choices: botCommands.Select(bc => new Choice { Name = bc.Name, Value = bc.Name }).ToList())
             }, serializerSettings);
         }
-        
+
         //Otherwise create the command, run it on another thread and continue with a followup response back to the discord API
-        var command = service.BotCommandFactory.Create(botCommandType, request);
-        await Task.Run( () => service.Mediator.Send(command, token), token)
-            .ContinueWith(async data =>
-            {
-                await service.DiscordHttpRequestHelper.SendFollowupMessageAsync(ulong.Parse(request.ApplicationId!), request.Token!, await data, token);
-            }, token);
+        await service.Bus.Publish(new DeferredInteractionEvent(request), cancellationToken);
 
         return Results.Json(new InteractionResponse{ Type = InteractionResponseType.DeferredInteractionResponse}, serializerSettings);
     }

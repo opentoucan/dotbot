@@ -1,6 +1,7 @@
 using System.Text.Json;
-using Bot.Gateway.Model.Requests.Discord;
-using Bot.Gateway.Model.Responses.Discord;
+using Bot.Gateway.Dto.Requests.Discord;
+using Bot.Gateway.Dto.Responses.Discord;
+using Bot.Gateway.Infrastructure.HttpClient;
 using Discord;
 using MediatR;
 using Xkcd.Sdk;
@@ -12,17 +13,15 @@ public class XkcdCommandHandler(ILogger<XkcdCommandHandler> logger, XkcdService 
 {
     public async Task<InteractionData> Handle(XkcdCommand request, CancellationToken cancellationToken)
     {
-        var comicNumber = ((JsonElement?)request.Data.Data!.Options?.FirstOrDefault()?.Value)?.GetInt32();
+        var xkcdComic = await xkcdService.GetXkcdComicAsync(request.ComicNumber, cancellationToken);
+        logger.LogInformation($"Fetching XKCD: {request.ComicNumber?.ToString() ?? "latest"}");
         
-        var xkcdComic = await xkcdService.GetXkcdComicAsync(comicNumber, cancellationToken);
-        logger.LogInformation($"Fetching XKCD: {comicNumber?.ToString() ?? "latest"}");
-        
-        if (comicNumber is null && xkcdComic is null)
+        if (request.ComicNumber is null && xkcdComic is null)
             return new InteractionData("There was an issue fetching the XKCD");
         if (xkcdComic is null)
-            return new InteractionData($"XKCD comic #{comicNumber} does not exist");
+            return new InteractionData($"XKCD comic #{request.ComicNumber} does not exist");
         
-        var comicNumberOrLatestText = (comicNumber is null ? "Latest comic" : "Comic") + $" #{xkcdComic.ComicNumber}";
+        var comicNumberOrLatestText = (request.ComicNumber is null ? "Latest comic" : "Comic") + $" #{xkcdComic.ComicNumber}";
 
         var embedBuilder = new EmbedBuilder();
         embedBuilder.WithImageUrl(xkcdComic.ImageUrl);
@@ -36,6 +35,13 @@ public class XkcdCommandHandler(ILogger<XkcdCommandHandler> logger, XkcdService 
 
 public class XkcdCommand : InteractionCommand
 {
-    public override BotCommandType CommandType => BotCommandType.Xkcd;
-    public override InteractionRequest Data { get; set; } = null!;
+    public override string InteractionCommandName => "xkcd";
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        ComicNumber = ((JsonElement?)interactionRequest.Data!.Options?.FirstOrDefault()?.Value)?.GetInt32();
+    }
+    
+    public int? ComicNumber { get; private set; }
+    
+    public XkcdCommand(){}
 }

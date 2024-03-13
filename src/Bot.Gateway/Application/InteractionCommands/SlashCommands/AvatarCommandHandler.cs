@@ -1,5 +1,5 @@
-﻿using Bot.Gateway.Model.Requests.Discord;
-using Bot.Gateway.Model.Responses.Discord;
+﻿using Bot.Gateway.Dto.Requests.Discord;
+using Bot.Gateway.Dto.Responses.Discord;
 using Discord;
 using MediatR;
 
@@ -9,12 +9,9 @@ public class AvatarCommandHandler : IRequestHandler<AvatarCommand, InteractionDa
 {
     public Task<InteractionData> Handle(AvatarCommand request, CancellationToken cancellationToken)
     {
-        var mentionedUser = request.Data.Data!.Resolved!.Users!.FirstOrDefault().Value;
-        var userId = ulong.Parse(mentionedUser.Id!);
-        var avatarId = mentionedUser.Avatar!;
         var embedBuilder = new EmbedBuilder();
-        embedBuilder.WithImageUrl($"https://cdn.discordapp.com/avatars/{userId}/{avatarId}?size=512");
-        embedBuilder.WithTitle(request.Data.Data.Resolved.Users!.FirstOrDefault().Value.Username);
+        embedBuilder.WithImageUrl($"https://cdn.discordapp.com/avatars/{request.TargetUserId}/{request.AvatarId}?size=512");
+        embedBuilder.WithTitle(request.TargetUsername);
         embedBuilder.WithDescription("Avatar");
         var interactionData = new InteractionData(embeds: [embedBuilder.Build()]);
         return Task.FromResult(interactionData);
@@ -23,6 +20,16 @@ public class AvatarCommandHandler : IRequestHandler<AvatarCommand, InteractionDa
 
 public class AvatarCommand : InteractionCommand
 {
-    public override BotCommandType CommandType => BotCommandType.Avatar;
-    public override InteractionRequest Data { get; set; } = null!;
+    public override string InteractionCommandName => "avatar";
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        var mentionedUser = interactionRequest.Data!.Resolved!.Users!.FirstOrDefault().Value;
+        AvatarId = mentionedUser.Avatar!;
+        TargetUserId = mentionedUser.Id!;
+        TargetUsername = mentionedUser.Username!;
+    }
+
+    public string TargetUserId { get; private set; } = null!;
+    public string TargetUsername { get; private set; } = null!;
+    public string AvatarId { get; private set; } = null!;
 }

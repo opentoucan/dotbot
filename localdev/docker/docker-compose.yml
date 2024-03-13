@@ -9,7 +9,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: docker.io/library/rabbitmq:3.9-management
+    image: docker.io/rabbitmq:3.9-management
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -18,7 +18,7 @@ services:
       - "15672:15672"
   localstack:
     container_name: localstack
-    image: localstack/localstack
+    image: docker.io/localstack/localstack:latest
     ports:
       - "127.0.0.1:4566:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # external services port range
@@ -26,28 +26,25 @@ services:
       # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
       - DEBUG=${DEBUG:-0}
     volumes:
-      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-  mongo:
-    container_name: mongo
-    image: mongo:7.0
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-    ports:
-      - 27017:27017
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    healthcheck:
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
-      interval: 5s
-      timeout: 30s
-      start_period: 0s
-      retries: 30
-    volumes:
-      - "mongo_data:/data/db"
-      - "mongo_config:/data/configdb"
+      - "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock"
+#  mongo:
+#    container_name: mongo
+#    image: docker.io/library/mongo:7.0
+#    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+#    ports:
+#      - 27017:27017
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+#    healthcheck:
+#      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+#      interval: 5s
+#      timeout: 30s
+#      start_period: 0s
+#      retries: 30
+
   ngrok:
     container_name: ngrok
-    image: ngrok/ngrok:alpine
+    image: docker.io/ngrok/ngrok:alpine
     environment:
       - NGROK_AUTHTOKEN
     command: 'http 127.0.0.1:5292'
@@ -58,7 +55,7 @@ services:
   # ********************
   # Jaeger
   jaeger:
-    image: jaegertracing/all-in-one:1.53
+    image: docker.io/jaegertracing/all-in-one:1.53
     container_name: jaeger
     command:
       - "--memory.max-traces=5000"
@@ -80,7 +77,7 @@ services:
 
   # Grafana
   grafana:
-    image: grafana/grafana:10.3.1
+    image: docker.io/grafana/grafana:10.3.1
     container_name: grafana
     deploy:
       resources:
@@ -91,14 +88,14 @@ services:
       - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
     volumes:
       - ../grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ../grafana/provisioning/:/etc/grafana/provisioning/
+      - ../grafana/provisioning/:/etc/grafana/provisioning/:U
     ports:
       - 3000:3000
     logging: *logging
 
   # OpenTelemetry Collector
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.93.0
+    image: docker.io/otel/opentelemetry-collector-contrib:0.93.0
     container_name: otel-col
     deploy:
       resources:
@@ -139,8 +136,10 @@ services:
     ports:
       - "9090:9090"
     logging: *logging
+
   loki:
-    image: grafana/loki:2.9.4
+    container_name: loki
+    image: docker.io/grafana/loki:2.9.4
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml

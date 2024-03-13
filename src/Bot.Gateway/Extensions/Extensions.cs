@@ -3,7 +3,7 @@ using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
 using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
-using MassTransit.MongoDbIntegration;
+using MassTransit;
 using MongoDB.Driver;
 using Polly;
 using Polly.Extensions.Http;
@@ -20,7 +20,7 @@ public static partial class Extensions
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
-        builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
+        builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IBotCommandRepository, BotCommandRepository>();
         builder.Services.AddHttpClient<XkcdService>(client =>
             {
@@ -36,12 +36,40 @@ public static partial class Extensions
         return builder;
     }
 
+    private static IHostApplicationBuilder AddMassTransit(this IHostApplicationBuilder builder)
+    {
+        var rabbitMqSection = builder.Configuration.GetSection("RabbitMQ");
+        builder.Services.AddMassTransit(x =>
+        {
+            x.AddConsumers(Assembly.GetExecutingAssembly());
+            
+            x.AddMongoDbOutbox(o =>
+            {
+                o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
+                o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
+
+                o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+                o.UseBusOutbox();
+            });
+    
+            x.UsingRabbitMq((context,cfg) =>
+            {
+                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),  h => {
+                    h.Username(rabbitMqSection.GetValue<string>("User"));
+                    h.Password(rabbitMqSection.GetValue<string>("Password"));
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+        return builder;
+    }
+    
     private static IHostApplicationBuilder AddDatabase(this IHostApplicationBuilder builder)
     {
         builder.AddMongoDbDefaults();
         builder.Services.AddMongoDbCollection<BotCommand>();
-        builder.Services.AddScoped<DbContext>(c =>
-            new DbContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<BotCommand>>()));
+        builder.Services.AddScoped<DbContext>();
         return builder;
     }
 }

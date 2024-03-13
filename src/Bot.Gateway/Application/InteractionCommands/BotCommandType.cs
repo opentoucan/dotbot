@@ -7,5 +7,5 @@ public enum BotCommandType
     Custom = 2,
     Avatar = 3,
     Greet = 4,
-    Xkcd
+    Xkcd = 5
 }

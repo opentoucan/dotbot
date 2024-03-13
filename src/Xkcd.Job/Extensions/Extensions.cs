@@ -1,3 +1,4 @@
+using System.Reflection;
 using MassTransit;
 using MassTransit.MongoDbIntegration;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using Polly;
 using Polly.Extensions.Http;
+using Polly.Timeout;
 using ServiceDefaults;
 using Xkcd.Job.Infrastructure;
 using Xkcd.Job.Infrastructure.Repositories;
@@ -22,10 +24,40 @@ public static class Extensions
         builder.Services.AddTransient<IXkcdRepository, XkcdRepository>();
         return builder;
     }
+    
+    public static IHostApplicationBuilder AddMassTransit(this IHostApplicationBuilder builder)
+    {
+        var rabbitMqSection = builder.Configuration.GetSection("RabbitMQ");
+        builder.Services.AddMassTransit(x =>
+        {
+            x.AddConsumers(Assembly.GetExecutingAssembly());
+            
+            x.AddMongoDbOutbox(o =>
+            {
+                o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
+                o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
+
+                o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+                o.UseBusOutbox();
+            });
+    
+            x.UsingRabbitMq((context,cfg) =>
+            {
+                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),  h => {
+                    h.Username(rabbitMqSection.GetValue<string>("User"));
+                    h.Password(rabbitMqSection.GetValue<string>("Password"));
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        return builder;
+    }
   
     public static IHostApplicationBuilder AddHttpClient(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddHttpClient<IXkcdService, XkcdService>(client => 
+        builder.Services.AddHttpClient<IXkcdService, XkcdService>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
             })

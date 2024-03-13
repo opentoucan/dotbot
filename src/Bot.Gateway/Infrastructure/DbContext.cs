@@ -33,15 +33,15 @@ public class DbContext
         }
         catch
         {
-            RollbackTransaction(cancellationToken);
+            await RollbackTransactionAsync(cancellationToken);
             Session = null;
             throw;
         }
     }
 
-    public void RollbackTransaction(CancellationToken cancellationToken)
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
     {
-        _mongoDbContext.AbortTransaction(cancellationToken);
+        await _mongoDbContext.AbortTransaction(cancellationToken);
         Session = null;
     }
 }

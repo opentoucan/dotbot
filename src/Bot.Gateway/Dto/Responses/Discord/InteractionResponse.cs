@@ -1,4 +1,4 @@
-namespace Bot.Gateway.Model.Responses.Discord;
+namespace Bot.Gateway.Dto.Responses.Discord;
 
 public class InteractionResponse
 {

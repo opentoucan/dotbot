@@ -1,4 +1,4 @@
-namespace Bot.Gateway.Model.Responses;
+namespace Bot.Gateway.Dto.Responses;
 
 public class FileDetails
 {
