@@ -55,7 +55,7 @@ public static class DiscordInteractionApi
         }
 
         //Otherwise create the command, run it on another thread and continue with a followup response back to the discord API
-        await service.Bus.Publish(new DeferredInteractionEvent(request), cancellationToken);
+        await service.Bus.Publish(new DeferredInteractionEvent(request));
 
         return Results.Json(new InteractionResponse{ Type = InteractionResponseType.DeferredInteractionResponse}, serializerSettings);
     }
