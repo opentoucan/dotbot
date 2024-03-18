@@ -83,7 +83,7 @@ public class SaveCustomCommand : InteractionCommand
         if (string.IsNullOrWhiteSpace(GuildId) && string.IsNullOrWhiteSpace(DirectMessageChannelId))
             throw new CommandValidationException("Custom command must be used inside a server or in a direct message");
         
-        if (interactionRequest.Data?.Resolved?.Attachments?.Any(x => (x.Value?.Size / 1024 / 1024) > 25) ?? true)
+        if (interactionRequest.Data?.Resolved?.Attachments != null && interactionRequest.Data.Resolved.Attachments.Any(x => x.Value.Size / 1000000 > 25))
             throw new CommandValidationException("File is too large, it must be less than 25MB");
 
         SenderId = interactionRequest.Member?.User.Id ?? interactionRequest.User!.Id!;

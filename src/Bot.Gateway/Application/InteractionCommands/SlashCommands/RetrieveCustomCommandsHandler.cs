@@ -36,8 +36,7 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
             if (file == null) return new InteractionData("Failed to retrieve the file for this command");
             using var memoryStream = new MemoryStream();
             await file.FileContent.CopyToAsync(memoryStream, cancellationToken);
-            discordFileAttachments.Add(new DiscordFileAttachment(file.Filename, "Custom command", false,
-                memoryStream.ToArray()));
+            discordFileAttachments.Add(new DiscordFileAttachment(file.Filename, "Custom command", false, memoryStream.ToArray()));
         }
 
         return new InteractionData(botCommand.Content, new List<Embed>(), discordFileAttachments);

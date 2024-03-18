@@ -6,7 +6,7 @@ using Xkcd.Sdk;
 
 namespace Bot.Gateway.Application.IntegrationEvents.EventHandlers;
 
-public class XkcdPostedEventHandler(IDiscordWebhookClientFactory discordWebhookClientFactory)
+public class XkcdPostedEventHandler(IDiscordWebhookClientFactory discordWebhookClientFactory, ILogger<XkcdPostedEventHandler> logger)
     : IConsumer<XkcdPostedEvent>
 {
     public async Task Consume(ConsumeContext<XkcdPostedEvent> context)
@@ -37,5 +37,12 @@ public class XkcdPostedEventHandler(IDiscordWebhookClientFactory discordWebhookC
             .Build();
 
         await xkcdWebhook.SendMessageAsync(embeds: new List<Embed> { embed });
+        
+        logger.LogInformation(
+            "XKCD posted event (message id): {id} has been sent to Discord with comic number: {comicNumber} posted at date: {datePosted}",
+            context.MessageId,
+            context.Message.ComicNumber,
+            context.Message.DatePosted);
+        
     }
 }

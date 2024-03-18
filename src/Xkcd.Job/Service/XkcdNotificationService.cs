@@ -61,7 +61,7 @@ public class XkcdNotificationService : IXkcdNotificationService
         }
 
         var xkcdPostedEvent = new XkcdPostedEvent(latestXkcd.ComicNumber, latestXkcd.DatePosted, latestXkcd.AltText, latestXkcd.ImageUrl, latestXkcd.Title);
-        await _bus.Publish(xkcdPostedEvent, cancellationToken);
+        await _bus.Publish(xkcdPostedEvent);
         await _xkcdRepository.UnitOfWork.CommitTransactionAsync(cancellationToken);
     }
 }

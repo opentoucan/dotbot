@@ -32,9 +32,10 @@ public static class DiscordInteractionApi
             return Results.Json(new InteractionResponse { Type = InteractionResponseType.Ping }, serializerSettings);
         }
         
-        //Check if there is an interaction command that matches the endpoint
-        var interactionType =
-            DiscordExtensions.GetInteractionCommands().FirstOrDefault(x => x.Name.Value == request.Data?.Name)?.Name.Value;
+        
+        var interactionType = DiscordExtensions.GetInteractionCommands()
+            .FirstOrDefault(x => x.Name.Value == request.Data?.Name)
+            ?.Name.Value;
         if(string.IsNullOrWhiteSpace(interactionType))
             return TypedResults.NotFound($"Command not found for {request.Data?.Name!}");
         
