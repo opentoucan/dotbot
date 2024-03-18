@@ -50,6 +50,7 @@ public sealed class XkcdJobFixture : WebApplicationFactory<Program>, IAsyncLifet
     public async Task InitializeAsync()
     {
         await MongoDb.StartAsync();
+        await Task.Delay(1000);
         await MongoDb.ExecAsync(new List<string>
         {
             "mongosh", "--eval", "rs.initiate()"
