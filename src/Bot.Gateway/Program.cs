@@ -11,12 +11,6 @@ builder.Services.AddHostedService<DiscordRegistrationService>();
 
 var app = builder.Build();
 
-app.Use((context, next) =>
-{
-    context.Request.EnableBuffering();
-    return next();
-});
-
 app.UseDefaultOpenApi();
 
 app.MapDefaultEndpoints();

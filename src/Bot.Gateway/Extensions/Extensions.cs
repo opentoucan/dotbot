@@ -1,3 +1,4 @@
+using System.Net;
 using System.Reflection;
 using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
@@ -26,8 +27,8 @@ public static partial class Extensions
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
             })
-            .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
-
+            .AddPolicyHandler(GetRetryPolicy());
+        
         builder.AddDatabase();
         builder.AddMassTransit();
         builder.ConfigureDiscordServices();
@@ -36,6 +37,22 @@ public static partial class Extensions
         return builder;
     }
 
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    {
+        var retryCount = 3;
+        var retrySleepDuration = 2;
+
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
+            .WaitAndRetryAsync(
+                retryCount,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(retrySleepDuration, retryAttempt)),
+                onRetry: (_, _, retryAttempt, _) =>
+                {
+                    Console.WriteLine($"Retry attempt ({retryAttempt} of {retryCount})");
+                });
+    }
     private static IHostApplicationBuilder AddMassTransit(this IHostApplicationBuilder builder)
     {
         var rabbitMqSection = builder.Configuration.GetSection("RabbitMQ");

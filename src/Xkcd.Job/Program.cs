@@ -11,4 +11,4 @@ builder.AddMassTransit();
 builder.AddHttpClient();
 builder.Services.AddHostedService<Worker>();
 using IHost host = builder.Build();
-await host.RunAsync(new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token);
+await host.RunAsync(new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);

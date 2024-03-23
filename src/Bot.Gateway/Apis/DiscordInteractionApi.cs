@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bot.Gateway.Apis.Filters;
 using Bot.Gateway.Dto.Requests.Discord;
 using Bot.Gateway.Dto.Responses.Discord;
 using Bot.Gateway.Extensions;
-using Contracts.MessageBus;
 using Discord;
 using Microsoft.AspNetCore.Mvc;
 using InteractionResponseType = Bot.Gateway.Dto.Responses.Discord.InteractionResponseType;
@@ -14,11 +14,11 @@ public static class DiscordInteractionApi
 {
     public static RouteGroupBuilder MapDiscordInteractionApi(this RouteGroupBuilder app)
     {
-        app.MapPost("/", Interaction);
+        app.MapPost("/", Interaction).AddEndpointFilter<DeferredInteractionPublisherFilter>();
         return app;
     }
     
-    public static async Task<IResult> Interaction([AsParameters] DiscordInteractionService service, [FromBody]InteractionRequest request, CancellationToken cancellationToken)
+    public static IResult Interaction([AsParameters] DiscordInteractionService service, [FromBody]InteractionRequest request, CancellationToken cancellationToken)
     {
         var serializerSettings = new JsonSerializerOptions
         {
@@ -28,10 +28,7 @@ public static class DiscordInteractionApi
         
         //Discord health check
         if (request.Type == (int)InteractionType.Ping)
-        {
             return Results.Json(new InteractionResponse { Type = InteractionResponseType.Ping }, serializerSettings);
-        }
-        
         
         var interactionType = DiscordExtensions.GetInteractionCommands()
             .FirstOrDefault(x => x.Name.Value == request.Data?.Name)
@@ -54,9 +51,6 @@ public static class DiscordInteractionApi
                 Data = new InteractionData(choices: botCommands.Select(bc => new Choice { Name = bc.Name, Value = bc.Name }).ToList())
             }, serializerSettings);
         }
-
-        //Otherwise create the command, run it on another thread and continue with a followup response back to the discord API
-        await service.Bus.Publish(new DeferredInteractionEvent(request));
 
         return Results.Json(new InteractionResponse{ Type = InteractionResponseType.DeferredInteractionResponse}, serializerSettings);
     }
