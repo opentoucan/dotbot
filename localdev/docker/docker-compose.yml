@@ -9,7 +9,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: docker.io/rabbitmq:3.9-management
+    image: docker.io/masstransit/rabbitmq:3.12.7
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest

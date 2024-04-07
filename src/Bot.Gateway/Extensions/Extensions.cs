@@ -59,7 +59,7 @@ public static partial class Extensions
         builder.Services.AddMassTransit(x =>
         {
             x.AddConsumers(Assembly.GetExecutingAssembly());
-            
+            x.AddDelayedMessageScheduler();
             x.AddMongoDbOutbox(o =>
             {
                 o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
@@ -75,7 +75,7 @@ public static partial class Extensions
                     h.Username(rabbitMqSection.GetValue<string>("User"));
                     h.Password(rabbitMqSection.GetValue<string>("Password"));
                 });
-
+                cfg.UseDelayedMessageScheduler();                
                 cfg.ConfigureEndpoints(context);
             });
         });

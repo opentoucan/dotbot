@@ -6,14 +6,16 @@ using Microsoft.Extensions.Options;
 
 namespace Bot.Gateway.Apis.Auth;
 
-public class DiscordSignatureAuthenticationHandler : AuthenticationHandler<DiscordSignatureAuthenticationSchemeOptions>
+public class DiscordSignatureAuthenticationHandler(
+    ILogger<DiscordSignatureAuthenticationHandler> logger,
+    IOptionsMonitor<DiscordSignatureAuthenticationSchemeOptions> options,
+    ILoggerFactory loggerFactory,
+    UrlEncoder encoder)
+    : AuthenticationHandler<DiscordSignatureAuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
-    public DiscordSignatureAuthenticationHandler(IOptionsMonitor<DiscordSignatureAuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
-    {
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {            
+        logger.LogDebug("Attempting to authenticate http request {path}", Request.Path);
         Request.EnableBuffering();
         var signature = Request.Headers["X-Signature-Ed25519"].FirstOrDefault();
         var timestamp = Request.Headers["X-Signature-Timestamp"].FirstOrDefault();

@@ -4,8 +4,10 @@ using Bot.Gateway.Dto.Requests.Discord;
 using Bot.Gateway.Dto.Responses.Discord;
 using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
+using Bot.Gateway.Settings;
 using Discord;
 using MediatR;
+using Microsoft.Extensions.Options;
 
 namespace Bot.Gateway.Application.InteractionCommands.SlashCommands;
 
@@ -13,11 +15,15 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
 {
     private readonly IBotCommandRepository _botCommandRepository;
     private readonly IFileUploadService _fileUploadService;
-
-    public RetrieveCustomCommandHandler(IBotCommandRepository botCommandRepository, IFileUploadService fileUploadService)
+    private readonly DiscordSettings _discordSettings;
+    public RetrieveCustomCommandHandler(
+        IBotCommandRepository botCommandRepository, 
+        IFileUploadService fileUploadService,
+        IOptions<DiscordSettings> discordSettings)
     {
         _botCommandRepository = botCommandRepository;
         _fileUploadService = fileUploadService;
+        _discordSettings = discordSettings.Value;
     }
 
     public async Task<InteractionData> Handle(RetrieveCustomCommand request, CancellationToken cancellationToken)
@@ -32,7 +38,7 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
         
         foreach (var attachmentId in botCommand.AttachmentIds)
         {
-            var file = await _fileUploadService.GetFile($"discord-{contextId}", attachmentId);
+            var file = await _fileUploadService.GetFile($"{_discordSettings.BucketEnvPrefix}-discord-{contextId}", attachmentId);
             if (file == null) return new InteractionData("Failed to retrieve the file for this command");
             using var memoryStream = new MemoryStream();
             await file.FileContent.CopyToAsync(memoryStream, cancellationToken);
@@ -50,7 +56,7 @@ public class RetrieveCustomCommand : InteractionCommand
     {
         CustomCommandName = ((JsonElement?)interactionRequest.Data?.Options?.FirstOrDefault()?.Value)?.GetString() 
                             ?? throw new CommandValidationException("Custom command name must be passed");
-        GuildId = interactionRequest.Data?.GuildId;
+        GuildId = interactionRequest.Guild?.Id;
         DirectMessageChannelId = interactionRequest.User?.Id;
         if (string.IsNullOrWhiteSpace(GuildId) && string.IsNullOrWhiteSpace(DirectMessageChannelId))
             throw new CommandValidationException("Custom command must be used inside a server or in a direct message");

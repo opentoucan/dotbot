@@ -6,8 +6,9 @@ using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
 using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
+using Bot.Gateway.Settings;
 using MediatR;
-using Path = System.IO.Path;
+using Microsoft.Extensions.Options;
 
 namespace Bot.Gateway.Application.InteractionCommands.SlashCommands;
 
@@ -18,14 +19,22 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
     private readonly IBotCommandRepository _botCommandRepository;
     private readonly IFileUploadService _fileUploadService;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly DiscordSettings _discordSettings;
 
-    public SaveCustomCommandHandler(ILogger<SaveCustomCommandHandler> logger, DbContext dbContext, IBotCommandRepository botCommandRepository, IFileUploadService fileUploadService, IHttpClientFactory httpClientFactory)
+    public SaveCustomCommandHandler(
+        ILogger<SaveCustomCommandHandler> logger,
+        DbContext dbContext, 
+        IBotCommandRepository botCommandRepository, 
+        IFileUploadService fileUploadService, 
+        IHttpClientFactory httpClientFactory, 
+        IOptions<DiscordSettings> discordSettings)
     {
         _logger = logger;
         _dbContext = dbContext;
         _botCommandRepository = botCommandRepository;
         _fileUploadService = fileUploadService;
         _httpClientFactory = httpClientFactory;
+        _discordSettings = discordSettings.Value;
     }
 
     public async Task<InteractionData> Handle(SaveCustomCommand request, CancellationToken cancellationToken)
@@ -50,7 +59,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
             foreach (var item in request.FileNameUrlDictionary)
             {
                 var stream = await client.GetStreamAsync(new Uri(item.Value), cancellationToken);
-                await _fileUploadService.UploadFile($"discord-{contextId}", item.Key, stream);
+                await _fileUploadService.UploadFile($"{_discordSettings.BucketEnvPrefix}-discord-{contextId}", item.Key, stream);
             }
             _logger.LogDebug("Saving bot command {botCommand}", botCommand.Name);
             await _botCommandRepository.SaveCommand(botCommand);

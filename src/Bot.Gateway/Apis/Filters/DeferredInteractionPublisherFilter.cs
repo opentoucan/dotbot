@@ -3,18 +3,14 @@ using Bot.Gateway.Dto.Requests.Discord;
 using Bot.Gateway.Dto.Responses.Discord;
 using Contracts.MessageBus;
 using MassTransit;
+using MassTransit.Scheduling;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Bot.Gateway.Apis.Filters;
 
-public class DeferredInteractionPublisherFilter : IEndpointFilter
+public class DeferredInteractionPublisherFilter(IBus bus) : IEndpointFilter
 {
-    private readonly IBus _bus;
-
-    public DeferredInteractionPublisherFilter(IBus bus)
-    {
-        _bus = bus;
-    }
+    private readonly MessageScheduler _scheduler = new(new DelayedScheduleMessageProvider(bus), bus.Topology as IRabbitMqBusTopology);
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -26,11 +22,11 @@ public class DeferredInteractionPublisherFilter : IEndpointFilter
             body.Seek(0, SeekOrigin.Begin);
 
             using var bodyReader = new StreamReader(body);
-            string rawBody = await bodyReader.ReadToEndAsync();
+            var rawBody = await bodyReader.ReadToEndAsync();
             var interactionRequest = JsonSerializer.Deserialize<InteractionRequest>(rawBody);
-            await _bus.Publish(new DeferredInteractionEvent(interactionRequest!));
+            
+            await _scheduler.SchedulePublish(DateTime.UtcNow + TimeSpan.FromSeconds(2), new DeferredInteractionEvent(interactionRequest!));
         }
-
         return result;
     }
 }
