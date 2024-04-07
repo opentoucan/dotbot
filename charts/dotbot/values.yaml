@@ -4,8 +4,8 @@ gateway:
   replicaCount: 1
   image:
     repository: "ghcr.io/opentoucan/bot.gateway"
-    tag: "0.3.25"
-    digest: "sha256:2938c05e27227580c24a192be19d11e35dd623f3eaf642450708824539b60d4a"
+    tag: "0.3.26"
+    digest: "sha256:a9394a08a06fb7a56d6e1ad59d3c09674bb9f474e603bfe21f32e1fbdb367d41"
     pullPolicy: IfNotPresent
   secretName: dotbot-secret
   podAnnotations: { }
@@ -57,8 +57,8 @@ jobs:
       fsGroup: 2000
     image:
       repository: "ghcr.io/opentoucan/xkcd.job"
-      tag: "0.3.25"
-      digest: "sha256:bca59a0ae93c92116fa310078ee37ea9028c1a9fcf9da6f772774c507270784d"
+      tag: "0.3.26"
+      digest: "sha256:4d905a5bc81ceda6accd62e105bbe6d9fb90e9a09f903e90c19f954a469d027f"
       imagePullPolicy: Always
     secretName: dotbot-secret
     schedule: "0 * * * 1,3,5"
