@@ -11,6 +11,7 @@ on:
       - 'src/ServiceDefaults/**'
       - '!src/Bot.Gateway/CHANGELOG.md'
       - '!src/Xkcd.Job/CHANGELOG.md'
+      - 'tests/**'
 
 env:
   REGISTRY: ghcr.io
