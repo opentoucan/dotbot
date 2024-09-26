@@ -28,7 +28,6 @@ public class BotGatewayTests(CustomWebApplicationFactory factory) : IClassFixtur
 {
     public async Task InitializeAsync()
     {
-        FakeData.GenerateData();
         var dbConnection = new NpgsqlConnection(factory.PostgresConnectionString);
         await dbConnection.OpenAsync();
         FakeData.PopulateTestData(new DotbotContext(new DbContextOptionsBuilder<DotbotContext>().UseNpgsql(dbConnection).Options));
@@ -73,7 +72,7 @@ public class BotGatewayTests(CustomWebApplicationFactory factory) : IClassFixtur
     [Fact]
     public async Task SaveInteractionRequestWorks()
     {
-        var requestData = new InteractionRequestFaker(new CustomCommandRequestFaker()).Generate();
+        var requestData = new InteractionRequestFaker(new CustomCommandRequestFaker(), "123456789").UseSeed(69).Generate();
 
         var result = await factory.HttpClient.PostAsync("/api/interactions", new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json"));
         var interactionResponse = await result.Content.ReadFromJsonAsync<InteractionResponse>();

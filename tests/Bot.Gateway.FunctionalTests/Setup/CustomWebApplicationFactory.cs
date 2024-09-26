@@ -20,9 +20,9 @@ namespace Bot.Gateway.FunctionalTests.Setup;
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithDatabase("postgres")
-        .WithUsername("postgres")
-        .WithPassword("postgres")
+        .WithDatabase("dotbot")
+        .WithUsername("dotbot")
+        .WithPassword("yourWeak(!)Password")
         .WithImage("postgres:16")
         .WithPortBinding(54321, 5432)
         .WithCleanUp(true)
@@ -46,18 +46,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration(config =>
-        {
-            config.Sources.Add(new MemoryConfigurationSource
-            {
-                InitialData = new Dictionary<string, string>
-                {
-                    {"S3:ServiceURL", _localStackContainer.GetConnectionString()},
-                    {"AWS_ACCESS_KEY_ID", "unused"},
-                    {"AWS_SECRET_ACCESS_KEY", "unused"}
-                }!
-            });
-        });
+        Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", "localstack");
+        Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "localstack");
+        Environment.SetEnvironmentVariable("S3__ServiceURL", $"{_localStackContainer.GetConnectionString()}");
+
         builder.ConfigureTestServices(services =>
         {
             services.RemoveHostedService<DiscordRegistrationService>();
