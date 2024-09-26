@@ -25,7 +25,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\ServiceDefaults\ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\src\Xkcd.Job\Xkcd.Job.csproj" />
+      <ProjectReference Include="..\..\src\Xkcd.Sdk\Xkcd.Sdk.csproj" />
     </ItemGroup>
 
 </Project>

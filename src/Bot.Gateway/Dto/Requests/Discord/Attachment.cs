@@ -17,5 +17,5 @@ public class Attachment
     public string ContentType { get; set; } = null!;
     
     [JsonPropertyName("size")]
-    public int Size { get; set; }
+    public uint Size { get; set; }
 }

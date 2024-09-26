@@ -1,11 +1,13 @@
 using System.Net;
 using System.Reflection;
+using Bot.Gateway.Application.Behaviours;
+using Bot.Gateway.Application.Queries;
+using Bot.Gateway.Dto.AutoMapper;
 using Bot.Gateway.Infrastructure;
-using Bot.Gateway.Infrastructure.Entities;
 using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
 using MassTransit;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
 using ServiceDefaults;
@@ -20,9 +22,11 @@ public static partial class Extensions
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
         });
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-        builder.Services.AddScoped<IBotCommandRepository, BotCommandRepository>();
+        builder.Services.AddScoped<ICustomCommandRepository, CustomCommandRepository>();
+        builder.Services.AddScoped<ICustomCommandQueries, CustomCommandQueries>();
         builder.Services.AddHttpClient<XkcdService>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
@@ -34,6 +38,7 @@ public static partial class Extensions
         builder.ConfigureDiscordServices();
         builder.ConfigureAWS();
         builder.AddDiscordInteractionAuth();
+        builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
         return builder;
     }
 
@@ -44,7 +49,7 @@ public static partial class Extensions
 
         return HttpPolicyExtensions
             .HandleTransientHttpError()
-            .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
+            //.OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
             .WaitAndRetryAsync(
                 retryCount,
                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(retrySleepDuration, retryAttempt)),
@@ -60,20 +65,20 @@ public static partial class Extensions
         {
             x.AddConsumers(Assembly.GetExecutingAssembly());
             x.AddDelayedMessageScheduler();
-            x.AddMongoDbOutbox(o =>
+            x.AddEntityFrameworkOutbox<DotbotContext>(o =>
             {
-                o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
-                o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
-
-                o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+                o.UsePostgres();
                 o.UseBusOutbox();
             });
     
             x.UsingRabbitMq((context,cfg) =>
             {
-                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),  h => {
-                    h.Username(rabbitMqSection.GetValue<string>("User"));
-                    h.Password(rabbitMqSection.GetValue<string>("Password"));
+                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"), 
+                    rabbitMqSection.GetValue<ushort>("Port"),
+                    "/", 
+                    h => {
+                        h.Username(rabbitMqSection.GetValue<string>("User")!);
+                        h.Password(rabbitMqSection.GetValue<string>("Password")!);
                 });
                 cfg.UseDelayedMessageScheduler();                
                 cfg.ConfigureEndpoints(context);
@@ -84,9 +89,11 @@ public static partial class Extensions
     
     private static IHostApplicationBuilder AddDatabase(this IHostApplicationBuilder builder)
     {
-        builder.AddMongoDbDefaults();
-        builder.Services.AddMongoDbCollection<BotCommand>();
         builder.Services.AddScoped<DbContext>();
+        builder.Services.AddDbContext<DotbotContext>(options =>
+        {
+            options.UseNpgsql(builder.Configuration.GetConnectionString("dotbot"));
+        });
         return builder;
     }
 }

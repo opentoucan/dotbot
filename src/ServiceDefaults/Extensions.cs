@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -148,13 +147,6 @@ public static partial class Extensions
             .AllowAnonymous();
         
         return app;
-    }
-    
-    public static IHostApplicationBuilder AddMongoDbDefaults(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(builder.Configuration.GetValue<string>("MongoDbSettings:ConnectionString")));
-        builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(builder.Configuration.GetValue<string>("MongoDbSettings:DatabaseName")));
-        return builder;
     }
     
     public static IHostApplicationBuilder ConfigureAWS(this IHostApplicationBuilder builder)

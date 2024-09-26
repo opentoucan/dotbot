@@ -1,26 +1,23 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using Bot.Gateway.Application.InteractionCommands;
-using Bot.Gateway.Infrastructure;
-using Bot.Gateway.Infrastructure.Repositories;
-using Bot.Gateway.Services;
+using Bot.Gateway.Application.Queries;
 using MassTransit;
+using MassTransit.Scheduling;
 
 namespace Bot.Gateway.Apis;
 
 public class DiscordInteractionService(
     IBus bus,
-    IInteractionCommandFactory interactionCommandFactory,
-    IBotCommandRepository botCommandRepository,
+    ICustomCommandQueries queries,
+    IPublishEndpoint publishEndpoint,
     ILogger<DiscordInteractionService> logger,
-    IMeterFactory meterFactory,
-    DbContext dbContext)
+    IMeterFactory meterFactory)
 {
     public IBus Bus { get; set; } = bus;
-    public IInteractionCommandFactory InteractionCommandFactory { get; set; } = interactionCommandFactory;
-    public IBotCommandRepository BotCommandRepository { get; set; } = botCommandRepository;
+    public MessageScheduler Scheduler { get; set; } = new(new DelayedScheduleMessageProvider(bus), bus.Topology as IRabbitMqBusTopology);
+    public IPublishEndpoint PublishEndpoint { get; set; } = publishEndpoint; 
+    public ICustomCommandQueries Queries { get; set; } = queries;
     public ILogger<DiscordInteractionService> Logger { get; set; } = logger;
     public IMeterFactory MeterFactory { get; } = meterFactory;
-    public DbContext DbContext { get; } = dbContext;
     public static ActivitySource ActivitySource { get; } = new(nameof(DiscordInteractionApi));
 }

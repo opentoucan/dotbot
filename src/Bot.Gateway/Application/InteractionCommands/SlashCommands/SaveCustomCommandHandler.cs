@@ -1,39 +1,33 @@
-using System.Text.Json;
-using Bot.Gateway.Application.InteractionCommands.Exceptions;
-using Bot.Gateway.Dto.Requests.Discord;
 using Bot.Gateway.Dto.Responses.Discord;
-using Bot.Gateway.Infrastructure;
 using Bot.Gateway.Infrastructure.Entities;
 using Bot.Gateway.Infrastructure.Repositories;
 using Bot.Gateway.Services;
 using Bot.Gateway.Settings;
 using MediatR;
 using Microsoft.Extensions.Options;
+using Guild = Bot.Gateway.Infrastructure.Entities.Guild;
 
 namespace Bot.Gateway.Application.InteractionCommands.SlashCommands;
 
 public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, InteractionData>
 {
     private readonly ILogger<SaveCustomCommandHandler> _logger;
-    private readonly DbContext _dbContext;
-    private readonly IBotCommandRepository _botCommandRepository;
     private readonly IFileUploadService _fileUploadService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly DiscordSettings _discordSettings;
+    private readonly ICustomCommandRepository _customCommandRepository;
 
     public SaveCustomCommandHandler(
         ILogger<SaveCustomCommandHandler> logger,
-        DbContext dbContext, 
-        IBotCommandRepository botCommandRepository, 
         IFileUploadService fileUploadService, 
         IHttpClientFactory httpClientFactory, 
-        IOptions<DiscordSettings> discordSettings)
+        IOptions<DiscordSettings> discordSettings,
+        ICustomCommandRepository customCommandRepository)
     {
         _logger = logger;
-        _dbContext = dbContext;
-        _botCommandRepository = botCommandRepository;
         _fileUploadService = fileUploadService;
         _httpClientFactory = httpClientFactory;
+        _customCommandRepository = customCommandRepository;
         _discordSettings = discordSettings.Value;
     }
 
@@ -45,33 +39,34 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
         var contextId = request.GuildId ?? request.DirectMessageChannelId!;
     
         _logger.LogInformation("Saving custom command {command} with {files} files", request.CustomCommandName, request.FileNameUrlDictionary.Count);
-        var botCommand = new BotCommand(contextId,
-            request.CustomCommandName,
-                request.SenderId,
-            request.TextContent,
-            request.FileNameUrlDictionary.Keys.ToList());
+
+        var customCommand = await _customCommandRepository.GetByNameAsync(request.CustomCommandName);
+        if (customCommand is not null)
+        {
+            customCommand.SetNewCommandContent(request.TextContent, request.SenderId);
+            _customCommandRepository.Update(customCommand);
+        }
+        else
+        {
+            customCommand = new CustomCommand(request.CustomCommandName, request.SenderId, new Guild(contextId, !string.IsNullOrWhiteSpace(request.DirectMessageChannelId)), request.TextContent);
+            _customCommandRepository.Add(customCommand);
+        }
 
         try
         {
-            _logger.LogDebug("Opening transaction for bot command {botCommand}", botCommand.Name);
-            await _dbContext.BeginTransactionAsync(cancellationToken);
-
             foreach (var item in request.FileNameUrlDictionary)
             {
                 var stream = await client.GetStreamAsync(new Uri(item.Value), cancellationToken);
                 await _fileUploadService.UploadFile($"{_discordSettings.BucketEnvPrefix}-discord-{contextId}", item.Key, stream);
+                customCommand.AddAttachment(item.Key, Path.GetExtension(item.Key), item.Value);
             }
-            _logger.LogDebug("Saving bot command {botCommand}", botCommand.Name);
-            await _botCommandRepository.SaveCommand(botCommand);
-            _logger.LogDebug("Committing transaction for bot command {botCommand}", botCommand.Name);
-            await _dbContext.CommitTransactionAsync(cancellationToken);
-            return new ("Saved command");
+            await _customCommandRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            return new InteractionData("Saved command");
         }
         catch (Exception ex)
         {
             _logger.LogError("{Exception}", ex.Message);
-            await _dbContext.RollbackTransactionAsync(cancellationToken);
-            return new ("Failed to save command");
+            return new InteractionData("Failed to save command");
         }
     }
 }
@@ -79,34 +74,10 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
 public class SaveCustomCommand : InteractionCommand
 {
     public override string InteractionCommandName => "save";
-    
-    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
-    {
-        var commandOptions = interactionRequest.Data?.Options?.FirstOrDefault()?.SubOptions;
-        CustomCommandName = ((JsonElement?)commandOptions?.FirstOrDefault(o => o.Name == "name")?.Value)?.GetString() 
-                            ?? throw new CommandValidationException("Custom command must have a name");
-        
-        TextContent = ((JsonElement?)commandOptions?.FirstOrDefault(o => o.Name == "text")?.Value)?.GetString();
-        GuildId = interactionRequest.Guild?.Id;
-        DirectMessageChannelId = interactionRequest.User?.Id;
-        if (string.IsNullOrWhiteSpace(GuildId) && string.IsNullOrWhiteSpace(DirectMessageChannelId))
-            throw new CommandValidationException("Custom command must be used inside a server or in a direct message");
-        
-        if (interactionRequest.Data?.Resolved?.Attachments != null && interactionRequest.Data.Resolved.Attachments.Any(x => x.Value.Size / 1000000 > 25))
-            throw new CommandValidationException("File is too large, it must be less than 25MB");
-
-        SenderId = interactionRequest.Member?.User.Id ?? interactionRequest.User!.Id!;
-        FileNameUrlDictionary = interactionRequest.Data?.Resolved?.Attachments?
-            .Select((value, i) => (value, i))
-            .ToDictionary(
-                x => $"{CustomCommandName}_{x.i}{Path.GetExtension(x.value.Value.Url).Split("?")[0]}", 
-                x => x.value.Value.Url) ?? new Dictionary<string, string>();
-    }
-
-    public string CustomCommandName { get; private set; } = null!;
-    public string? TextContent { get; private set; }
-    public string? GuildId { get; private set; }
-    public string? DirectMessageChannelId { get; private set; }
-    public string SenderId { get; private set; } = null!;
-    public IDictionary<string, string> FileNameUrlDictionary { get; private set; } = null!;
+    public string CustomCommandName { get; set; } = null!;
+    public string? TextContent { get; set; }
+    public string? GuildId { get; set; }
+    public string? DirectMessageChannelId { get; set; }
+    public string SenderId { get; set; } = null!;
+    public IDictionary<string, string> FileNameUrlDictionary { get; set; } = new Dictionary<string, string>();
 }

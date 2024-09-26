@@ -1,6 +1,6 @@
 using Bot.Gateway.Extensions;
-using Bot.Gateway.Settings;
 using Discord;
+using Bot.Gateway.Settings;
 using Discord.Rest;
 using Microsoft.Extensions.Options;
 

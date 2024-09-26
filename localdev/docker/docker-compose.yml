@@ -1,12 +1,4 @@
-version: '3.8'
-x-default-logging: &logging
-  driver: "json-file"
-  options:
-    max-size: "5m"
-    max-file: "2"
-
 services:
-
   rabbitmq:
     container_name: rabbitmq
     image: docker.io/masstransit/rabbitmq:3.12.7
@@ -16,6 +8,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - com
   localstack:
     container_name: localstack
     image: docker.io/localstack/localstack:latest
@@ -27,26 +21,25 @@ services:
       - DEBUG=${DEBUG:-0}
     volumes:
       - "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock"
-#  mongo:
-#    container_name: mongo
-#    image: docker.io/library/mongo:7.0
-#    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-#    ports:
-#      - 27017:27017
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    healthcheck:
-#      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
-#      interval: 5s
-#      timeout: 30s
-#      start_period: 0s
-#      retries: 30
+    networks:
+      - com
+  postgres:
+    container_name: postgres
+    image: docker.io/library/postgres:16.4
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: "dotbot"
+      POSTGRES_PASSWORD: "yourWeak(!)Password"
+      POSTGRES_DB: "dotbot"
+    networks:
+      - com
 
   ngrok:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:alpine
     environment:
-      - NGROK_AUTHTOKEN
+      - NGROK_AUTHTOKEN="2CWjmAFVTYilgLK8WuXex7Yfshl_33EUJquMhvnCaTbrEPAL7"
     command: 'http 127.0.0.1:5292'
     network_mode: "host"
     
@@ -69,12 +62,12 @@ services:
           memory: 300M
     restart: unless-stopped
     ports:
-      - 16686:16686         # Jaeger UI
+      - "16686:16686"         # Jaeger UI
       - "4317"
     environment:
       - METRICS_STORAGE_TYPE=prometheus
-    logging: *logging
-
+    networks:
+      - com
   # Grafana
   grafana:
     image: docker.io/grafana/grafana:10.3.1
@@ -90,8 +83,7 @@ services:
       - ../grafana/grafana.ini:/etc/grafana/grafana.ini
       - ../grafana/provisioning/:/etc/grafana/provisioning/:U
     ports:
-      - 3000:3000
-    logging: *logging
+      - "3000:3000"
 
   # OpenTelemetry Collector
   otelcol:
@@ -110,7 +102,8 @@ services:
       - "4318:4318"
     depends_on:
       - jaeger
-    logging: *logging
+    networks:
+      - com
 
   # Prometheus
   prometheus:
@@ -135,14 +128,15 @@ services:
     restart: unless-stopped
     ports:
       - "9090:9090"
-    logging: *logging
-
+    networks:
+      - com
   loki:
     container_name: loki
     image: docker.io/grafana/loki:2.9.4
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
-volumes:
-  mongo_data:
-  mongo_config:
+    networks:
+      - com
+networks:
+  com: {}

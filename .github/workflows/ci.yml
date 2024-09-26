@@ -55,7 +55,11 @@ jobs:
     needs: [tests]
     strategy:
       matrix:
-        image: ["Bot.Gateway", "Xkcd.Job"]
+        image: [
+          {image: "Bot.Gateway", path: "src/Bot.Gateway/Dockerfile"},
+          {image: "Xkcd.Job", path: "src/Xkcd.Job/Dockerfile"},
+          {image: "Bot.Gateway.Migration", path: "src/Bot.Gateway/migration.Dockerfile"}
+        ]
     permissions:
       contents: write
       packages: write
@@ -90,7 +94,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          file: src/${{ matrix.image }}/Dockerfile
+          file: ${{ matrix.path }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -13,6 +13,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8378DB18-9725-4D55-BA59-7EED997FBC0B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkcd.Job.UnitTests", "tests\Xkcd.Job.UnitTests\Xkcd.Job.UnitTests.csproj", "{0364378B-3A4B-4993-9D85-153124F5A5B7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C931806-93F7-4885-90D3-868E7D7F272E} = {2C931806-93F7-4885-90D3-868E7D7F272E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xkcd.Job.FunctionalTests", "tests\Xkcd.Job.FunctionalTests\Xkcd.Job.FunctionalTests.csproj", "{549E349F-A9B9-4C1E-A5A6-8966EFDD4C3F}"
 EndProject

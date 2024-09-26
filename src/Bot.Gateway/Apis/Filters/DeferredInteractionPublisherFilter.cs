@@ -1,7 +1,7 @@
 using System.Text.Json;
+using Contracts.MessageBus;
 using Bot.Gateway.Dto.Requests.Discord;
 using Bot.Gateway.Dto.Responses.Discord;
-using Contracts.MessageBus;
 using MassTransit;
 using MassTransit.Scheduling;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -18,6 +18,8 @@ public class DeferredInteractionPublisherFilter(IBus bus) : IEndpointFilter
         var response = result as JsonHttpResult<InteractionResponse>;
         if (response?.Value?.Type == InteractionResponseType.DeferredInteractionResponse)
         {
+            using var memoryStream = new MemoryStream();
+            context.HttpContext.Request.Body.CopyTo(memoryStream);
             var body = context.HttpContext.Request.Body;
             body.Seek(0, SeekOrigin.Begin);
 

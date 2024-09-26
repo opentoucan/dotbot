@@ -1,8 +1,8 @@
+using Discord;
 using Bot.Gateway.Application.InteractionCommands;
 using Bot.Gateway.Application.InteractionCommands.SlashCommands;
 using Bot.Gateway.Infrastructure.HttpClient;
 using Bot.Gateway.Settings;
-using Discord;
 using Discord.Interactions;
 using Discord.Rest;
 
@@ -19,6 +19,7 @@ public static class DiscordExtensions
         builder.Services.AddScoped<InteractionCommand, SaveCustomCommand>();
         builder.Services.AddScoped<InteractionCommand, RetrieveCustomCommand>();
         builder.Services.AddScoped<InteractionCommand, XkcdCommand>();
+        builder.Services.AddScoped<IDiscordClient, DiscordRestClient>();
         
         builder.Services.AddHttpClient(
             "discord",

@@ -13,12 +13,11 @@
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore"/>
         <PackageReference Include="MassTransit.Grpc"  />
-        <PackageReference Include="MassTransit.MongoDb" />
         <PackageReference Include="MassTransit.RabbitMQ" />
         <PackageReference Include="MediatR" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" />
-        <PackageReference Include="MongoDB.Driver" />
     </ItemGroup>
 
     <ItemGroup>

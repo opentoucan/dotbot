@@ -1,6 +1,5 @@
-﻿using Bot.Gateway.Dto.Requests.Discord;
+﻿using Discord;
 using Bot.Gateway.Dto.Responses.Discord;
-using Discord;
 using MediatR;
 
 namespace Bot.Gateway.Application.InteractionCommands.SlashCommands;
@@ -21,15 +20,7 @@ public class AvatarCommandHandler : IRequestHandler<AvatarCommand, InteractionDa
 public class AvatarCommand : InteractionCommand
 {
     public override string InteractionCommandName => "avatar";
-    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
-    {
-        var mentionedUser = interactionRequest.Data!.Resolved!.Users!.FirstOrDefault().Value;
-        AvatarId = mentionedUser.Avatar!;
-        TargetUserId = mentionedUser.Id!;
-        TargetUsername = mentionedUser.Username!;
-    }
-
-    public string TargetUserId { get; private set; } = null!;
-    public string TargetUsername { get; private set; } = null!;
-    public string AvatarId { get; private set; } = null!;
+    public string TargetUserId { get; set; } = null!;
+    public string TargetUsername { get; set; } = null!;
+    public string AvatarId { get; set; } = null!;
 }

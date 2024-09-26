@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using System.Net.Http.Headers;
-using Bot.Gateway.Dto.Responses.Discord;
 using Discord;
+using Bot.Gateway.Dto.Responses.Discord;
 
 namespace Bot.Gateway.Infrastructure.HttpClient;
 

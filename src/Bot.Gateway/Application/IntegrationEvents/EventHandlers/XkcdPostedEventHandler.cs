@@ -1,6 +1,6 @@
-using Bot.Gateway.Infrastructure.HttpClient;
 using Contracts.MessageBus;
 using Discord;
+using Bot.Gateway.Infrastructure.HttpClient;
 using MassTransit;
 using Xkcd.Sdk;
 

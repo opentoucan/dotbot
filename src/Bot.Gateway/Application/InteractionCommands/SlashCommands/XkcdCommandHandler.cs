@@ -1,8 +1,5 @@
-using System.Text.Json;
-using Bot.Gateway.Dto.Requests.Discord;
-using Bot.Gateway.Dto.Responses.Discord;
-using Bot.Gateway.Infrastructure.HttpClient;
 using Discord;
+using Bot.Gateway.Dto.Responses.Discord;
 using MediatR;
 using Xkcd.Sdk;
 
@@ -36,12 +33,5 @@ public class XkcdCommandHandler(ILogger<XkcdCommandHandler> logger, XkcdService 
 public class XkcdCommand : InteractionCommand
 {
     public override string InteractionCommandName => "xkcd";
-    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
-    {
-        ComicNumber = ((JsonElement?)interactionRequest.Data!.Options?.FirstOrDefault()?.Value)?.GetInt32();
-    }
-    
-    public int? ComicNumber { get; private set; }
-    
-    public XkcdCommand(){}
+    public int? ComicNumber { get; set; }
 }

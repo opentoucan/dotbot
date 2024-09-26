@@ -5,15 +5,17 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
-      <UserSecretsId>aea46887-1dad-4bb6-a4a3-63c361371309</UserSecretsId>
-  </PropertyGroup>
+        <UserSecretsId>aea46887-1dad-4bb6-a4a3-63c361371309</UserSecretsId>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AutoMapper" />
         <PackageReference Include="MimeTypes" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="AWSSDK.S3" />
         <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
-        <PackageReference Include="MassTransit.MongoDb" />
         <PackageReference Include="MassTransit.RabbitMQ" />
         <PackageReference Include="MassTransit" />
         <PackageReference Include="Discord.Net.Commands" />
@@ -22,11 +24,12 @@
         <PackageReference Include="Discord.Net.Webhook" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Google.Protobuf" />
         <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" />
-        <PackageReference Include="MongoDB.Driver" />
         <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
         <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
@@ -36,25 +39,17 @@
         <PackageReference Include="OpenTelemetry.Exporter.Console" />
         <PackageReference Include="Grpc.Tools">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
+            <PrivateAssets>none</PrivateAssets>
         </PackageReference>
     </ItemGroup>
     <PropertyGroup>
         <NoWarn>$(NoWarn);AD0001</NoWarn>
     </PropertyGroup>
-
-    <ItemGroup>
-      <GraphQL Update="Infrastructure\GraphQL\SearchBotCommands.graphql">
-        <Generator>MSBuild:GenerateGraphQLCode</Generator>
-      </GraphQL>
-    </ItemGroup>
+    
 
     <ItemGroup>
       <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
       <ProjectReference Include="..\Xkcd.Sdk\Xkcd.Sdk.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Application\InteractionCommands\UserCommands\" />
-    </ItemGroup>
+    
 </Project>

@@ -1,7 +1,7 @@
 namespace Xkcd.Job.Infrastructure;
 
-public interface IUnitOfWork
+public interface IUnitOfWork : IDisposable
 {
-    Task BeginTransactionAsync(CancellationToken cancellationToken);
-    Task CommitTransactionAsync(CancellationToken cancellationToken);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default);
 }

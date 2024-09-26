@@ -12,7 +12,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="Testcontainers.MongoDb" />
+        <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -26,6 +26,14 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Xkcd.Job\Xkcd.Job.csproj" />
+      <ProjectReference Include="..\..\src\ServiceDefaults\ServiceDefaults.csproj" />
+      <ProjectReference Include="..\..\src\Xkcd.Sdk\Xkcd.Sdk.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Testcontainers.PostgreSql">
+        <HintPath>..\..\..\..\.nuget\packages\testcontainers.postgresql\3.10.0\lib\net8.0\Testcontainers.PostgreSql.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

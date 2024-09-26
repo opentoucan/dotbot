@@ -1,17 +1,11 @@
 using System.Reflection;
 using MassTransit;
-using MassTransit.MongoDbIntegration;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
-using Polly.Timeout;
-using ServiceDefaults;
+using Xkcd.Job.Behaviours;
 using Xkcd.Job.Infrastructure;
 using Xkcd.Job.Infrastructure.Repositories;
-using Xkcd.Job.Service;
 using Xkcd.Sdk;
 
 namespace Xkcd.Job.Extensions;
@@ -20,8 +14,12 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddTransient<IXkcdNotificationService, XkcdNotificationService>();
         builder.Services.AddTransient<IXkcdRepository, XkcdRepository>();
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining(typeof(Program));
+            cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
+        });
         return builder;
     }
     
@@ -32,20 +30,17 @@ public static class Extensions
         {
             x.AddConsumers(Assembly.GetExecutingAssembly());
             
-            x.AddMongoDbOutbox(o =>
+            x.AddEntityFrameworkOutbox<XkcdContext>(o =>
             {
-                o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
-                o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
-
-                o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+                o.UsePostgres();
                 o.UseBusOutbox();
             });
     
             x.UsingRabbitMq((context,cfg) =>
             {
                 cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),  h => {
-                    h.Username(rabbitMqSection.GetValue<string>("User"));
-                    h.Password(rabbitMqSection.GetValue<string>("Password"));
+                    h.Username(rabbitMqSection.GetValue<string>("User")!);
+                    h.Password(rabbitMqSection.GetValue<string>("Password")!);
                 });
 
                 cfg.ConfigureEndpoints(context);
@@ -68,10 +63,11 @@ public static class Extensions
 
     public static IHostApplicationBuilder AddDatabase(this IHostApplicationBuilder builder)
     {
-        builder.AddMongoDbDefaults();
-        builder.Services.AddMongoDbCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>();
-        builder.Services.AddScoped<XkcdContext>(c =>
-            new XkcdContext(c.GetRequiredService<MongoDbContext>(), c.GetRequiredService<IMongoCollection<Xkcd.Job.Infrastructure.Entities.Xkcd>>()));
+        builder.Services.AddScoped<DbContext>();
+        builder.Services.AddDbContext<XkcdContext>(options =>
+        {
+            options.UseNpgsql(builder.Configuration.GetConnectionString("dotbot"));
+        });
         return builder;
     }
 }

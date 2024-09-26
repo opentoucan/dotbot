@@ -2,7 +2,6 @@ using Contracts.MessageBus;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Xkcd.Job.Infrastructure;
 using Xkcd.Job.Infrastructure.Repositories;
 using Xkcd.Job.Service;
@@ -30,11 +29,11 @@ public class XkcdNotificationServiceTests
     {
         var sut = new XkcdNotificationService(Repository, XkcdService, Bus, Logger);
         
-        await sut.CheckAndNotify();
+        await sut.Handle(new XkcdCheckNewXkcdRequest(), new CancellationToken());
 
-        await Repository
+        Repository
             .DidNotReceive()
-            .Upsert(Arg.Any<Infrastructure.Entities.Xkcd>());
+            .Add(Arg.Any<Infrastructure.Entities.Xkcd>());
 
         await Bus
             .DidNotReceive()
@@ -64,11 +63,11 @@ public class XkcdNotificationServiceTests
         
         var sut = new XkcdNotificationService(Repository, XkcdService, Bus, Logger);
         
-        await sut.CheckAndNotify();
+        await sut.Handle(new XkcdCheckNewXkcdRequest(), new CancellationToken());
 
-        await Repository
+        Repository
             .DidNotReceive()
-            .Upsert(Arg.Any<Infrastructure.Entities.Xkcd>());
+            .Add(Arg.Any<Infrastructure.Entities.Xkcd>());
 
         await Bus
             .DidNotReceive()
@@ -95,11 +94,11 @@ public class XkcdNotificationServiceTests
         
         var sut = new XkcdNotificationService(Repository, XkcdService, Bus, Logger);
         
-        await sut.CheckAndNotify();
+        await sut.Handle(new XkcdCheckNewXkcdRequest(), new CancellationToken());
 
-        await Repository
+        Repository
             .Received(1)
-            .Upsert(Arg.Is<Infrastructure.Entities.Xkcd>(x =>
+            .Add(Arg.Is<Infrastructure.Entities.Xkcd>(x =>
                 x.ComicNumber == stubXkcd.ComicNumber &&
                 x.Posted.DateTime == stubXkcd.DatePosted));
 

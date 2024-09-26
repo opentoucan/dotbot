@@ -1,9 +1,9 @@
+using Contracts.MessageBus;
 using Bot.Gateway.Application.InteractionCommands;
 using Bot.Gateway.Application.InteractionCommands.Exceptions;
 using Bot.Gateway.Dto.Responses.Discord;
 using Bot.Gateway.Extensions;
 using Bot.Gateway.Infrastructure.HttpClient;
-using Contracts.MessageBus;
 using MassTransit;
 using MediatR;
 
@@ -26,7 +26,6 @@ public class DeferredInteractionEventHandler(
         try
         {
             var command = interactionCommandFactory.Create(interactionType, context.Message.Request);
-
             var response = await mediator.Send(command);
             await discordHttpRequestHelper
                 .SendFollowupMessageAsync(
