@@ -55,7 +55,7 @@ jobs:
     needs: [tests]
     strategy:
       matrix:
-        image: [
+        project: [
           {image: "Bot.Gateway", path: "src/Bot.Gateway/Dockerfile"},
           {image: "Xkcd.Job", path: "src/Xkcd.Job/Dockerfile"},
           {image: "Bot.Gateway.Migration", path: "src/Bot.Gateway/migration.Dockerfile"}
@@ -84,7 +84,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project.image }}
           tags: |
             type=sha,format=long
             type=raw,value=latest
@@ -94,7 +94,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          file: ${{ matrix.path }}
+          file: ${{ matrix.project.path }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
