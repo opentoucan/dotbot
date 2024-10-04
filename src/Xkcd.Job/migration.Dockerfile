@@ -13,12 +13,12 @@ COPY ["nuget.config", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["Dotbot.sln", "."]
-COPY ["src/Bot.Gateway/Bot.Gateway.csproj", "Bot.Gateway/Bot.Gateway.csproj"]
 COPY ["src/Xkcd.Sdk/Xkcd.Sdk.csproj", "Xkcd.Sdk/Xkcd.Sdk.csproj"]
+COPY ["src/Xkcd.Job/Xkcd.Job.csproj", "Xkcd.Job/Xkcd.Job.csproj"]
 COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefaults.csproj"]
 
-COPY ["src/Bot.Gateway/", "Bot.Gateway"]
 COPY ["src/Xkcd.Sdk/", "Xkcd.Sdk"]
+COPY ["src/Xkcd.Job/", "Xkcd.Job"]
 COPY ["src/ServiceDefaults/", "ServiceDefaults"]
 
 # Build the migrationbundle here
@@ -26,7 +26,7 @@ FROM build as migrationbuilder
 ENV PATH $PATH:/root/.dotnet/tools
 RUN dotnet tool install --global dotnet-ef
 RUN mkdir /migrations
-RUN dotnet ef migrations bundle -s /src/Bot.Gateway -p /src/Bot.Gateway -c DotbotContext --self-contained -r linux-x64 -o /migrations/migration
+RUN dotnet ef migrations bundle -s /src/Xkcd.Job -p /src/Xkcd.Job -c DotbotContext --self-contained -r linux-x64 -o /migrations/migration
 
 FROM ${DOTNET_RUNTIME} as initcontainer
 ENV CONNECTIONSTRING=""

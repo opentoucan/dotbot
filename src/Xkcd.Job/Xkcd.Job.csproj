@@ -8,7 +8,8 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <IsPackable>false</IsPackable>
         <UserSecretsId>c2ff8da8-d2ec-4d8b-871d-bc2d264ff1ea</UserSecretsId>
-  </PropertyGroup>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore"/>
@@ -16,6 +17,7 @@
         <PackageReference Include="MassTransit.RabbitMQ" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
         <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" />
     </ItemGroup>
@@ -32,5 +34,9 @@
       <None Update="appsettings.Development.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\Migrations\" />
     </ItemGroup>
 </Project>

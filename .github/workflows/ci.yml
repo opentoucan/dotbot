@@ -59,6 +59,7 @@ jobs:
           {image: "Bot.Gateway", path: "src/Bot.Gateway/Dockerfile"},
           {image: "Xkcd.Job", path: "src/Xkcd.Job/Dockerfile"},
           {image: "Bot.Gateway.Migration", path: "src/Bot.Gateway/migration.Dockerfile"}
+          {image: "Xkcd.Job.Migration", path: "src/Xkcd.Job/migration.Dockerfile"}
         ]
     permissions:
       contents: write

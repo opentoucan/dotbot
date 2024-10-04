@@ -66,7 +66,7 @@ public static class Extensions
         builder.Services.AddScoped<DbContext>();
         builder.Services.AddDbContext<XkcdContext>(options =>
         {
-            options.UseNpgsql(builder.Configuration.GetConnectionString("dotbot"));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("xkcd"));
         });
         return builder;
     }

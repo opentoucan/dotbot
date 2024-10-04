@@ -27,11 +27,22 @@ services:
     container_name: postgres
     image: docker.io/library/postgres:16.4
     ports:
-      - '5432:5432'
+      - '54321:5432'
     environment:
       POSTGRES_USER: "dotbot"
       POSTGRES_PASSWORD: "yourWeak(!)Password"
       POSTGRES_DB: "dotbot"
+    networks:
+      - com
+  postgres-xkcd:
+    container_name: postgres-xkcd
+    image: docker.io/library/postgres:16.4
+    ports:
+      - '54322:5432'
+    environment:
+      POSTGRES_USER: "xkcd"
+      POSTGRES_PASSWORD: "yourWeak(!)Password"
+      POSTGRES_DB: "xkcd"
     networks:
       - com
 
