@@ -52,8 +52,9 @@ jobs:
       contents: write # to push chart release and create a release (helm/chart-releaser-action)
       packages: write # needed for ghcr access
       id-token: write # needed for keyless signing
-
     runs-on: ubuntu-latest
+    environment: 
+      name: 'Production'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
