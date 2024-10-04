@@ -26,7 +26,7 @@ FROM build as migrationbuilder
 ENV PATH $PATH:/root/.dotnet/tools
 RUN dotnet tool install --global dotnet-ef
 RUN mkdir /migrations
-RUN dotnet ef migrations bundle -s /src/Xkcd.Job -p /src/Xkcd.Job -c DotbotContext --self-contained -r linux-x64 -o /migrations/migration
+RUN dotnet ef migrations bundle -s /src/Xkcd.Job -p /src/Xkcd.Job -c XkcdContext --self-contained -r linux-x64 -o /migrations/migration
 
 FROM ${DOTNET_RUNTIME} as initcontainer
 ENV CONNECTIONSTRING=""
