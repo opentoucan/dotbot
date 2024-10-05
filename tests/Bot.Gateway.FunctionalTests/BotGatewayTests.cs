@@ -85,7 +85,7 @@ public class BotGatewayTests(CustomWebApplicationFactory factory) : IClassFixtur
         var queries = scope.ServiceProvider.GetRequiredService<ICustomCommandQueries>();
         var customCommands = await queries.GetCustomCommandsFromServerAsync(requestData.Guild!.Id);
         
-        using (new AssertionScope())
+        using (new AssertionScope{FormattingOptions = { MaxLines = 300}})
         {
             result.StatusCode.Should().Be(HttpStatusCode.OK);
             interactionResponse.Should().NotBeNull();

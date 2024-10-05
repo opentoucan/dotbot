@@ -24,7 +24,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         .WithUsername("dotbot")
         .WithPassword("yourWeak(!)Password")
         .WithImage("postgres:16")
-        .WithPortBinding(54321, 5432)
+        .WithPortBinding(54320, 5432)
         .WithCleanUp(true)
         .Build();
 
