@@ -8,6 +8,9 @@ on:
 jobs:
   release-images:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ["bot.gateway", "xkcd.job", "bot.gateway.migration", "xkcd.job.migration"]
     permissions:
       contents: write
       packages: write
@@ -28,5 +31,4 @@ jobs:
       
       - uses: imjasonh/setup-crane@v0.3
       - run: |
-          crane tag "ghcr.io/${{ github.repository_owner }}/bot.gateway:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
-          crane tag "ghcr.io/${{ github.repository_owner }}/xkcd.job:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
+          crane tag "ghcr.io/${{ github.repository_owner }}/${{matrix.image}}:sha-${{ github.sha }}" "${{ steps.prep.outputs.SEMVER }}"
