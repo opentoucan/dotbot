@@ -3,10 +3,15 @@ fullnameOverride: ""
 gateway:
   replicaCount: 1
   image:
-    repository: "ghcr.io/opentoucan/bot.gateway"
-    tag: "0.3.26"
-    digest: "sha256:a9394a08a06fb7a56d6e1ad59d3c09674bb9f474e603bfe21f32e1fbdb367d41"
+    repository: "ghcr.io/opentoucan"
+    tag: "1.0.0"
     pullPolicy: IfNotPresent
+    main:
+      name: "bot.gateway"
+      digest: "sha256:a6357f77cb90dd27ee20f34beaa77e5c36aa47dd3fb5152d6a940ea9cf7b57df"
+    migration:
+      name: "bot.gateway.migration"
+      digest: "ha256:93aba37d3228da4cd54176ea9f94e391bf4012eaf4999f501497582344a18bc6"
   secretName: dotbot-secret
   podAnnotations: { }
   podLabels: { }
@@ -56,10 +61,15 @@ jobs:
       runAsGroup: 1000
       fsGroup: 2000
     image:
-      repository: "ghcr.io/opentoucan/xkcd.job"
-      tag: "0.3.26"
-      digest: "sha256:4d905a5bc81ceda6accd62e105bbe6d9fb90e9a09f903e90c19f954a469d027f"
+      repository: "ghcr.io/opentoucan"
+      tag: "1.0.0"
       imagePullPolicy: Always
+      main:
+        name: "xkcd.job"
+        digest: "sha256:1260888b92e648b0da5c8809035561842cb6935498c612fa4eba44fc966c0700"
+      migration:
+        name: "xkcd.job.migration"
+        digest: "sha256:6e209a6038f705be20beb71cd939271624181c282ab7f33a8659b0e251807b16"
     secretName: dotbot-secret
     schedule: "0 * * * 1,3,5"
     resources:

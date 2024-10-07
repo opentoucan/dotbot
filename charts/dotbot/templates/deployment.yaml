@@ -28,11 +28,18 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
+      initContainers:
+        - image: {{ .image.repository }}/{{ .image.migration.name }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.migration.digest }}@{{ .image.migration.digest }}{{ end }}
+          imagePullPolicy: {{ .image.imagePullPolicy }}
+          name: {{- include "dotbot.name" $ }}-migration
+          envFrom:
+              - secretRef:
+                name: {{ .secretName }}
       containers:
         - name: "{{- include "dotbot.name" $ }}"
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          image: {{ .image.repository }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
+          image: {{ .image.repository }}/{{ .image.main.name }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
           imagePullPolicy: {{ .image.pullPolicy }}
           envFrom:
             - secretRef:

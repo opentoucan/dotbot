@@ -31,8 +31,15 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
+          initContainers:
+            - image: {{ $job.image.repository }}/{{ $job.image.migration.name }}:{{ $job.image.tag | default $.Chart.AppVersion }}{{ if $job.image.migration.digest }}@{{ $job.image.migration.digest }}{{ end }}
+              imagePullPolicy: {{ $job.image.imagePullPolicy }}
+              name: {{ $job.name }}-migration
+              envFrom:
+                - secretRef:
+                    name: {{ $job.secretName }}
           containers:
-            - image: {{ $job.image.repository }}:{{ $job.image.tag | default $.Chart.AppVersion }}{{ if $job.image.digest }}@{{ $job.image.digest }}{{ end }}
+            - image: {{ $job.image.repository }}/{{ $job.image.main.name }}:{{ $job.image.tag | default $.Chart.AppVersion }}{{ if $job.image.main.digest }}@{{ $job.image.main.digest }}{{ end }}
               imagePullPolicy: {{ $job.image.imagePullPolicy }}
               name: {{ $job.name }}
               envFrom:
