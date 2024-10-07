@@ -5,7 +5,7 @@ gateway:
   image:
     repository: "ghcr.io/opentoucan"
     tag: "1.0.0"
-    pullPolicy: IfNotPresent
+    imagePullPolicy: IfNotPresent
     main:
       name: "bot.gateway"
       digest: "sha256:a6357f77cb90dd27ee20f34beaa77e5c36aa47dd3fb5152d6a940ea9cf7b57df"
