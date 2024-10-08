@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: {{ .image.imagePullPolicy }}
           name: "{{- include "dotbot.name" $ }}-migration"
           envFrom:
-              - secretRef:
+            - secretRef:
                 name: {{ .secretName }}
       containers:
         - name: "{{- include "dotbot.name" $ }}"
