@@ -11,7 +11,7 @@ gateway:
       digest: "sha256:a6357f77cb90dd27ee20f34beaa77e5c36aa47dd3fb5152d6a940ea9cf7b57df"
     migration:
       name: "bot.gateway.migration"
-      digest: "ha256:93aba37d3228da4cd54176ea9f94e391bf4012eaf4999f501497582344a18bc6"
+      digest: "sha256:93aba37d3228da4cd54176ea9f94e391bf4012eaf4999f501497582344a18bc6"
   secretName: dotbot-secret
   podAnnotations: { }
   podLabels: { }
