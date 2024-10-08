@@ -13,8 +13,8 @@ gateway:
       name: "bot.gateway.migration"
       digest: "sha256:93aba37d3228da4cd54176ea9f94e391bf4012eaf4999f501497582344a18bc6"
   secretName: dotbot-secret
-  podAnnotations: { }
-  podLabels: { }
+  podAnnotations: {}
+  podLabels: {}
   podSecurityContext:
     runAsUser: 1000
     runAsGroup: 1000
@@ -30,8 +30,8 @@ gateway:
     requests:
       cpu: 100m
       memory: 128Mi
-  volumes: [ ]
-  volumeMounts: [ ]
+  volumes: []
+  volumeMounts: []
 
 service:
   name: http
