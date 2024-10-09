@@ -59,7 +59,7 @@ jobs:
         project: [
           {image: "Dotbot.Gateway", path: "src/Dotbot.Gateway/Dockerfile"},
           {image: "Xkcd.Job", path: "src/Xkcd.Job/Dockerfile"},
-          {image: "Dotbot.Gateway.Migration", path: "src/Dotbot.Gateway/migration.Dockerfile"},
+          {image: "Dotbot.Migration", path: "src/Dotbot.Gateway/migration.Dockerfile"},
         ]
     permissions:
       contents: write
@@ -103,12 +103,6 @@ jobs:
   output-migration:
     runs-on: ubuntu-latest
     needs: [build]
-    strategy:
-      matrix:
-        project: [
-          {name: "Dotbot.Gateway", path: "src/Dotbot.Gateway"},
-          {name: "Xkcd.Job", path: "src/Xkcd.Job"}
-        ]
     permissions:
       contents: write
       packages: write
@@ -132,11 +126,11 @@ jobs:
         
         - name: Generate SQL migration script
           run: |
-            dotnet ef migrations script --idempotent -p ${{ matrix.project.path }} -o ${{ matrix.project.path }}/script.sql
+            dotnet ef migrations script --idempotent -s /src/Dotbot.Gateway -p /src/Dotbot.Infrastructure -o dotbot-migration.sql
         
         - name: Upload SQL script artifact
           uses: actions/upload-artifact@v4
           with:
-            name: ${{ matrix.project.name }}.sql
-            path: ${{ matrix.project.path }}/script.sql
+            name: dotbot-migration.sql
+            path: dotbot-migration.sql
           if: ${{ always() }}
