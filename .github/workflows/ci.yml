@@ -126,7 +126,7 @@ jobs:
         
         - name: Generate SQL migration script
           run: |
-            dotnet ef migrations script --idempotent -s /src/Dotbot.Gateway -p /src/Dotbot.Infrastructure -o dotbot-migration.sql
+            dotnet ef migrations script --idempotent -s ./src/Dotbot.Gateway -p ./src/Dotbot.Infrastructure -o dotbot-migration.sql
         
         - name: Upload SQL script artifact
           uses: actions/upload-artifact@v4
