@@ -1,15 +1,15 @@
 using Contracts.MessageBus;
+using Dotbot.Infrastructure;
+using Dotbot.Infrastructure.Repositories;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xkcd.Job.FunctionalTests.Util;
 using Xkcd.Job.FunctionalTests.Util.Consumers;
-using Xkcd.Job.Infrastructure;
-using Xkcd.Job.Infrastructure.Repositories;
 
 namespace Xkcd.Job.FunctionalTests;
 
-public class XkcdJobTests(CustomWebApplicationFactory<Program, XkcdContext> factory)
-    : IClassFixture<CustomWebApplicationFactory<Program, XkcdContext>>
+public class XkcdJobTests(CustomWebApplicationFactory<Program, DotbotContext> factory)
+    : IClassFixture<CustomWebApplicationFactory<Program, DotbotContext>>
 {
 
     [Fact]

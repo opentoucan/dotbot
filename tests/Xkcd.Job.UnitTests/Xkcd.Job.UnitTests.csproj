@@ -25,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Dotbot.Infrastructure\Dotbot.Infrastructure.csproj" />
       <ProjectReference Include="..\..\src\ServiceDefaults\ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\src\Xkcd.Job\Xkcd.Job.csproj" />
       <ProjectReference Include="..\..\src\Xkcd.Sdk\Xkcd.Sdk.csproj" />

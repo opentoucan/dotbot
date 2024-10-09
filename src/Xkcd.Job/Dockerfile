@@ -9,10 +9,12 @@ COPY ["nuget.config", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["src/Xkcd.Job/Xkcd.Job.csproj", "Xkcd.Job/Xkcd.Job.csproj"]
+COPY ["src/Dotbot.Infrastructure/Dotbot.Infrastructure.csproj", "Dotbot.Infrastructure/Dotbot.Infrastructure.csproj"]
 COPY ["src/Xkcd.Sdk/Xkcd.Sdk.csproj", "Xkcd.Sdk/Xkcd.Sdk.csproj"]
 COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefaults.csproj"]
 
 COPY "src/Xkcd.Job/" "Xkcd.Job"
+COPY "src/Dotbot.Infrastructure/" "Dotbot.Infrastructure"
 COPY "src/Xkcd.Sdk/" "Xkcd.Sdk"
 COPY "src/ServiceDefaults/" "ServiceDefaults"
 RUN dotnet restore "Xkcd.Job/Xkcd.Job.csproj"

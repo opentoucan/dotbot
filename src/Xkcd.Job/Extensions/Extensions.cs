@@ -1,11 +1,11 @@
 using System.Reflection;
+using Dotbot.Infrastructure;
+using Dotbot.Infrastructure.Behaviours;
+using Dotbot.Infrastructure.Extensions;
+using Dotbot.Infrastructure.Repositories;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
-using Xkcd.Job.Behaviours;
-using Xkcd.Job.Infrastructure;
-using Xkcd.Job.Infrastructure.Repositories;
 using Xkcd.Sdk;
 
 namespace Xkcd.Job.Extensions;
@@ -14,12 +14,12 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddTransient<IXkcdRepository, XkcdRepository>();
         builder.Services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblyContaining(typeof(Program));
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
         });
+        builder.Services.AddTransient<IXkcdRepository, XkcdRepository>();
         return builder;
     }
     
@@ -29,8 +29,8 @@ public static class Extensions
         builder.Services.AddMassTransit(x =>
         {
             x.AddConsumers(Assembly.GetExecutingAssembly());
-            
-            x.AddEntityFrameworkOutbox<XkcdContext>(o =>
+            x.AddDelayedMessageScheduler();
+            x.AddEntityFrameworkOutbox<DotbotContext>(o =>
             {
                 o.UsePostgres();
                 o.UseBusOutbox();
@@ -38,18 +38,20 @@ public static class Extensions
     
             x.UsingRabbitMq((context,cfg) =>
             {
-                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),  h => {
-                    h.Username(rabbitMqSection.GetValue<string>("User")!);
-                    h.Password(rabbitMqSection.GetValue<string>("Password")!);
-                });
-
+                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"), 
+                    rabbitMqSection.GetValue<ushort>("Port"),
+                    "/", 
+                    h => {
+                        h.Username(rabbitMqSection.GetValue<string>("User")!);
+                        h.Password(rabbitMqSection.GetValue<string>("Password")!);
+                    });
+                cfg.UseDelayedMessageScheduler();                
                 cfg.ConfigureEndpoints(context);
             });
         });
-
         return builder;
     }
-  
+    
     public static IHostApplicationBuilder AddHttpClient(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHttpClient<IXkcdService, XkcdService>(client =>
@@ -58,16 +60,6 @@ public static class Extensions
             })
             .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
 
-        return builder;
-    }
-
-    public static IHostApplicationBuilder AddDatabase(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<DbContext>();
-        builder.Services.AddDbContext<XkcdContext>(options =>
-        {
-            options.UseNpgsql(builder.Configuration.GetConnectionString("xkcd"));
-        });
         return builder;
     }
 }

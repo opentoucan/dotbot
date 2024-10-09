@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Dotbot.Infrastructure\Dotbot.Infrastructure.csproj" />
       <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
       <ProjectReference Include="..\Xkcd.Sdk\Xkcd.Sdk.csproj" />
     </ItemGroup>
@@ -34,9 +35,5 @@
       <None Update="appsettings.Development.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Infrastructure\Migrations\" />
     </ItemGroup>
 </Project>

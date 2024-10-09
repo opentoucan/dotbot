@@ -1,7 +1,7 @@
 using Contracts.MessageBus;
+using Dotbot.Infrastructure.Repositories;
 using MassTransit;
 using MediatR;
-using Xkcd.Job.Infrastructure.Repositories;
 using Xkcd.Sdk;
 
 namespace Xkcd.Job.Service;
@@ -46,7 +46,7 @@ public class XkcdNotificationService : IRequestHandler<XkcdCheckNewXkcdRequest, 
 
         _logger.LogInformation("Current comic is {existingComicNumber}, last checked was {latestComicNumber}",  lastPostedXkcd?.ComicNumber, latestXkcd.ComicNumber);
 
-        var newXkcd = new Xkcd.Job.Infrastructure.Entities.Xkcd(latestXkcd.ComicNumber, latestXkcd.DatePosted);
+        var newXkcd = new Dotbot.Infrastructure.Entities.Xkcd(latestXkcd.ComicNumber, latestXkcd.DatePosted);
         _xkcdRepository.Add(newXkcd);
         var xkcdPostedEvent = new XkcdPostedEvent(latestXkcd.ComicNumber, latestXkcd.DatePosted, latestXkcd.AltText, latestXkcd.ImageUrl, latestXkcd.Title);
         await _bus.Publish(xkcdPostedEvent, cancellationToken);

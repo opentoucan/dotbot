@@ -1,9 +1,8 @@
 using Contracts.MessageBus;
+using Dotbot.Infrastructure.Repositories;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xkcd.Job.Infrastructure;
-using Xkcd.Job.Infrastructure.Repositories;
 using Xkcd.Job.Service;
 using Xkcd.Sdk;
 
@@ -33,7 +32,7 @@ public class XkcdNotificationServiceTests
 
         Repository
             .DidNotReceive()
-            .Add(Arg.Any<Infrastructure.Entities.Xkcd>());
+            .Add(Arg.Any<Dotbot.Infrastructure.Entities.Xkcd>());
 
         await Bus
             .DidNotReceive()
@@ -53,7 +52,7 @@ public class XkcdNotificationServiceTests
         };
         
         var existingXkcd =
-            new Infrastructure.Entities.Xkcd(stubXkcd.ComicNumber, stubXkcd.DatePosted);
+            new Dotbot.Infrastructure.Entities.Xkcd(stubXkcd.ComicNumber, stubXkcd.DatePosted);
         XkcdService
             .GetXkcdComicAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(stubXkcd);
@@ -67,7 +66,7 @@ public class XkcdNotificationServiceTests
 
         Repository
             .DidNotReceive()
-            .Add(Arg.Any<Infrastructure.Entities.Xkcd>());
+            .Add(Arg.Any<Dotbot.Infrastructure.Entities.Xkcd>());
 
         await Bus
             .DidNotReceive()
@@ -98,7 +97,7 @@ public class XkcdNotificationServiceTests
 
         Repository
             .Received(1)
-            .Add(Arg.Is<Infrastructure.Entities.Xkcd>(x =>
+            .Add(Arg.Is<Dotbot.Infrastructure.Entities.Xkcd>(x =>
                 x.ComicNumber == stubXkcd.ComicNumber &&
                 x.Posted.DateTime == stubXkcd.DatePosted));
 
