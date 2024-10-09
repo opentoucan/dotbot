@@ -16,10 +16,12 @@ COPY ["Dotbot.sln", "."]
 COPY ["src/Dotbot.Gateway/Dotbot.Gateway.csproj", "Dotbot.Gateway/Dotbot.Gateway.csproj"]
 COPY ["src/Dotbot.Infrastructure/Dotbot.Infrastructure.csproj", "Dotbot.Infrastructure/Dotbot.Infrastructure.csproj"]
 COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefaults.csproj"]
+COPY ["src/Xkcd.Sdk/Xkcd.Sdk.csproj", "Xkcd.Sdk/Xkcd.Sdk.csproj"]
 
 COPY ["src/Dotbot.Gateway/", "Dotbot.Gateway"]
 COPY ["src/Dotbot.Infrastructure/", "Dotbot.Infrastructure"]
 COPY ["src/ServiceDefaults/", "ServiceDefaults"]
+COPY ["src/Xkcd.Sdk/", "Xkcd.Sdk"]
 
 # Build the migrationbundle here
 FROM build as migrationbuilder
