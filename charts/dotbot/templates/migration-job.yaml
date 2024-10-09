@@ -1,16 +1,12 @@
-{{- with .Values.gateway }}
+{{- with .Values.migrator }}
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: "{{- include "dotbot.fullname" $ }}"
+  name: "{{- include "dotbot.fullname" $ }}-migrator"
   labels:
     {{- include "dotbot.labels" $ | nindent 4 }}
 spec:
-  replicas: {{ .replicaCount }}
-  selector:
-    matchLabels:
-      {{- include "dotbot.selectorLabels" $ | nindent 6 }}
   template:
     metadata:
       {{- with .podAnnotations }}
@@ -23,13 +19,14 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      restartPolicy: Never
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: "{{- include "dotbot.name" $ }}"
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
       containers:
-        - name: "{{- include "dotbot.name" $ }}"
+        - name: "{{- include "dotbot.name" $ }}-migrator"
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
           image: {{ .image.repository }}/{{ .image.name }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
@@ -38,26 +35,11 @@ spec:
             - secretRef:
                 name: {{ .secretName }}
                 optional: true
-          ports:
-            - name: http
-              containerPort: {{ $.Values.service.targetPort }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-          resources:
-            {{- toYaml .resources | nindent 12 }}
-          {{- with .volumeMounts }}
+          env:
+            - name: DOTNET_BUNDLE_EXTRACT_BASE_DIR
+              value: /cache
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .volumes }}
+            {{- toYaml .volumeMounts | nindent 12 }}
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .volumes | nindent 8 }}
 {{- end }}

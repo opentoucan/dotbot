@@ -4,25 +4,22 @@ gateway:
   replicaCount: 1
   image:
     repository: "ghcr.io/opentoucan"
-    tag: "1.0.0"
+    tag: "1.0.1"
     imagePullPolicy: IfNotPresent
-    main:
-      name: "bot.gateway"
-      digest: "sha256:a6357f77cb90dd27ee20f34beaa77e5c36aa47dd3fb5152d6a940ea9cf7b57df"
-    migration:
-      name: "bot.gateway.migration"
-      digest: "sha256:93aba37d3228da4cd54176ea9f94e391bf4012eaf4999f501497582344a18bc6"
+    name: "dotbot.gateway"
+    digest: "sha256:fffb516e18b492ca988c2f44b61b0b50e2d812a28364b84270a8858d92318467"
   secretName: dotbot-secret
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 2000
+    runAsUser: 1024
+    runAsGroup: 1024
+    fsGroup: 1024
+    supplementalGroups: [1024]
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 1000
+    runAsUser: 1024
     allowPrivilegeEscalation: false
   resources:
     limits:
@@ -32,6 +29,43 @@ gateway:
       memory: 128Mi
   volumes: []
   volumeMounts: []
+
+migrator:
+  image:
+    repository: "ghcr.io/opentoucan"
+    tag: "1.0.1"
+    imagePullPolicy: IfNotPresent
+    name: "dotbot.migration"
+    digest: "sha256:88e60d1939c571bd179e91c27f37539d38713f22d352e4764f798f33bdf0f70a"
+  secretName: dotbot-migrator-secret
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext:
+    runAsUser: 1024
+    runAsGroup: 1024
+    fsGroup: 1024
+    supplementalGroups: [1024]
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1024
+    allowPrivilegeEscalation: false
+  volumes:
+    - name: cache-volume
+      emptyDir:
+        sizeLimit: 500Mi
+  volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+  env:
+    - name: DOTNET_BUNDLE_EXTRACT_BASE_DIR
+      value: /cache
 
 service:
   name: http
@@ -57,19 +91,16 @@ ingress:
 jobs:
   - name: xkcd-job
     securityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 2000
+      runAsUser: 1024
+      runAsGroup: 1024
+      fsGroup: 1024
     image:
       repository: "ghcr.io/opentoucan"
-      tag: "1.0.0"
+      tag: "1.0.1"
       imagePullPolicy: Always
       main:
         name: "xkcd.job"
-        digest: "sha256:1260888b92e648b0da5c8809035561842cb6935498c612fa4eba44fc966c0700"
-      migration:
-        name: "xkcd.job.migration"
-        digest: "sha256:6e209a6038f705be20beb71cd939271624181c282ab7f33a8659b0e251807b16"
+        digest: "sha256:bc47bcdd6c10a0903eb630cf529ce58ff1a3cb5596b2bc0279e7bbb48dd121ac"
     secretName: dotbot-secret
     schedule: "0 * * * 1,3,5"
     resources:
