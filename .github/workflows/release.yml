@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ["bot.gateway", "xkcd.job", "bot.gateway.migration", "xkcd.job.migration"]
+        image: ["dotbot.gateway", "xkcd.job", "dotbot.gateway.migration"]
     permissions:
       contents: write
       packages: write

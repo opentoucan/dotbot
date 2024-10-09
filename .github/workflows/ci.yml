@@ -5,11 +5,12 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'src/Bot.Gateway/**'
+      - 'src/Dotbot.Gateway/**'
+      - 'src/Dotbot.Infrastructure/**'
       - 'src/Xkcd.Job/**'
       - 'src/Xkcd.Sdk/**'
       - 'src/ServiceDefaults/**'
-      - '!src/Bot.Gateway/CHANGELOG.md'
+      - '!src/Dotbot.Gateway/CHANGELOG.md'
       - '!src/Xkcd.Job/CHANGELOG.md'
       - 'tests/**'
 
@@ -21,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ["Bot.Gateway", "Xkcd.Job"]
+        project: ["Dotbot.Gateway", "Xkcd.Job"]
         test: ["UnitTests", "FunctionalTests"]
     permissions:
       contents: write
@@ -56,10 +57,9 @@ jobs:
     strategy:
       matrix:
         project: [
-          {image: "Bot.Gateway", path: "src/Bot.Gateway/Dockerfile"},
+          {image: "Dotbot.Gateway", path: "src/Dotbot.Gateway/Dockerfile"},
           {image: "Xkcd.Job", path: "src/Xkcd.Job/Dockerfile"},
-          {image: "Bot.Gateway.Migration", path: "src/Bot.Gateway/migration.Dockerfile"},
-          {image: "Xkcd.Job.Migration", path: "src/Xkcd.Job/migration.Dockerfile"}
+          {image: "Dotbot.Gateway.Migration", path: "src/Dotbot.Gateway/migration.Dockerfile"},
         ]
     permissions:
       contents: write
@@ -99,3 +99,44 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  
+  output-migration:
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        project: [
+          {name: "Dotbot.Gateway", path: "src/Dotbot.Gateway"},
+          {name: "Xkcd.Job", path: "src/Xkcd.Job"}
+        ]
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            token: ${{ secrets.PAT }}
+
+        - name: Setup dotnet
+          uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: '8.0.x'
+
+        - name: Install EF Tool
+          run: |
+            dotnet new tool-manifest
+            dotnet tool install dotnet-ef
+        
+        - name: Generate SQL migration script
+          run: |
+            dotnet ef migrations script --idempotent -p ${{ matrix.project.path }} -o ${{ matrix.project.path }}/script.sql
+        
+        - name: Upload SQL script artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: ${{ matrix.project.name }}.sql
+            path: ${{ matrix.project.path }}/script.sql
+          if: ${{ always() }}
