@@ -7,7 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddDefaultOpenApi();
 builder.AddApplicationServices();
-builder.Services.AddHostedService<DiscordRegistrationService>();
+var healthCheckMode = builder.Configuration.GetValue<bool>("DiscordSettings:HealthCheckMode");
+if(!healthCheckMode)
+    builder.Services.AddHostedService<DiscordRegistrationService>();
 
 var app = builder.Build();
 

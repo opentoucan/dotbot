@@ -38,11 +38,8 @@ public static class DiscordExtensions
         
         return builder;
     }
-    public static async Task RegisterCommands(this DiscordRestClient client, bool isProduction, bool healthCheckMode, DiscordSettings discordSettings)
+    public static async Task RegisterCommands(this DiscordRestClient client, bool isProduction, DiscordSettings discordSettings)
     {
-        if (healthCheckMode)
-            return;
-        
         if (!isProduction)
             await client.BulkOverwriteGuildCommands(GetInteractionCommands().ToArray(), (ulong)discordSettings.TestGuild!);
         else

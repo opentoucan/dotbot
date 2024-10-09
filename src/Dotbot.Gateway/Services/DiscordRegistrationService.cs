@@ -20,8 +20,7 @@ public class DiscordRegistrationService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
-        var healthCheckMode = _discordSettings.HealthCheckMode;
         await _discordRestClient.LoginAsync(TokenType.Bot, _discordSettings.BotToken);
-        await _discordRestClient.RegisterCommands(isProduction, healthCheckMode, _discordSettings);
+        await _discordRestClient.RegisterCommands(isProduction, _discordSettings);
     }
 }
