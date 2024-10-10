@@ -34,7 +34,6 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .secretName }}
-                optional: true
           env:
             - name: DOTNET_BUNDLE_EXTRACT_BASE_DIR
               value: /cache

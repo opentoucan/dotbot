@@ -37,7 +37,6 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .secretName }}
-                optional: true
           ports:
             - name: http
               containerPort: {{ $.Values.service.targetPort }}

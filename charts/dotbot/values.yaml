@@ -7,7 +7,7 @@ gateway:
     tag: "1.0.3"
     imagePullPolicy: IfNotPresent
     name: "dotbot.gateway"
-    digest: "sha256:24b999bdd47c56b8a5943eeb794df439370c35667b6cdb6899bb86712ea3fddf"
+    digest: "sha256:2e31f433592fd8c066a78087d1796519ef2e6e00ed25cc646679a9b239ce17cd"
   secretName: dotbot-secret
   podAnnotations: {}
   podLabels: {}
