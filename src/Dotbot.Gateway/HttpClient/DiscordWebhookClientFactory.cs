@@ -6,16 +6,16 @@ namespace Dotbot.Gateway.HttpClient;
 
 public class DiscordWebhookClientFactory : IDiscordWebhookClientFactory
 {
-    private readonly DiscordSettings _discordSettings;
+    private readonly Settings.Discord _discord;
 
-    public DiscordWebhookClientFactory(IOptions<DiscordSettings> botSettings)
+    public DiscordWebhookClientFactory(IOptions<Settings.Discord> botSettings)
     {
-        _discordSettings = botSettings.Value;
+        _discord = botSettings.Value;
     }
 
     public DiscordWebhookClient Create(string channel)
     {
-        _discordSettings.Webhooks.TryGetValue(channel, out var webhookUrl);
+        _discord.Webhooks.TryGetValue(channel, out var webhookUrl);
         return new DiscordWebhookClient(webhookUrl);
     }
 }

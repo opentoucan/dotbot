@@ -2,7 +2,6 @@ using Discord;
 using Dotbot.Gateway.Application.Queries;
 using Dotbot.Gateway.Dto.Responses.Discord;
 using Dotbot.Gateway.Services;
-using Dotbot.Gateway.Settings;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -12,15 +11,15 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
 {
     private readonly ICustomCommandQueries _customCommandQueries;
     private readonly IFileUploadService _fileUploadService;
-    private readonly DiscordSettings _discordSettings;
+    private readonly Settings.Discord _discord;
     public RetrieveCustomCommandHandler(
         ICustomCommandQueries customCommandQueries, 
         IFileUploadService fileUploadService,
-        IOptions<DiscordSettings> discordSettings)
+        IOptions<Settings.Discord> discordSettings)
     {
         _customCommandQueries = customCommandQueries;
         _fileUploadService = fileUploadService;
-        _discordSettings = discordSettings.Value;
+        _discord = discordSettings.Value;
     }
 
     public async Task<InteractionData> Handle(RetrieveCustomCommand request, CancellationToken cancellationToken)
@@ -37,7 +36,7 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
         
         foreach (var attachment in matchingCommand.Attachments)
         {
-            var file = await _fileUploadService.GetFile($"{_discordSettings.BucketEnvPrefix}-discord-{contextId}", attachment.Name);
+            var file = await _fileUploadService.GetFile($"{_discord.BucketEnvPrefix}-discord-{contextId}", attachment.Name);
             if (file == null) return new InteractionData("Failed to retrieve the file for this command");
             using var memoryStream = new MemoryStream();
             await file.FileContent.CopyToAsync(memoryStream, cancellationToken);

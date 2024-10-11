@@ -40,5 +40,5 @@ public class DiscordSignatureAuthenticationHandler(
 
 public class DiscordSignatureAuthenticationSchemeOptions : AuthenticationSchemeOptions
 {
-    public string? PublicKey { get; set; }
+    public string PublicKey { get; set; } = null!;
 }

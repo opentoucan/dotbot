@@ -11,7 +11,7 @@ public static partial class Extensions
             .AddScheme<DiscordSignatureAuthenticationSchemeOptions, DiscordSignatureAuthenticationHandler>("DiscordSignature",
                 options =>
                 {
-                    builder.Configuration.GetSection("DiscordSettings").Bind(options);
+                    builder.Configuration.GetSection(nameof(Settings.Discord)).Bind(options);
                 });
         builder.Services.AddAuthorization(options =>
         {

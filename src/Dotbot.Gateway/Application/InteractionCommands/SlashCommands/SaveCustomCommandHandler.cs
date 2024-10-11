@@ -1,6 +1,5 @@
 using Dotbot.Gateway.Dto.Responses.Discord;
 using Dotbot.Gateway.Services;
-using Dotbot.Gateway.Settings;
 using Dotbot.Infrastructure.Entities;
 using Dotbot.Infrastructure.Repositories;
 using MediatR;
@@ -13,21 +12,21 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
     private readonly ILogger<SaveCustomCommandHandler> _logger;
     private readonly IFileUploadService _fileUploadService;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly DiscordSettings _discordSettings;
+    private readonly Settings.Discord _discord;
     private readonly ICustomCommandRepository _customCommandRepository;
 
     public SaveCustomCommandHandler(
         ILogger<SaveCustomCommandHandler> logger,
         IFileUploadService fileUploadService, 
         IHttpClientFactory httpClientFactory, 
-        IOptions<DiscordSettings> discordSettings,
+        IOptions<Settings.Discord> discordSettings,
         ICustomCommandRepository customCommandRepository)
     {
         _logger = logger;
         _fileUploadService = fileUploadService;
         _httpClientFactory = httpClientFactory;
         _customCommandRepository = customCommandRepository;
-        _discordSettings = discordSettings.Value;
+        _discord = discordSettings.Value;
     }
 
     public async Task<InteractionData> Handle(SaveCustomCommand request, CancellationToken cancellationToken)
@@ -56,7 +55,7 @@ public class SaveCustomCommandHandler : IRequestHandler<SaveCustomCommand, Inter
             foreach (var item in request.FileNameUrlDictionary)
             {
                 var stream = await client.GetStreamAsync(new Uri(item.Value), cancellationToken);
-                await _fileUploadService.UploadFile($"{_discordSettings.BucketEnvPrefix}-discord-{contextId}", item.Key, stream);
+                await _fileUploadService.UploadFile($"{_discord.BucketEnvPrefix}-discord-{contextId}", item.Key, stream);
                 customCommand.AddAttachment(item.Key, Path.GetExtension(item.Key), item.Value);
             }
             await _customCommandRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
