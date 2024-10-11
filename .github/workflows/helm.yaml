@@ -48,6 +48,16 @@ jobs:
           helm install postgresql oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username=test --set auth.password=test --set auth.database=test --set auth.postgresPassword=test
           helm install rabbitmq oci://registry-1.docker.io/bitnamicharts/rabbitmq --set auth.username=test --set auth.password=test
           helm install minio oci://registry-1.docker.io/bitnamicharts/minio
+          kubectl create secret generic dotbot-secret \
+            --from-literal=TestMode=true \
+            --from-literal=AWS_ACCESS_KEY_ID='test' \
+            --from-literal=AWS_SECRET_ACCESS_KEY='test' \
+            --from-literal=ConnectionStrings__dotbot='Host=postgresql;Port=5432;Database=test;Username=test;Password=test;' \
+            --from-literal=RabbitMQ__Password='test' \
+            --from-literal=RabbitMQ__User='test'
+          kubectl create secret generic dotbot-migrator-secret \
+            --from-literal=CONNECTIONSTRING='Host=postgresql;Port=5432;Database=test;Username=test;Password=test;'
+            
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'

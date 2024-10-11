@@ -37,8 +37,7 @@ spec:
               name: {{ $job.name }}
               envFrom:
                 - secretRef:
-                    name: {{ $job.secretName }}
-                    optional: true
+                    name: "{{ (tpl $.Values.existingAppSecret .) | default (include "dotbot.fullname" $) }}-secret"
             {{- if $job.command }}
               command: {{ $job.command }}
             {{- end }}

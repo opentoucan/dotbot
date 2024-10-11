@@ -1,14 +1,16 @@
 nameOverride: ""
 fullnameOverride: ""
+global:
+  env:
+    ASPNETCORE_ENVIRONMENT: 'Production'
 gateway:
   replicaCount: 1
   image:
     repository: "ghcr.io/opentoucan"
-    tag: "1.0.3"
+    tag: "1.0.4"
     imagePullPolicy: IfNotPresent
     name: "dotbot.gateway"
-    digest: "sha256:2e31f433592fd8c066a78087d1796519ef2e6e00ed25cc646679a9b239ce17cd"
-  secretName: dotbot-secret
+    digest: "sha256:7c9fc7ef8aa538582639b99224ea86f67fe87b73153601a33fdf8fefba3fba00"
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
@@ -33,11 +35,10 @@ gateway:
 migrator:
   image:
     repository: "ghcr.io/opentoucan"
-    tag: "1.0.3"
+    tag: "1.0.4"
     imagePullPolicy: IfNotPresent
     name: "dotbot.migration"
-    digest: "sha256:24b999bdd47c56b8a5943eeb794df439370c35667b6cdb6899bb86712ea3fddf"
-  secretName: dotbot-migrator-secret
+    digest: "sha256:3166df982141f8abd8e5dfaa9194df6e92324e759dac4bb7dd5b352d0c4d0577"
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
@@ -66,6 +67,31 @@ migrator:
   env:
     - name: DOTNET_BUNDLE_EXTRACT_BASE_DIR
       value: /cache
+
+# environment variables for configMap
+env:
+  RabbitMQ__Endpoint: 'rabbitmq'
+  RabbitMQ__port: '5672'
+  S3__ServiceUrl: 'minio:9000'
+  OTEL_EXPORTER_OTLP_ENDPOINT: 'http://opentelemetry-operator.default.svc.cluster.local:8080' 
+configMapAnnotations: {}
+
+# Secrets
+existingAppSecret: 'dotbot-secret'
+existingMigratorSecret: 'dotbot-migrator-secret'
+# discord:
+#   publicKey: ''
+#   botToken: ''
+#   webhooks:
+#     xkcd: ''
+# appUserDBConnectionString: ''
+# migratorUserDBConnectionString: ''
+# rabbitMQCredentials:
+#   user: 'test'
+#   password: 'test'
+# objectStorageCredentials:
+#   accessKeyId: 'dev'
+#   secretAccessKey: 'dev'
 
 service:
   name: http
@@ -96,11 +122,11 @@ jobs:
       fsGroup: 1024
     image:
       repository: "ghcr.io/opentoucan"
-      tag: "1.0.3"
+      tag: "1.0.4"
       imagePullPolicy: Always
       main:
         name: "xkcd.job"
-        digest: "sha256:24b999bdd47c56b8a5943eeb794df439370c35667b6cdb6899bb86712ea3fddf"
+        digest: "sha256:9e93263c32be144b1c2424572972de48b6f3a81549de76d084703b99e71903de"
     secretName: dotbot-secret
     schedule: "0 * * * 1,3,5"
     resources:

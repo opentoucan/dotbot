@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: {{ .image.imagePullPolicy }}
           envFrom:
             - secretRef:
-                name: {{ .secretName }}
+                name: {{ (tpl $.Values.existingMigratorSecret .) | default ((printf "%s-%s-%s" (include "dotbot.fullname" $) "migrator" "secret")) }}
           env:
             - name: DOTNET_BUNDLE_EXTRACT_BASE_DIR
               value: /cache

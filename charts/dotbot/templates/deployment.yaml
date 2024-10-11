@@ -34,9 +34,17 @@ spec:
             {{- toYaml .securityContext | nindent 12 }}
           image: {{ .image.repository }}/{{ .image.name }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
           imagePullPolicy: {{ .image.imagePullPolicy }}
+          env:
+            {{- $env := $.Values.global.env | default dict -}}
+            {{ range $k, $v := $env }}
+                - name: {{ $k | quote }}
+                  value: {{ $v | quote }}
+            {{- end }}
           envFrom:
+            - configMapRef:
+                name: "{{ include "dotbot.fullname" $ }}"
             - secretRef:
-                name: {{ .secretName }}
+                name: {{ (tpl $.Values.existingAppSecret .) | default ((printf "%s-%s" (include "dotbot.fullname" $) "secret")) }}
           ports:
             - name: http
               containerPort: {{ $.Values.service.targetPort }}
