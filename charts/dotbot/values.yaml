@@ -124,10 +124,8 @@ jobs:
       repository: "ghcr.io/opentoucan"
       tag: "1.0.4"
       imagePullPolicy: Always
-      main:
-        name: "xkcd.job"
-        digest: "sha256:9e93263c32be144b1c2424572972de48b6f3a81549de76d084703b99e71903de"
-    secretName: dotbot-secret
+      name: "xkcd.job"
+      digest: "sha256:9e93263c32be144b1c2424572972de48b6f3a81549de76d084703b99e71903de"
     schedule: "0 * * * 1,3,5"
     resources:
       limits:
