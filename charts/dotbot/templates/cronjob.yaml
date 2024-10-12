@@ -36,6 +36,8 @@ spec:
               imagePullPolicy: {{ $job.image.imagePullPolicy }}
               name: {{ $job.name }}
               envFrom:
+                - configMapRef:
+                    name: "{{ include "dotbot.fullname" $ }}"
                 - secretRef:
                     name: {{ (tpl $.Values.existingAppSecret .) | default ((printf "%s-%s" (include "dotbot.fullname" $) "secret")) }}
             {{- if $job.command }}

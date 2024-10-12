@@ -1,0 +1,2 @@
+existingAppSecret: 'dotbot-secret'
+existingMigratorSecret: 'dotbot-migrator-secret'

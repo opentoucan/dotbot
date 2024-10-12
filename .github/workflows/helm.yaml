@@ -48,6 +48,12 @@ jobs:
           helm install postgresql oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username=test --set auth.password=test --set auth.database=test --set auth.postgresPassword=test
           helm install rabbitmq oci://registry-1.docker.io/bitnamicharts/rabbitmq --set auth.username=test --set auth.password=test
           helm install minio oci://registry-1.docker.io/bitnamicharts/minio
+          kubectl create configmap dotbot \
+            --from-literal=RabbitMQ__Endpoint='rabbitmq' \
+            --from-literal=RabbitMQ__port=5672 \
+            --from-literal=S3__ServiceUrl='minio:9000' \
+            --from-literal=OTEL_EXPORTER_OTLP_ENDPOINT='http://opentelemetry-operator.default.svc.cluster.local:8080'
+          
           kubectl create secret generic dotbot-secret \
             --from-literal=TestMode=true \
             --from-literal=AWS_ACCESS_KEY_ID='test' \
