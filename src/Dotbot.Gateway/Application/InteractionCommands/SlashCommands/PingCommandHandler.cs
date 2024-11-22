@@ -1,4 +1,5 @@
-﻿using Dotbot.Gateway.Dto.Responses.Discord;
+﻿using Dotbot.Gateway.Dto.Requests.Discord;
+using Dotbot.Gateway.Dto.Responses.Discord;
 using MediatR;
 
 namespace Dotbot.Gateway.Application.InteractionCommands.SlashCommands;
@@ -14,4 +15,8 @@ public class PingCommandHandler : IRequestHandler<PingCommand, InteractionData>
 public class PingCommand : InteractionCommand
 {
     public override string InteractionCommandName => "ping";
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        
+    }
 }

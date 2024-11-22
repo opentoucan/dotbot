@@ -27,7 +27,10 @@ public class DotbotGatewayTests(CustomWebApplicationFactory factory) : IClassFix
     {
         var dbConnection = new NpgsqlConnection(factory.PostgresConnectionString);
         await dbConnection.OpenAsync();
-        FakeData.PopulateTestData(new DotbotContext(new DbContextOptionsBuilder<DotbotContext>().UseNpgsql(dbConnection).Options));
+        var context = new DotbotContext(new DbContextOptionsBuilder<DotbotContext>().UseNpgsql(dbConnection).Options);
+        FakeData.PopulateTestData(context);
+        context.Guilds.Add(new Infrastructure.Entities.Guild("123456789", "test"));
+        await context.SaveChangesAsync();
     }
 
     public async Task DisposeAsync() => await factory.ResetDatabaseAsync();
@@ -70,7 +73,7 @@ public class DotbotGatewayTests(CustomWebApplicationFactory factory) : IClassFix
     public async Task SaveInteractionRequestWorks()
     {
         var requestData = new InteractionRequestFaker(new CustomCommandRequestFaker(), "123456789").UseSeed(69).Generate();
-
+        
         var result = await factory.HttpClient.PostAsync("/api/interactions", new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json"));
         var interactionResponse = await result.Content.ReadFromJsonAsync<InteractionResponse>();
         
@@ -79,8 +82,8 @@ public class DotbotGatewayTests(CustomWebApplicationFactory factory) : IClassFix
         var testHarness = factory.Services.GetTestHarness();
         var consumerHarness = testHarness.GetConsumerHarness<DeferredInteractionEventHandler>();
         await testHarness.InactivityTask;
-        var queries = scope.ServiceProvider.GetRequiredService<ICustomCommandQueries>();
-        var customCommands = await queries.GetCustomCommandsFromServerAsync(requestData.Guild!.Id);
+        var queries = scope.ServiceProvider.GetRequiredService<IGuildQueries>();
+        var customCommands = await queries.GetAllCustomCommands(requestData.Guild!.Id);
         
         using (new AssertionScope{FormattingOptions = { MaxLines = 300}})
         {
@@ -90,8 +93,7 @@ public class DotbotGatewayTests(CustomWebApplicationFactory factory) : IClassFix
             (await consumerHarness.Consumed.Any<DeferredInteractionEvent>()).Should().Be(true);
             customCommands.Should().Contain(x => 
                 x.Name == requestData.Data!.Options!.First().SubOptions![0].Value!.ToString() && 
-                x.Content == requestData.Data!.Options!.First().SubOptions![1].Value!.ToString() &&
-                x.Guild.ExternalId == requestData.Guild!.Id);
+                x.Content == requestData.Data!.Options!.First().SubOptions![1].Value!.ToString());
         }
 
     }

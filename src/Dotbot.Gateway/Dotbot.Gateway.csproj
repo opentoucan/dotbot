@@ -6,7 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
         <UserSecretsId>aea46887-1dad-4bb6-a4a3-63c361371309</UserSecretsId>
-        <InvariantGlobalization>true</InvariantGlobalization>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     </PropertyGroup>
 

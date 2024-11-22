@@ -67,13 +67,37 @@ namespace Dotbot.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("GuildId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("commands", "dotbot");
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("custom_commands", "dotbot");
+                });
+
+            modelBuilder.Entity("Dotbot.Infrastructure.Entities.Guild", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Guilds", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.Xkcd", b =>
@@ -274,33 +298,19 @@ namespace Dotbot.Infrastructure.Migrations
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CustomCommand", b =>
                 {
-                    b.OwnsOne("Dotbot.Infrastructure.Entities.Guild", "Guild", b1 =>
-                        {
-                            b1.Property<Guid>("CustomCommandId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("ExternalId")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<bool>("IsServer")
-                                .HasColumnType("boolean");
-
-                            b1.HasKey("CustomCommandId");
-
-                            b1.ToTable("Guilds", "dotbot");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CustomCommandId");
-                        });
-
-                    b.Navigation("Guild")
-                        .IsRequired();
+                    b.HasOne("Dotbot.Infrastructure.Entities.Guild", null)
+                        .WithMany("CustomCommands")
+                        .HasForeignKey("GuildId");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CustomCommand", b =>
                 {
                     b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("Dotbot.Infrastructure.Entities.Guild", b =>
+                {
+                    b.Navigation("CustomCommands");
                 });
 #pragma warning restore 612, 618
         }

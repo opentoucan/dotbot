@@ -14,7 +14,7 @@ public static class DiscordInteractionApi
 {
     public static RouteGroupBuilder MapDiscordInteractionApi(this RouteGroupBuilder app)
     {
-        app.MapPost("/", Interaction);//.AddEndpointFilter<DeferredInteractionPublisherFilter>();
+        app.MapPost("/", Interaction);
         return app;
     }
     
@@ -29,11 +29,11 @@ public static class DiscordInteractionApi
         //Discord health check
         if (request.Type == (int)InteractionType.Ping)
             return Results.Json(new InteractionResponse { Type = InteractionResponseType.Ping }, serializerSettings);
-        
-        var guildId = request.Guild?.Id ?? request.Channel?.Id;
+
+        var guildId = request.Guild?.Id;
         
         if(string.IsNullOrEmpty(guildId))
-            return TypedResults.BadRequest("The request must be made in the context of a server or direct message.");
+            return TypedResults.BadRequest("The request must be made in the context of a server");
 
         var interactionType = DiscordExtensions.GetInteractionCommands()
             .FirstOrDefault(x => x.Name.Value == request.Data?.Name)
@@ -47,7 +47,7 @@ public static class DiscordInteractionApi
         {
             var commandJson = (JsonElement?)request.Data!.Options!.FirstOrDefault()?.Value;
             //Might want to use a fuzzy search
-            var customCommands = await service.Queries.GetCustomCommandsByFuzzySearchOnNameAsync(commandJson?.GetString()!);
+            var customCommands = await service.Queries.GetCustomCommandsByFuzzySearchOnNameAsync(guildId, commandJson?.GetString()!);
             
             return Results.Json(new InteractionResponse
             {

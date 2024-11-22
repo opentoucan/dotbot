@@ -9,19 +9,22 @@ namespace Dotbot.Gateway.FunctionalTests.Setup;
 
 public static class FakeData
 {
-    public static void PopulateTestData(DotbotContext dbContext)
+    public static void PopulateTestData(DotbotContext dbContext, string? guildId = null)
     {
-        var customCommands = new Faker<CustomCommand>()
+        var guild = new Faker<Guild>()
             .UseSeed(69)
-            .RuleFor(c => c.Id, f => f.Random.Guid())
-            .RuleFor(cc => cc.Attachments, _ => new Faker<CommandAttachment>()
+            .CustomInstantiator(f => new Guild(guildId ?? new Faker().Random.ULong().ToString(), f.Random.Word()))
+            .RuleFor(g => g.CustomCommands, _ => new Faker<CustomCommand>()
                 .UseSeed(69)
-                .CustomInstantiator(f => new CommandAttachment(f.Lorem.Word(), f.System.FileType(), f.Internet.Url()))
-                .Generate(5))
-            .CustomInstantiator(f => new CustomCommand(f.Lorem.Word(), f.Random.UInt().ToString(),
-                new Guild("123456789", f.Random.Bool()), f.Random.Bool() ? f.Lorem.Sentence() : null))
-            .Generate(10);
-        dbContext.CustomCommands.AddRange(customCommands);
+                .CustomInstantiator(f => new CustomCommand(f.Lorem.Word(), f.Random.UInt().ToString(), f.Random.Bool() ? f.Lorem.Sentence() : null))
+                .RuleFor(c => c.Id, f => f.Random.Guid())
+                .RuleFor(cc => cc.Attachments, _ => new Faker<CommandAttachment>()
+                    .UseSeed(69)
+                    .CustomInstantiator(f => new CommandAttachment(f.Lorem.Word(), f.System.FileType(), f.Internet.Url()))
+                    .Generate(5))
+                .Generate(10))
+            .Generate();
+        dbContext.Guilds.AddRange(guild);
         dbContext.SaveChanges();
     }
 }
@@ -34,7 +37,7 @@ public class AttachmentFaker : Faker<Dto.Requests.Discord.Attachment>
             .RuleFor(a => a.Filename, f => f.Random.Word() + f.System.FileType())
             .RuleFor(a => a.Url, f => f.Image.PlaceImgUrl(f.Random.Int(), f.Random.Int()) + "." + f.System.FileExt())
             .RuleFor(a => a.ContentType, f => f.System.MimeType())
-            .RuleFor(a => a.Size, f => f.Random.UInt());
+            .RuleFor(a => a.Size, f => f.Random.UShort());
 }
 
 public class ResolvedFaker : Faker<Resolved>

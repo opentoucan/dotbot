@@ -38,8 +38,7 @@ services:
   ngrok:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:alpine
-    environment:
-      - NGROK_AUTHTOKEN="2CWjmAFVTYilgLK8WuXex7Yfshl_33EUJquMhvnCaTbrEPAL7"
+    env_file: .env
     command: 'http 127.0.0.1:5292'
     network_mode: "host"
     

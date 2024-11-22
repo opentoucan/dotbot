@@ -23,8 +23,8 @@ public static partial class Extensions
             cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
         });
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-        builder.Services.AddScoped<ICustomCommandRepository, CustomCommandRepository>();
-        builder.Services.AddScoped<ICustomCommandQueries, CustomCommandQueries>();
+        builder.Services.AddScoped<IGuildRepository, GuildRepository>();
+        builder.Services.AddScoped<IGuildQueries, GuildQueries>();
         builder.Services.AddHttpClient<XkcdService>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);

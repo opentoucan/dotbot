@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Dotbot.Gateway.Dto.Requests.Discord;
 using Dotbot.Gateway.Dto.Responses.Discord;
 using MediatR;
 
@@ -23,4 +24,12 @@ public class AvatarCommand : InteractionCommand
     public string TargetUserId { get; set; } = null!;
     public string TargetUsername { get; set; } = null!;
     public string AvatarId { get; set; } = null!;
+    
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        var mentionedUser = interactionRequest.Data!.Resolved!.Users!.FirstOrDefault().Value;
+        AvatarId = mentionedUser.Avatar!;
+        TargetUserId = mentionedUser.Id!;
+        TargetUsername = mentionedUser.Username!;
+    }
 }

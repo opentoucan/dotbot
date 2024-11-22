@@ -1,5 +1,8 @@
+using System.Text.Json;
 using Discord;
+using Dotbot.Gateway.Application.InteractionCommands.Exceptions;
 using Dotbot.Gateway.Application.Queries;
+using Dotbot.Gateway.Dto.Requests.Discord;
 using Dotbot.Gateway.Dto.Responses.Discord;
 using Dotbot.Gateway.Services;
 using MediatR;
@@ -7,25 +10,16 @@ using Microsoft.Extensions.Options;
 
 namespace Dotbot.Gateway.Application.InteractionCommands.SlashCommands;
 
-public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomCommand, InteractionData>
+public class RetrieveCustomCommandHandler(
+    IGuildQueries guildQueries,
+    IFileUploadService fileUploadService,
+    IOptions<Settings.Discord> discordSettings)
+    : IRequestHandler<RetrieveCustomCommand, InteractionData>
 {
-    private readonly ICustomCommandQueries _customCommandQueries;
-    private readonly IFileUploadService _fileUploadService;
-    private readonly Settings.Discord _discord;
-    public RetrieveCustomCommandHandler(
-        ICustomCommandQueries customCommandQueries, 
-        IFileUploadService fileUploadService,
-        IOptions<Settings.Discord> discordSettings)
-    {
-        _customCommandQueries = customCommandQueries;
-        _fileUploadService = fileUploadService;
-        _discord = discordSettings.Value;
-    }
-
     public async Task<InteractionData> Handle(RetrieveCustomCommand request, CancellationToken cancellationToken)
     {
-        var contextId = request.GuildId ?? request.DirectMessageChannelId!;
-        var customCommandsInServer = await _customCommandQueries.GetCustomCommandsFromServerAsync(contextId);
+        var guildId = request.GuildId;
+        var customCommandsInServer = await guildQueries.GetAllCustomCommands(guildId);
 
         var matchingCommand = customCommandsInServer.FirstOrDefault(cc => cc.Name == request.CustomCommandName);
         if (matchingCommand is null)
@@ -36,7 +30,7 @@ public class RetrieveCustomCommandHandler : IRequestHandler<RetrieveCustomComman
         
         foreach (var attachment in matchingCommand.Attachments)
         {
-            var file = await _fileUploadService.GetFile($"{_discord.BucketEnvPrefix}-discord-{contextId}", attachment.Name);
+            var file = await fileUploadService.GetFile($"{discordSettings.Value.BucketEnvPrefix}-discord-{guildId}", attachment.Name);
             if (file == null) return new InteractionData("Failed to retrieve the file for this command");
             using var memoryStream = new MemoryStream();
             await file.FileContent.CopyToAsync(memoryStream, cancellationToken);
@@ -51,7 +45,17 @@ public class RetrieveCustomCommand : InteractionCommand
 {
     public override string InteractionCommandName => "custom";
     
-    public string? GuildId { get; set; }
+    public required string GuildId { get; set; }
     public string? DirectMessageChannelId { get; set; }
     public string CustomCommandName { get; set; } = null!;
+    
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        CustomCommandName = ((JsonElement?)interactionRequest.Data?.Options?.FirstOrDefault()?.Value)?.GetString() 
+                            ?? throw new CommandValidationException("Custom command name must be passed");
+        GuildId = interactionRequest.Guild?.Id ?? throw new CommandValidationException("Command must be used within a guild");
+        DirectMessageChannelId = interactionRequest.User?.Id;
+        if (string.IsNullOrWhiteSpace(GuildId) && string.IsNullOrWhiteSpace(DirectMessageChannelId))
+            throw new CommandValidationException("Custom command must be used inside a server or in a direct message");
+    }
 }

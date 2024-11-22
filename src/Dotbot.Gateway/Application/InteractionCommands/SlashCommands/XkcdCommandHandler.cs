@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Discord;
+using Dotbot.Gateway.Dto.Requests.Discord;
 using Dotbot.Gateway.Dto.Responses.Discord;
 using MediatR;
 using Xkcd.Sdk;
@@ -34,4 +36,9 @@ public class XkcdCommand : InteractionCommand
 {
     public override string InteractionCommandName => "xkcd";
     public int? ComicNumber { get; set; }
+    
+    public override void MapFromInteractionRequest(InteractionRequest interactionRequest)
+    {
+        ComicNumber = ((JsonElement?)interactionRequest.Data!.Options?.FirstOrDefault()?.Value)?.GetInt32();
+    }
 }

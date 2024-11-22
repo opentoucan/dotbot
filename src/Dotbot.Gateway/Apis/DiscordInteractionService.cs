@@ -8,7 +8,7 @@ namespace Dotbot.Gateway.Apis;
 
 public class DiscordInteractionService(
     IBus bus,
-    ICustomCommandQueries queries,
+    IGuildQueries queries,
     IPublishEndpoint publishEndpoint,
     ILogger<DiscordInteractionService> logger,
     IMeterFactory meterFactory)
@@ -16,7 +16,7 @@ public class DiscordInteractionService(
     public IBus Bus { get; set; } = bus;
     public MessageScheduler Scheduler { get; set; } = new(new DelayedScheduleMessageProvider(bus), bus.Topology as IRabbitMqBusTopology);
     public IPublishEndpoint PublishEndpoint { get; set; } = publishEndpoint; 
-    public ICustomCommandQueries Queries { get; set; } = queries;
+    public IGuildQueries Queries { get; set; } = queries;
     public ILogger<DiscordInteractionService> Logger { get; set; } = logger;
     public IMeterFactory MeterFactory { get; } = meterFactory;
     public static ActivitySource ActivitySource { get; } = new(nameof(DiscordInteractionApi));

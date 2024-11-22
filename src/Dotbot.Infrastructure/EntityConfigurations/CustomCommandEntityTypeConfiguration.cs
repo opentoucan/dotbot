@@ -8,13 +8,11 @@ public class CustomCommandEntityTypeConfiguration : IEntityTypeConfiguration<Cus
 {
     public void Configure(EntityTypeBuilder<CustomCommand> customCommandConfiguration)
     {
-        customCommandConfiguration.ToTable("commands");
+        customCommandConfiguration.ToTable("custom_commands");
 
         customCommandConfiguration.Ignore(b => b.DomainEvents);
         
         customCommandConfiguration.HasMany(cc => cc.Attachments)
             .WithOne();
-        customCommandConfiguration
-            .OwnsOne(o => o.Guild);
     }
 }
