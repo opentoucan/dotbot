@@ -35,7 +35,7 @@ public class AttachmentFaker : Faker<Dto.Requests.Discord.Attachment>
         UseSeed(69)
             .RuleFor(a => a.Id, f => f.Random.Guid().ToString())
             .RuleFor(a => a.Filename, f => f.Random.Word() + f.System.FileType())
-            .RuleFor(a => a.Url, f => f.Image.PlaceImgUrl(f.Random.Int(), f.Random.Int()) + "." + f.System.FileExt())
+            .RuleFor(a => a.Url, f => "https://picsum.photos/200/300")
             .RuleFor(a => a.ContentType, f => f.System.MimeType())
             .RuleFor(a => a.Size, f => f.Random.UShort());
 }
