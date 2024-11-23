@@ -46,7 +46,7 @@ public class SaveCustomCommandHandler(
             foreach (var item in request.FileNameUrlDictionary)
             {
                 var stream = await client.GetStreamAsync(new Uri(item.Value), cancellationToken);
-                await fileUploadService.UploadFile($"{discordSettings.Value.BucketEnvPrefix}-discord-{guild.Id}", item.Key, stream);
+                await fileUploadService.UploadFile($"{discordSettings.Value.BucketEnvPrefix}-discord-{guild.ExternalId}", item.Key, stream);
                 customCommand.AddAttachment(item.Key, Path.GetExtension(item.Key), item.Value);
             }
             await guildRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
