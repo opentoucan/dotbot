@@ -10,7 +10,7 @@ gateway:
     tag: "1.0.5"
     imagePullPolicy: IfNotPresent
     name: "dotbot.gateway"
-    digest: ""
+    digest: "sha256:cac03c4125a06903238e281530b5e0a80ff5a08ab64eab624352d485bc2585c3"
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
@@ -38,7 +38,7 @@ migrator:
     tag: "1.0.5"
     imagePullPolicy: IfNotPresent
     name: "dotbot.migration"
-    digest: ""
+    digest: "sha256:ee4cee930914b9c97ff1fd80c601aea847f02882b3e324a190e134700d6324db"
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
@@ -125,7 +125,7 @@ jobs:
       tag: "1.0.5"
       imagePullPolicy: Always
       name: "xkcd.job"
-      digest: ""
+      digest: "sha256:8baffe1bc9b976ad1dcaca461f91d8ac3683154fd707cc4fbca7535393c4ade1"
     schedule: "0 * * * 1,3,5"
     resources:
       limits:
