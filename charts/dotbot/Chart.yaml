@@ -5,6 +5,6 @@ maintainers:
   - name: sillock1
     url: https://github.com/sillock1
 name: dotbot
-version: 0.8.10
-appVersion: "1.0.6"
+version: 0.8.11
+appVersion: "1.0.7"
 home: https://github.com/opentoucan/dotbot
