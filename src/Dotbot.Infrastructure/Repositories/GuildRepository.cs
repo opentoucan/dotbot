@@ -15,7 +15,9 @@ public class GuildRepository(DotbotContext context) : IGuildRepository
         if (guild is not null)
         {
             await context.Entry(guild)
-                .Collection(i => i.CustomCommands)
+                .Collection(g => g.CustomCommands)
+                .Query()
+                .Include(cc => cc.Attachments)
                 .LoadAsync();
         }
 

@@ -30,7 +30,7 @@ public class RetrieveCustomCommandHandler(
         
         foreach (var attachment in matchingCommand.Attachments)
         {
-            var file = await fileUploadService.GetFile($"{discordSettings.Value.BucketEnvPrefix}-discord-{guildId}", attachment.Name);
+            var file = await fileUploadService.GetFile($"{discordSettings.Value.BucketEnvPrefix}-discord-{guildId}", attachment.Name, cancellationToken);
             if (file == null) return new InteractionData("Failed to retrieve the file for this command");
             using var memoryStream = new MemoryStream();
             await file.FileContent.CopyToAsync(memoryStream, cancellationToken);

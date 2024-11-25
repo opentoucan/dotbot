@@ -30,4 +30,9 @@ public class CustomCommand : Entity
         Content = content;
         CreatorId = creatorId;
     }
+
+    public void DeleteAllAttachments()
+    {
+        Attachments.Clear();
+    }
 }

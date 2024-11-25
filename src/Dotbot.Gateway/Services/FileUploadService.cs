@@ -7,8 +7,10 @@ namespace Dotbot.Gateway.Services;
 
 public interface IFileUploadService
 {
-    Task UploadFile(string parentName, string attachmentName, Stream content);
-    Task<FileDetails?> GetFile(string parentName, string filename);
+    Task UploadFile(string parentName, string attachmentName, Stream content, CancellationToken token);
+    Task<FileDetails?> GetFile(string parentName, string filename, CancellationToken token);
+    Task DeleteFile(string parentName, string attachmentName, CancellationToken token);
+
 }
 
 public class FileUploadService : IFileUploadService
@@ -21,15 +23,15 @@ public class FileUploadService : IFileUploadService
         _logger = logger;
     }
 
-    public async Task UploadFile(string parentName, string attachmentName, Stream content)
+    public async Task UploadFile(string parentName, string attachmentName, Stream content, CancellationToken token = default)
     {
         try
         {
             _logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
             using var fileTransferUtility = new TransferUtility(_amazonS3Client);
-            var bucketsResponse = await _amazonS3Client.ListBucketsAsync();
+            var bucketsResponse = await _amazonS3Client.ListBucketsAsync(token);
             if(bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
-                await _amazonS3Client.PutBucketAsync(parentName);
+                await _amazonS3Client.PutBucketAsync(parentName, token);
             
             var transferRequest = new TransferUtilityUploadRequest
             {
@@ -39,7 +41,7 @@ public class FileUploadService : IFileUploadService
                 Key = attachmentName,
                 DisablePayloadSigning = _amazonS3Client.Config.ServiceURL.StartsWith("https")
             };
-            await fileTransferUtility.UploadAsync(transferRequest);
+            await fileTransferUtility.UploadAsync(transferRequest, token);
         }
         catch (Exception ex)
         {
@@ -48,7 +50,7 @@ public class FileUploadService : IFileUploadService
         }
     }
     
-    public async Task<FileDetails?> GetFile(string parentName, string filename)
+    public async Task<FileDetails?> GetFile(string parentName, string filename, CancellationToken token = default)
     {
         try
         {
@@ -56,7 +58,7 @@ public class FileUploadService : IFileUploadService
             {
                 BucketName = parentName,
                 Key = filename
-            });
+            }, token);
 
             return new FileDetails(response.ResponseStream, response.Key, response.BucketName);
         }
@@ -66,5 +68,18 @@ public class FileUploadService : IFileUploadService
         }
 
         return null;
+    }
+
+    public async Task DeleteFile(string parentName, string filename, CancellationToken token = default)
+    {
+        try
+        {
+            _logger.LogInformation("Deleting file {filename}", filename);
+            await _amazonS3Client.DeleteObjectAsync(parentName, filename, token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete file");
+        }
     }
 }
