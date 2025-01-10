@@ -1,8 +1,5 @@
-using Dotbot.Gateway.Apis.Auth;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Dotbot.Gateway.FunctionalTests.Setup;
 
@@ -22,21 +19,5 @@ public static class ServiceCollectionExtensions
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<T>();
         context.Database.EnsureCreated();
-    }
-
-    public static void AddMockAuthentication(this IServiceCollection services)
-    {
-        services.RemoveAll<DiscordSignatureAuthenticationHandler>();
-        services.RemoveAll<AuthenticationHandler<DiscordSignatureAuthenticationSchemeOptions>>();
-        services.RemoveAll<DiscordSignatureAuthenticationSchemeOptions>();
-        services.AddTransient<IAuthenticationSchemeProvider, MockSchemeProvider>();
-        services.Configure<AuthenticationOptions>(o =>
-        {
-            o.SchemeMap.Clear();
-            ((IList<AuthenticationSchemeBuilder>) o.Schemes).Clear();
-        });
-        services
-            .AddAuthentication("DiscordSignature")
-            .AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>("DiscordSignature", null);
     }
 }

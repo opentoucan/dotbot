@@ -9,7 +9,6 @@ using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
 using ServiceDefaults;
-using Xkcd.Sdk;
 
 namespace Dotbot.Gateway.Extensions;
 
@@ -22,21 +21,25 @@ public static partial class Extensions
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
         });
+        builder.ConfigureXkcd();
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IGuildRepository, GuildRepository>();
         builder.Services.AddScoped<IGuildQueries, GuildQueries>();
-        builder.Services.AddHttpClient<XkcdService>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
-            })
-            .AddPolicyHandler(GetRetryPolicy());
-        
         builder.AddDatabase();
         builder.AddMassTransit();
         builder.ConfigureDiscordServices();
         builder.ConfigureAWS();
-        builder.AddDiscordInteractionAuth();
-        builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        return builder;
+    }
+
+    public static IHostApplicationBuilder ConfigureXkcd(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddHttpClient<IXkcdService, XkcdService>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
+            })
+            .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
+
         return builder;
     }
 
@@ -52,23 +55,24 @@ public static partial class Extensions
                 o.UsePostgres();
                 o.UseBusOutbox();
             });
-    
-            x.UsingRabbitMq((context,cfg) =>
+
+            x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"), 
+                cfg.Host(rabbitMqSection.GetValue<string>("Endpoint"),
                     rabbitMqSection.GetValue<ushort>("Port"),
-                    "/", 
-                    h => {
+                    "/",
+                    h =>
+                    {
                         h.Username(rabbitMqSection.GetValue<string>("User")!);
                         h.Password(rabbitMqSection.GetValue<string>("Password")!);
                     });
-                cfg.UseDelayedMessageScheduler();                
+                cfg.UseDelayedMessageScheduler();
                 cfg.ConfigureEndpoints(context);
             });
         });
         return builder;
     }
-    
+
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
     {
         var retryCount = 3;

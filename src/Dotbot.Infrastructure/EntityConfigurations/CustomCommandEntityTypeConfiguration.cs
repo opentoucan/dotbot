@@ -11,7 +11,7 @@ public class CustomCommandEntityTypeConfiguration : IEntityTypeConfiguration<Cus
         customCommandConfiguration.ToTable("custom_commands");
 
         customCommandConfiguration.Ignore(b => b.DomainEvents);
-        
+
         customCommandConfiguration.HasMany(cc => cc.Attachments)
             .WithOne();
     }

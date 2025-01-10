@@ -6,7 +6,7 @@ public class CommandAttachment : Entity
     public string FileType { get; private set; } = null!;
     public string Url { get; private set; } = null!;
 
-    protected CommandAttachment(){}
+    protected CommandAttachment() { }
     public CommandAttachment(string name, string fileType, string url)
     {
         if (string.IsNullOrWhiteSpace(name))

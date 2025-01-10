@@ -9,7 +9,7 @@ public class GuildEntityTypeConfiguration : IEntityTypeConfiguration<Guild>
     public void Configure(EntityTypeBuilder<Guild> guildConfiguration)
     {
         guildConfiguration.ToTable("guilds");
-        
+
         guildConfiguration.HasMany(g => g.CustomCommands)
             .WithOne();
     }

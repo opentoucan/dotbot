@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
-using Dotbot.Gateway.Dto.Responses;
+using Dotbot.Gateway.Dto;
 
 namespace Dotbot.Gateway.Services;
 
@@ -30,9 +30,9 @@ public class FileUploadService : IFileUploadService
             _logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
             using var fileTransferUtility = new TransferUtility(_amazonS3Client);
             var bucketsResponse = await _amazonS3Client.ListBucketsAsync(token);
-            if(bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
+            if (bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
                 await _amazonS3Client.PutBucketAsync(parentName, token);
-            
+
             var transferRequest = new TransferUtilityUploadRequest
             {
                 BucketName = parentName,
@@ -49,7 +49,7 @@ public class FileUploadService : IFileUploadService
             throw;
         }
     }
-    
+
     public async Task<FileDetails?> GetFile(string parentName, string filename, CancellationToken token = default)
     {
         try

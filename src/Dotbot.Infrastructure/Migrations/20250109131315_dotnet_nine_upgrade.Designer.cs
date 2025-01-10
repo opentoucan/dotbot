@@ -3,6 +3,7 @@ using System;
 using Dotbot.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dotbot.Infrastructure.Migrations
 {
     [DbContext(typeof(DotbotContext))]
-    partial class DotbotContextModelSnapshot : ModelSnapshot
+    [Migration("20250109131315_dotnet_nine_upgrade")]
+    partial class dotnet_nine_upgrade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

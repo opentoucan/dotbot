@@ -19,10 +19,10 @@ public class GuildQueries(DotbotContext context) : IGuildQueries
         var guild = await context.Guilds
             .Include(g => g.CustomCommands)
             .FirstOrDefaultAsync(g => g.ExternalId == externalId);
-        
-        if(guild is null)
+
+        if (guild is null)
             throw new Exception("Guild not found");
-        
+
         return guild.CustomCommands
             .Where(cc => cc.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase))
             .Take(10)

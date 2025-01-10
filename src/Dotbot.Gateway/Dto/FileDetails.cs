@@ -1,4 +1,4 @@
-namespace Dotbot.Gateway.Dto.Responses;
+namespace Dotbot.Gateway.Dto;
 
 public class FileDetails
 {

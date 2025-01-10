@@ -8,10 +8,10 @@ public class CustomCommand : Entity
     public string? Content { get; private set; }
     public string CreatorId { get; private set; } = null!;
     public DateTimeOffset Created { get; private set; }
-   
+
     public List<CommandAttachment> Attachments { get; private set; } = [];
-    
-    protected CustomCommand(){}
+
+    protected CustomCommand() { }
     public CustomCommand(string name, string creatorId, string? content = null)
     {
         Name = name;
@@ -19,7 +19,7 @@ public class CustomCommand : Entity
         CreatorId = creatorId;
         Created = DateTimeOffset.UtcNow;
     }
-    
+
     public void AddAttachment(string name, string fileType, string url)
     {
         Attachments.Add(new CommandAttachment(name, fileType, url));

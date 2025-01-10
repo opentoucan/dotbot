@@ -54,7 +54,7 @@ public static partial class Extensions
         return builder;
     }
 
-    
+
     private static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
     {
         var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
@@ -79,7 +79,7 @@ public static partial class Extensions
         });
 
         var otel = builder.Services.AddOpenTelemetry();
-        
+
         // Configure OpenTelemetry Resources with the application name
         otel.ConfigureResource(resource => resource
             .AddService(serviceName: builder.Environment.ApplicationName));
@@ -98,7 +98,7 @@ public static partial class Extensions
                 .AddMeter("Microsoft.AspNetCore.Diagnostics")
                 .AddMeter("Microsoft.AspNetCore.RateLimiting")
                 .AddMeter("Dotbot");
-            
+
             if (isOtlpEnabled)
                 metrics.AddOtlpExporter(options =>
                 {
@@ -107,7 +107,7 @@ public static partial class Extensions
                 });
             else
                 metrics.AddConsoleExporter();
-            
+
         });
 
         // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
@@ -127,12 +127,12 @@ public static partial class Extensions
                 });
             else
                 tracing.AddConsoleExporter();
-            
+
         });
-        
+
         return builder;
     }
-    
+
     public static IHostApplicationBuilder AddDefaultHealthChecks(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks();
@@ -145,10 +145,10 @@ public static partial class Extensions
         // All health checks must pass for app to be considered ready to accept traffic after starting
         app.MapHealthChecks("/health")
             .AllowAnonymous();
-        
+
         return app;
     }
-    
+
     public static IHostApplicationBuilder ConfigureAWS(this IHostApplicationBuilder builder)
     {
         var awsOptions = builder.Configuration.GetAWSOptions<AmazonS3Config>("S3");
@@ -156,5 +156,5 @@ public static partial class Extensions
         builder.Services.AddAWSService<IAmazonS3>();
         return builder;
     }
-    
+
 }

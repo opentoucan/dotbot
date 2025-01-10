@@ -1,22 +1,26 @@
-using Dotbot.Gateway.Apis;
 using Dotbot.Gateway.Extensions;
 using Dotbot.Gateway.Services;
+using NetCord.Hosting.AspNetCore;
+using NetCord.Hosting.Services;
 using ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddDefaultOpenApi();
 builder.AddApplicationServices();
-var healthCheckMode = builder.Configuration.GetValue<bool>("TestMode");
-if(!healthCheckMode)
-    builder.Services.AddHostedService<DiscordRegistrationService>();
-
 var app = builder.Build();
+
+app.AddModules(typeof(Program).Assembly);
 
 app.UseDefaultOpenApi();
 
+app.UseHttpInteractions("/interactions");
+
 app.MapDefaultEndpoints();
-app.MapGroup("/api/interactions")
-    .MapDiscordInteractionApi()
-    .RequireAuthorization("DiscordSignature");
-app.Run();
+
+using var scope = app.Services.CreateScope();
+
+var registrationService = scope.ServiceProvider.GetRequiredService<IRegistrationService>();
+
+await registrationService.Register();
+await app.RunAsync();

@@ -21,9 +21,9 @@ public class GuildRepository(DotbotContext context) : IGuildRepository
                 .LoadAsync();
         }
 
-        return guild;    
+        return guild;
     }
-    
+
     public Guild Add(Guild guild)
     {
         return context.Guilds.Add(guild).Entity;

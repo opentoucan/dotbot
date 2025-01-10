@@ -10,5 +10,5 @@ public sealed class Xkcd : Entity
         ComicNumber = comicNumber;
         Posted = posted;
     }
-    
+
 }

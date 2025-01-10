@@ -11,7 +11,7 @@ public abstract class Entity
         get => _id;
         set => _id = value;
     }
-    
+
     private readonly List<INotification> _domainEvents = [];
     public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
 

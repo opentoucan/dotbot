@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Logging;
+using Dotbot.Gateway.Dto;
 
-namespace Xkcd.Sdk;
+namespace Dotbot.Gateway.Services;
 
 public interface IXkcdService
 {
@@ -46,7 +46,7 @@ public class XkcdService : IXkcdService
 
         return null;
     }
-    
+
     private class XkcdContent
     {
         public int Month { get; set; }
@@ -57,7 +57,7 @@ public class XkcdService : IXkcdService
         public required string Title { get; set; }
         public int Day { get; set; }
     }
-    
+
     private XkcdComic MapFromXkcdContent(XkcdContent xkcdResponse)
     {
         return new XkcdComic

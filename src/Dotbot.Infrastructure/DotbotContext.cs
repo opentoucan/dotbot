@@ -41,14 +41,14 @@ public class DotbotContext : DbContext, IUnitOfWork
         modelBuilder.AddOutboxMessageEntity();
         modelBuilder.AddOutboxStateEntity();
     }
-    
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder
             .Properties<DateTimeOffset>()
             .HaveConversion<DateTimeOffsetConverter>();
     }
-    
+
     public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default)
     {
         // Dispatch Domain Events collection. 

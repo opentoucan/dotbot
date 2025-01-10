@@ -114,27 +114,4 @@ ingress:
     - dotbot.local
   tls: []
 
-jobs:
-  - name: xkcd-job
-    securityContext:
-      runAsUser: 1024
-      runAsGroup: 1024
-      fsGroup: 1024
-    image:
-      repository: "ghcr.io/opentoucan"
-      tag: "1.0.7"
-      imagePullPolicy: Always
-      name: "xkcd.job"
-      digest: "sha256:3ffc8cd2695ed04371433354a9f108e613d2b76e52710d5655878a367af322c0"
-    schedule: "0 * * * 1,3,5"
-    resources:
-      limits:
-        memory: 128Mi
-      requests:
-        cpu: 50m
-        memory: 128Mi
-    failedJobsHistoryLimit: 1
-    successfulJobsHistoryLimit: 3
-    concurrencyPolicy: Forbid
-    restartPolicy: Never
-    ttlSecondsAfterFinished: 2400
+jobs: []

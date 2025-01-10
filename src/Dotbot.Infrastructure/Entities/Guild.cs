@@ -6,7 +6,7 @@ public class Guild : Entity
 {
     public string ExternalId { get; private set; } = null!;
     public string Name { get; private set; } = null!;
-    
+
     public List<CustomCommand> CustomCommands { get; private set; } = [];
 
     protected Guild() { }

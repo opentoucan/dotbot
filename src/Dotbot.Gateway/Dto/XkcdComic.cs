@@ -1,4 +1,4 @@
-﻿namespace Xkcd.Sdk;
+﻿namespace Dotbot.Gateway.Dto;
 
 public class XkcdComic
 {

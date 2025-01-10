@@ -7,11 +7,8 @@ on:
     paths:
       - 'src/Dotbot.Gateway/**'
       - 'src/Dotbot.Infrastructure/**'
-      - 'src/Xkcd.Job/**'
-      - 'src/Xkcd.Sdk/**'
       - 'src/ServiceDefaults/**'
       - '!src/Dotbot.Gateway/CHANGELOG.md'
-      - '!src/Xkcd.Job/CHANGELOG.md'
       - 'tests/**'
 
 env:
@@ -22,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: ["Dotbot.Gateway", "Xkcd.Job"]
+        project: ["Dotbot.Gateway"]
         test: ["UnitTests", "FunctionalTests"]
     permissions:
       contents: write
@@ -39,7 +36,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
       - name: Install dependencies
         run: dotnet restore
       - name: Test with dotnet
@@ -58,7 +55,6 @@ jobs:
       matrix:
         project: [
           {image: "Dotbot.Gateway", path: "src/Dotbot.Gateway/Dockerfile"},
-          {image: "Xkcd.Job", path: "src/Xkcd.Job/Dockerfile"},
           {image: "Dotbot.Migration", path: "src/Dotbot.Infrastructure/migration.Dockerfile"},
         ]
     permissions:
@@ -117,7 +113,7 @@ jobs:
         - name: Setup dotnet
           uses: actions/setup-dotnet@v3
           with:
-            dotnet-version: '8.0.x'
+            dotnet-version: '9.0.x'
 
         - name: Install EF Tool
           run: |
