@@ -124,7 +124,7 @@ public class DiscordCommandsModule(
         return !string.IsNullOrWhiteSpace(stringBuilder.ToString()) ? $"Here's a way to avoid the ad/paywall \n {stringBuilder}"  : "No link in your message";
     }
 
-    [SlashCommand("version", "Gets the version of the bot.", GuildId = 301062316647120896)]
+    [SlashCommand("version", "Gets the version of the bot.")]
     public string Version()
     {
         var version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split("+")[0] ?? "Unknown";
