@@ -14,14 +14,14 @@ gateway:
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
-    runAsUser: 1024
-    runAsGroup: 1024
-    fsGroup: 1024
-    supplementalGroups: [1024]
+    runAsUser: 2048
+    runAsGroup: 2048
+    fsGroup: 2048
+    supplementalGroups: [2048]
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 1024
+    runAsUser: 2048
     allowPrivilegeEscalation: false
   resources:
     limits:
@@ -42,10 +42,10 @@ migrator:
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
-    runAsUser: 1024
-    runAsGroup: 1024
-    fsGroup: 1024
-    supplementalGroups: [1024]
+    runAsUser: 2048
+    runAsGroup: 2048
+    fsGroup: 2048
+    supplementalGroups: [2048]
   resources:
     limits:
       memory: 512Mi
@@ -55,7 +55,7 @@ migrator:
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 1024
+    runAsUser: 2048
     allowPrivilegeEscalation: false
   volumes:
     - name: cache-volume

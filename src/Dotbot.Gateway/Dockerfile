@@ -1,9 +1,12 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+﻿ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:9.0
+ARG DOTNET_SDK=mcr.microsoft.com/dotnet/sdk:9.0
+
+FROM ${DOTNET_RUNTIME} AS base
 WORKDIR /app
 EXPOSE 8080
-USER 1024
+USER 2048
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM ${DOTNET_SDK} AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["nuget.config", "."]
