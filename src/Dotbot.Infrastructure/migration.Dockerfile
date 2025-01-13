@@ -1,5 +1,7 @@
-ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:9.0
-ARG DOTNET_SDK=mcr.microsoft.com/dotnet/sdk:9.0
+# renovate: datasource=dotnet-version depName=dotnet-runtime
+ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:9.0.0
+# renovate: datasource=dotnet-version depName=dotnet-sdk
+ARG DOTNET_SDK=mcr.microsoft.com/dotnet/sdk:9.0.0
 
 FROM ${DOTNET_RUNTIME} AS base
 WORKDIR /app
