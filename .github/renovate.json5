@@ -10,8 +10,8 @@
     ":separatePatchReleases",
     ":skipStatusChecks",
     ":timezone(Europe/London)",
-    "github>sillock1/home-ops//.github/renovate/labels.json5",
-    "github>sillock1/home-ops//.github/renovate/semanticCommits.json5"
+    "github>opentoucan/dotbot//.github/renovate/labels.json5",
+    "github>opentoucan/dotbot//.github/renovate/semanticCommits.json5"
   ],
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "suppressNotifications": ["prEditedNotification", "prIgnoreNotification"],
