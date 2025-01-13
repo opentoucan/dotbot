@@ -1,4 +1,4 @@
-name: ci
+name: Helm CI
 
 on:
   workflow_dispatch:
