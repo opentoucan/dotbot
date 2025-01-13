@@ -32,7 +32,7 @@ spec:
           {{- end }}
         {{- end }}
           containers:
-            - image: {{ $job.image.repository }}/{{ $job.image.name }}:{{ $job.tag | default $.Chart.AppVersion }}{{ if $job.image.digest }}@{{ $job.image.digest }}{{ end }}
+            - image: {{ $job.image.registry }}/{{ $job.image.repository }}:{{ $job.tag | default $.Chart.AppVersion }}{{ if $job.image.digest }}@{{ $job.image.digest }}{{ end }}
               imagePullPolicy: {{ $job.image.imagePullPolicy }}
               name: {{ $job.name }}
               envFrom:

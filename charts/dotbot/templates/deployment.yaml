@@ -32,7 +32,7 @@ spec:
         - name: "{{- include "dotbot.name" $ }}"
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          image: {{ .image.repository }}/{{ .image.name }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
+          image: {{ .image.registry }}/{{ .image.repository }}:{{ .image.tag | default $.Chart.AppVersion }}{{ if .image.digest }}@{{ .image.digest }} {{ end }}
           imagePullPolicy: {{ .image.imagePullPolicy }}
           env:
             {{- $env := $.Values.global.env | default dict -}}

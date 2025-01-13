@@ -6,11 +6,11 @@ global:
 gateway:
   replicaCount: 1
   image:
-    repository: ghcr.io/opentoucan
-    tag: "2.0.0"
+    registry: ghcr.io
+    repository: opentoucan/dotbot.gateway
+    tag: 2.0.0
+    digest: sha256:a756fb0969074645ec22091d9bb1b7a2e004e07fbcab59568b95c2ec2eb140f4
     imagePullPolicy: IfNotPresent
-    name: "dotbot.gateway"
-    digest: "sha256:a756fb0969074645ec22091d9bb1b7a2e004e07fbcab59568b95c2ec2eb140f4"
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
@@ -34,11 +34,11 @@ gateway:
 
 migrator:
   image:
-    repository: ghcr.io/opentoucan
-    tag: "2.0.0"
+    registry: ghcr.io
+    repository: opentoucan/dotbot.migration
+    tag: 2.0.0
+    digest: sha256:0ac02d48b5051832f2f3a9fb02e6b6138276428dfa9e882d165d52a675c2138a
     imagePullPolicy: IfNotPresent
-    name: "dotbot.migration"
-    digest: "sha256:0ac02d48b5051832f2f3a9fb02e6b6138276428dfa9e882d165d52a675c2138a"
   podAnnotations: {}
   podLabels: {}
   podSecurityContext:
