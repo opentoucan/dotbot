@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Publish Test Report
-        uses: dorny/test-reporter@v1.8.0
+        uses: dorny/test-reporter@v1.9.1
         with:
           artifact: dotnet-results
           name: report
