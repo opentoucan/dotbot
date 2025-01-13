@@ -30,7 +30,7 @@
     <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.339" />
     <!-- Version together with EF -->
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
-    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
+    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <!-- Version together with runtime -->
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(RuntimeVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="$(RuntimeVersion)" />
