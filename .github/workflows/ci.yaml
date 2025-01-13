@@ -5,12 +5,14 @@ on:
   push:
     branches: [ "main" ]
     paths-ignore:
+      - '.github/**'
       - 'docs/**'
       - '**.md'
       - 'charts/**'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
+      - '.github/**'
       - 'docs/**'
       - '**.md'
       - 'charts/**'
