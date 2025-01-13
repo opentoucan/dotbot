@@ -122,7 +122,7 @@ jobs:
           uses: actions/setup-dotnet@v3
           with:
             # renovate: datasource=dotnet-version depName=dotnet-sdk
-            dotnet-version: '9.0.0'
+            dotnet-version: '9.0.101'
 
         - name: Install EF Tool
           run: |
