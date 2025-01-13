@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <RootNamespace>Dotbot.Gateway.FunctionalTests</RootNamespace>
         <PreserveCompilationContext>true</PreserveCompilationContext>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <PackageReference Include="Bogus" />
         <PackageReference Include="BouncyCastle.Cryptography" />
@@ -20,7 +19,7 @@
         <PackageReference Include="Testcontainers.LocalStack" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="Testcontainers.RabbitMq" />
-        
+
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
