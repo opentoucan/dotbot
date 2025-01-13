@@ -6,7 +6,7 @@ global:
 gateway:
   replicaCount: 1
   image:
-    repository: "ghcr.io/opentoucan"
+    repository: ghcr.io/opentoucan
     tag: "2.0.0"
     imagePullPolicy: IfNotPresent
     name: "dotbot.gateway"
@@ -34,7 +34,7 @@ gateway:
 
 migrator:
   image:
-    repository: "ghcr.io/opentoucan"
+    repository: ghcr.io/opentoucan
     tag: "2.0.0"
     imagePullPolicy: IfNotPresent
     name: "dotbot.migration"
@@ -73,7 +73,7 @@ env: {}
 #  RabbitMQ__Endpoint: 'rabbitmq'
 #  RabbitMQ__port: '5672'
 #  S3__ServiceUrl: 'minio:9000'
-#  OTEL_EXPORTER_OTLP_ENDPOINT: 'http://opentelemetry-operator.default.svc.cluster.local:8080' 
+#  OTEL_EXPORTER_OTLP_ENDPOINT: 'http://opentelemetry-operator.default.svc.cluster.local:8080'
 configMapAnnotations: {}
 
 # Secrets
