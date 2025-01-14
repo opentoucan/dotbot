@@ -69,7 +69,7 @@ services:
       - com
   # Grafana
   grafana:
-    image: docker.io/grafana/grafana:10.3.12
+    image: docker.io/grafana/grafana:11.4.0
     container_name: grafana
     deploy:
       resources:
