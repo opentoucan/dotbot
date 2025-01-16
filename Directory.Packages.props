@@ -8,7 +8,7 @@
     <EfVersion>9.0.0</EfVersion>
     <RuntimeVersion>9.0.0</RuntimeVersion>
     <GrpcVersion>2.59.0</GrpcVersion>
-    <OtelVersion>1.10.0</OtelVersion>
+    <OtelVersion>1.11.0</OtelVersion>
     <MassTransitVersion>8.3.4</MassTransitVersion>
   </PropertyGroup>
   <ItemGroup>
