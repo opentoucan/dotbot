@@ -9,7 +9,7 @@ api:
     registry: ghcr.io
     repository: opentoucan/dotbot.api
     tag: 3.0.0
-    digest: sha256:42cc00d5e6afae8740965e7749334a5504acd5d1bb45cff3443d7b53835c83c8
+    digest: sha256:5eec3c43855ab05666970eeec0ebd2ee9da5a01a3fb3671a10ebca57126f087a
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
   podLabels: {}
