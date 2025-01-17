@@ -29,7 +29,6 @@
         <PackageReference Include="NetCord.Services" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
-        <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Google.Protobuf" />
         <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" />
