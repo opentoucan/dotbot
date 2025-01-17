@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Amazon.Runtime;
 using Amazon.S3;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
@@ -153,6 +154,9 @@ public static partial class Extensions
     public static IHostApplicationBuilder ConfigureAWS(this IHostApplicationBuilder builder)
     {
         var awsOptions = builder.Configuration.GetAWSOptions<AmazonS3Config>("S3");
+        awsOptions.DefaultClientConfig.RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED;
+        awsOptions.DefaultClientConfig.ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED;
+        
         builder.Services.AddDefaultAWSOptions(awsOptions);
         builder.Services.AddAWSService<IAmazonS3>();
         return builder;
