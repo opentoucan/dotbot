@@ -14,7 +14,7 @@ public static class DiscordExtensions
         var section = builder.Configuration.GetSection(nameof(Settings.Discord));
         var discordSettings = section.Get<Settings.Discord>();
         builder.Services.AddOptions<Settings.Discord>().Bind(section);
-        builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+        builder.Services.AddHostedService<RegistrationHostedService>();
         builder.Services.AddScoped<RestClient>(_ => new RestClient(new BotToken(discordSettings!.Token)));
 
         builder.Services.AddDiscordRest()

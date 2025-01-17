@@ -47,7 +47,7 @@ public class XkcdService : IXkcdService
         return null;
     }
 
-    private class XkcdContent
+    public class XkcdContent
     {
         public int Month { get; set; }
         public int Num { get; set; }

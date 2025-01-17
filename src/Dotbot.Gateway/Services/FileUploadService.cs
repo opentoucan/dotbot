@@ -13,25 +13,17 @@ public interface IFileUploadService
 
 }
 
-public class FileUploadService : IFileUploadService
+public class FileUploadService(IAmazonS3 amazonS3Client, ILogger<FileUploadService> logger) : IFileUploadService
 {
-    private readonly IAmazonS3 _amazonS3Client;
-    private readonly ILogger<FileUploadService> _logger;
-    public FileUploadService(IAmazonS3 amazonS3Client, ILogger<FileUploadService> logger)
-    {
-        _amazonS3Client = amazonS3Client;
-        _logger = logger;
-    }
-
     public async Task UploadFile(string parentName, string attachmentName, Stream content, CancellationToken token = default)
     {
         try
         {
-            _logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
-            using var fileTransferUtility = new TransferUtility(_amazonS3Client);
-            var bucketsResponse = await _amazonS3Client.ListBucketsAsync(token);
+            logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
+            using var fileTransferUtility = new TransferUtility(amazonS3Client);
+            var bucketsResponse = await amazonS3Client.ListBucketsAsync(token);
             if (bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
-                await _amazonS3Client.PutBucketAsync(parentName, token);
+                await amazonS3Client.PutBucketAsync(parentName, token);
 
             var transferRequest = new TransferUtilityUploadRequest
             {
@@ -39,13 +31,13 @@ public class FileUploadService : IFileUploadService
                 InputStream = content,
                 ContentType = MimeTypes.GetMimeType(attachmentName),
                 Key = attachmentName,
-                DisablePayloadSigning = _amazonS3Client.Config.ServiceURL.StartsWith("https")
+                DisablePayloadSigning = amazonS3Client.Config.ServiceURL.StartsWith("https")
             };
             await fileTransferUtility.UploadAsync(transferRequest, token);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save attachment into bucket");
+            logger.LogError(ex, "Failed to save attachment into bucket");
             throw;
         }
     }
@@ -54,7 +46,7 @@ public class FileUploadService : IFileUploadService
     {
         try
         {
-            var response = await _amazonS3Client.GetObjectAsync(new GetObjectRequest
+            var response = await amazonS3Client.GetObjectAsync(new GetObjectRequest
             {
                 BucketName = parentName,
                 Key = filename
@@ -64,7 +56,7 @@ public class FileUploadService : IFileUploadService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve image");
+            logger.LogError(ex, "Failed to retrieve image");
         }
 
         return null;
@@ -74,12 +66,12 @@ public class FileUploadService : IFileUploadService
     {
         try
         {
-            _logger.LogInformation("Deleting file {filename}", filename);
-            await _amazonS3Client.DeleteObjectAsync(parentName, filename, token);
+            logger.LogInformation("Deleting file {filename}", filename);
+            await amazonS3Client.DeleteObjectAsync(parentName, filename, token);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to delete file");
+            logger.LogError(ex, "Failed to delete file");
         }
     }
 }
