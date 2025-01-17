@@ -128,8 +128,7 @@ jobs:
 
         - name: Install EF Tool
           run: |
-            dotnet new tool-manifest
-            dotnet tool install dotnet-ef
+            dotnet tool restore
 
         - name: Generate SQL migration script
           run: |
