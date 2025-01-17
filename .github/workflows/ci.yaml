@@ -47,14 +47,14 @@ jobs:
         run: dotnet build
 
       - name: Test with dotnet
-        run: dotnet test --logger trx --results-directory "TestResults"
+        run: dotnet test -- --report-trx
         env:
           Discord__Token: ${{ secrets.DISCORD_TOKEN }}
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-results
-          path: TestResults
+          path: ./tests/**/TestResults
         if: ${{ always() }}
 
   build:
@@ -64,7 +64,7 @@ jobs:
     strategy:
       matrix:
         project: [
-          {image: "Dotbot.Gateway", path: "src/Dotbot.Gateway/Dockerfile"},
+          {image: "Dotbot.Api", path: "src/Dotbot.Api/Dockerfile"},
           {image: "Dotbot.Migration", path: "src/Dotbot.Infrastructure/migration.Dockerfile"},
         ]
     permissions:
@@ -133,7 +133,7 @@ jobs:
 
         - name: Generate SQL migration script
           run: |
-            dotnet ef migrations script --idempotent -s ./src/Dotbot.Gateway -p ./src/Dotbot.Infrastructure -o dotbot-migration.sql
+            dotnet ef migrations script --idempotent -s ./src/Dotbot.Api -p ./src/Dotbot.Infrastructure -o dotbot-migration.sql
 
         - name: Upload SQL script artifact
           uses: actions/upload-artifact@v4
