@@ -1,4 +1,4 @@
-{{- with .Values.gateway }}
+{{- with .Values.api }}
 ---
 apiVersion: apps/v1
 kind: Deployment
