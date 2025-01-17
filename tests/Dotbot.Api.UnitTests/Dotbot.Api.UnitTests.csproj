@@ -24,10 +24,5 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Dotbot.Api\Dotbot.Api.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="res\" />
-      <Folder Include="TestResults\" />
-    </ItemGroup>
     
 </Project>
