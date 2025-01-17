@@ -75,7 +75,7 @@
     <PackageVersion Include="Testcontainers.LocalStack" Version="4.1.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.1.0" />
     <PackageVersion Include="Testcontainers.RabbitMq" Version="4.1.0" />
-    <PackageVersion Include="TUnit" Version="0.6.117" />
+    <PackageVersion Include="TUnit" Version="0.6.119" />
     <PackageVersion Include="coverlet.collector" Version="6.0.3" />
     <PackageVersion Include="Bogus" Version="35.6.1" />
     <PackageVersion Include="FluentAssertions" Version="6.12.2" />
