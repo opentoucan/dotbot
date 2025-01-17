@@ -5,7 +5,6 @@ using ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
-builder.AddDefaultOpenApi();
 builder.AddApplicationServices();
 var app = builder.Build();
 

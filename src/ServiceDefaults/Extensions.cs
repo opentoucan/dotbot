@@ -35,6 +35,7 @@ public static partial class Extensions
             http.AddStandardResilienceHandler();
 
         });
+        builder.AddDefaultOpenApi();
         return builder;
     }
 
