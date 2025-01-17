@@ -25,6 +25,7 @@ public static partial class Extensions
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IGuildRepository, GuildRepository>();
         builder.Services.AddScoped<IGuildQueries, GuildQueries>();
+        builder.Services.AddScoped<ICustomCommandService, CustomCommandService>();
         builder.AddDatabase();
         builder.AddMassTransit();
         builder.ConfigureDiscordServices();
