@@ -9,7 +9,6 @@
     <ItemGroup>
         <PackageReference Include="Bogus" />
         <PackageReference Include="BouncyCastle.Cryptography" />
-        <PackageReference Include="Microsoft.AspNet.WebApi.Client" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
         <PackageReference Include="RichardSzalay.MockHttp" />
         <PackageReference Include="TUnit" />
