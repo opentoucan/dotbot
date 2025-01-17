@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using Dotbot.Api.Application.Queries;
+using Dotbot.Api.Settings;
 using Dotbot.Infrastructure.Repositories;
 using Microsoft.Extensions.Options;
 using NetCord;
 using NetCord.Rest;
-using Discord = Dotbot.Api.Settings.Discord;
 
 namespace Dotbot.Api.Services;
 
@@ -18,7 +18,7 @@ public class CustomCommandService(
     ILogger<CustomCommandService> logger,
     IGuildQueries guildQueries,
     IFileUploadService fileUploadService,
-    IOptions<Discord> discordSettings,
+    IOptions<DiscordSettings> discordSettings,
     IGuildRepository guildRepository,
     HttpClient httpClient)
     : ICustomCommandService

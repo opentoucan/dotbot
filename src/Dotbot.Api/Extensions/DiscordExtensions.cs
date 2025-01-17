@@ -1,4 +1,5 @@
 using Dotbot.Api.Services;
+using Dotbot.Api.Settings;
 using NetCord;
 using NetCord.Hosting.Rest;
 using NetCord.Hosting.Services.ApplicationCommands;
@@ -11,9 +12,9 @@ public static class DiscordExtensions
 {
     public static IHostApplicationBuilder ConfigureDiscordServices(this IHostApplicationBuilder builder)
     {
-        var section = builder.Configuration.GetSection(nameof(Settings.Discord));
-        var discordSettings = section.Get<Settings.Discord>();
-        builder.Services.AddOptions<Settings.Discord>().Bind(section);
+        var section = builder.Configuration.GetSection("Discord");
+        var discordSettings = section.Get<DiscordSettings>();
+        builder.Services.AddOptions<DiscordSettings>().Bind(section);
         builder.Services.AddHostedService<RegistrationHostedService>();
         builder.Services.AddScoped<RestClient>(_ => new RestClient(new BotToken(discordSettings!.Token)));
 

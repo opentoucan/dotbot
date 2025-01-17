@@ -3,6 +3,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Dotbot.Api.Application.Queries;
 using Dotbot.Api.Services;
+using Dotbot.Api.Settings;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities;
 using Dotbot.Infrastructure.Repositories;
@@ -13,7 +14,6 @@ using NetCord;
 using NetCord.JsonModels;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Discord = Dotbot.Api.Settings.Discord;
 
 namespace Dotbot.Api.UnitTests.Services;
 
@@ -26,7 +26,7 @@ public class CustomCommandServiceTests
     
     //Fakes
     private static readonly IFileUploadService FileUploadService = new FileUploadService(AmazonS3ClientMock, Substitute.For<ILogger<FileUploadService>>());
-    private static readonly IOptions<Discord> DiscordSettings = Options.Create(new Discord{BucketEnvPrefix = "test", Token = "some_token"});
+    private static readonly IOptions<DiscordSettings> DiscordSettings = Options.Create(new DiscordSettings{BucketEnvPrefix = "test", Token = "some_token"});
     private DotbotContext _dbContext = null!;
     private HttpClient _httpClient = null!;
     private readonly MockHttpMessageHandler _handler = new();
