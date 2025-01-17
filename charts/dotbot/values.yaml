@@ -3,13 +3,13 @@ fullnameOverride: ""
 global:
   env:
     ASPNETCORE_ENVIRONMENT: 'Production'
-gateway:
+api:
   replicaCount: 1
   image:
     registry: ghcr.io
-    repository: opentoucan/dotbot.gateway
-    tag: 2.0.0
-    digest: sha256:a756fb0969074645ec22091d9bb1b7a2e004e07fbcab59568b95c2ec2eb140f4
+    repository: opentoucan/dotbot.api
+    tag: 3.0.0
+    digest: sha256:42cc00d5e6afae8740965e7749334a5504acd5d1bb45cff3443d7b53835c83c8
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
   podLabels: {}
@@ -36,8 +36,8 @@ migrator:
   image:
     registry: ghcr.io
     repository: opentoucan/dotbot.migration
-    tag: 2.0.0
-    digest: sha256:0ac02d48b5051832f2f3a9fb02e6b6138276428dfa9e882d165d52a675c2138a
+    tag: 3.0.0
+    digest: sha256:1f30c60861e066a40832b5899fd943fa282ef10c82129b6c385117b58191816e
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
   podLabels: {}
