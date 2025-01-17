@@ -11,7 +11,7 @@ public static class SlashCommandApi
 {
     public static WebApplication MapSlashCommandApi(this WebApplication app)
     {
-        app.AddSlashCommand("ping", "Welfare check ping", () => "I'm still alive!");
+        app.AddSlashCommand("ping", "Welfare check ping", () => "I'm still responding!");
         app.AddSlashCommand("xkcd", "Fetches an XKCD comic", XkcdCommandAsync);
         app.AddSlashCommand("avatar", "Gets the avatar of the tagged user.", AvatarCommandAsync);
         app.AddSlashCommand("custom", "Retrieves a custom command", GetCustomCommandAsync);
