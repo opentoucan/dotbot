@@ -93,7 +93,7 @@ jobs:
         id: semver_tag
         run: |
           GIT_TAG=${{ github.ref_name  }}
-          echo "TAG${GIT_TAG#*v}" >> $GITHUB_OUTPUT
+          echo "TAG=${GIT_TAG#*v}" >> $GITHUB_OUTPUT
 
       - name: Extract Docker metadata
         id: meta
