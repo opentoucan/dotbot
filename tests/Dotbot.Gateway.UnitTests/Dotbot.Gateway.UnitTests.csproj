@@ -4,12 +4,16 @@
         <OutputType>Exe</OutputType>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <IsTestProject>true</IsTestProject>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Bogus" />
         <PackageReference Include="BouncyCastle.Cryptography" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="RichardSzalay.MockHttp" />
         <PackageReference Include="TUnit" />
 
@@ -19,6 +23,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Dotbot.Gateway\Dotbot.Gateway.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="res\" />
+      <Folder Include="TestResults\" />
     </ItemGroup>
     
 </Project>
