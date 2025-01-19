@@ -19,7 +19,7 @@
   color: "027fa0"
 - name: renovate/dotnet
   color: "5319E7"
-- name: renovaye/nuget
+- name: renovate/nuget
   color: 0052CC
 # Semantic Types
 - name: type/digest
