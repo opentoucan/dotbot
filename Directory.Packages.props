@@ -67,7 +67,7 @@
     <PackageVersion Include="NetCord" Version="1.0.0-alpha.339" />
     <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.339" />
     <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.339" />
-    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.339" />
+    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.340" />
     <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.339" />
     <!-- Testing -->
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.5.2" />
