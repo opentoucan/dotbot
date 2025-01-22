@@ -65,7 +65,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1" />
     <!-- Discord -->
     <PackageVersion Include="NetCord" Version="1.0.0-alpha.339" />
-    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.339" />
+    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.340" />
     <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.339" />
     <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.339" />
     <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.339" />
