@@ -1,0 +1,14 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "packageRules": [
+    {
+      "description": ["NetCord Group"]
+      "groupName": "NetCord",
+      "matchPackagePatterns": ["^NetCord"],
+      "matchDatasources": ["nuget"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      }
+    }
+  ]
+}
