@@ -64,11 +64,11 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1" />
     <!-- Discord -->
-    <PackageVersion Include="NetCord" Version="1.0.0-alpha.342" />
-    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.342" />
-    <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.342" />
-    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.342" />
-    <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.342" />
+    <PackageVersion Include="NetCord" Version="1.0.0-alpha.343" />
+    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.343" />
+    <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.343" />
+    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.343" />
+    <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.343" />
     <!-- Testing -->
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.5.3" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
