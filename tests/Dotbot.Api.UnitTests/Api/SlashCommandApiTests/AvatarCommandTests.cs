@@ -14,10 +14,10 @@ public class AvatarCommandTests
         var avatarHash = "some_global_hash";
         var guildAvatarHash = "some_guild_hash";
         var guildUser = new GuildUser(new JsonGuildUser
-            {
-                User = new JsonUser { Id = userId, AvatarHash = avatarHash },
-                GuildAvatarHash = guildAvatarHash
-            },
+        {
+            User = new JsonUser { Id = userId, AvatarHash = avatarHash },
+            GuildAvatarHash = guildAvatarHash
+        },
             123, new RestClient());
         var globalAvatarFlag = true;
         var sut = SlashCommandApi.AvatarCommandAsync(guildUser, globalAvatarFlag);
@@ -25,7 +25,7 @@ public class AvatarCommandTests
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.UserAvatar(userId, avatarHash, null).ToString());
     }
-    
+
     [Test]
     public async Task AvatarCommand_GlobalFlagIsFalse_ReturnsGuildAvatarUrl()
     {
@@ -34,17 +34,17 @@ public class AvatarCommandTests
         var avatarHash = "some_global_hash";
         var guildAvatarHash = "some_guild_hash";
         var guildUser = new GuildUser(new JsonGuildUser
-            {
-                User = new JsonUser { Id = userId, AvatarHash = avatarHash },
-                GuildAvatarHash = guildAvatarHash
-            },guildId, new RestClient());
+        {
+            User = new JsonUser { Id = userId, AvatarHash = avatarHash },
+            GuildAvatarHash = guildAvatarHash
+        }, guildId, new RestClient());
         var globalAvatarFlag = false;
         var sut = SlashCommandApi.AvatarCommandAsync(guildUser, globalAvatarFlag);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.GuildUserAvatar(guildId, userId, guildAvatarHash, null).ToString());
     }
-    
+
     [Test]
     public async Task AvatarCommand_GlobalFlagNotProvided_ReturnsGuildAvatarUrlByDefault()
     {
@@ -56,13 +56,13 @@ public class AvatarCommandTests
         {
             User = new JsonUser { Id = userId, AvatarHash = avatarHash },
             GuildAvatarHash = guildAvatarHash
-        },guildId, new RestClient());
+        }, guildId, new RestClient());
         var sut = SlashCommandApi.AvatarCommandAsync(guildUser);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.GuildUserAvatar(guildId, userId, guildAvatarHash, null).ToString());
     }
-    
+
     [Test]
     public async Task AvatarCommand_GlobalFlagNotProvided_ReturnsGlobalAvatarUrlWhenNoGuildAvatar()
     {
@@ -72,13 +72,13 @@ public class AvatarCommandTests
         var guildUser = new GuildUser(new JsonGuildUser
         {
             User = new JsonUser { Id = userId, AvatarHash = avatarHash }
-        },guildId, new RestClient());
+        }, guildId, new RestClient());
         var sut = SlashCommandApi.AvatarCommandAsync(guildUser);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.UserAvatar(userId, avatarHash, null).ToString());
     }
-    
+
     [Test]
     public async Task AvatarCommand_NoAvatarSet_ReturnsErrorMessage()
     {
@@ -87,7 +87,7 @@ public class AvatarCommandTests
         var guildUser = new GuildUser(new JsonGuildUser
         {
             User = new JsonUser { Id = userId }
-        },guildId, new RestClient());
+        }, guildId, new RestClient());
         var sut = SlashCommandApi.AvatarCommandAsync(guildUser);
 
         await Assert.That(sut.Embeds).IsNull();

@@ -35,7 +35,7 @@ public class CustomCommandService(
         }
 
         var discordFileAttachments = new List<AttachmentProperties>();
-        if (!matchingCommand.Attachments.Any())
+        if (matchingCommand.Attachments.Count == 0)
         {
             return Result<GetCustomCommandResponse>.Success(new GetCustomCommandResponse(matchingCommand.Name, matchingCommand.Content ?? "No content for this command", discordFileAttachments));
         }

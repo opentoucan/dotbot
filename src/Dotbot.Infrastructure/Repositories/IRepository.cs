@@ -1,4 +1,4 @@
-﻿using Dotbot.Infrastructure.Entities;
+using Dotbot.Infrastructure.Entities;
 using Dotbot.Infrastructure.SeedWork;
 
 namespace Dotbot.Infrastructure.Repositories;

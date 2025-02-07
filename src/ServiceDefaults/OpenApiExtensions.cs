@@ -14,7 +14,7 @@ public static partial class Extensions
             app.MapOpenApi();
             app.MapScalarApiReference();
         }
-        
+
         return app;
     }
 

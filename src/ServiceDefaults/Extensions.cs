@@ -156,7 +156,7 @@ public static partial class Extensions
         var awsOptions = builder.Configuration.GetAWSOptions<AmazonS3Config>("S3");
         awsOptions.DefaultClientConfig.RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED;
         awsOptions.DefaultClientConfig.ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED;
-        
+
         builder.Services.AddDefaultAWSOptions(awsOptions);
         builder.Services.AddAWSService<IAmazonS3>();
         return builder;

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Dotbot.Infrastructure.Entities;
 using Dotbot.Infrastructure.EntityConfigurations;
 using Dotbot.Infrastructure.Extensions;
@@ -12,10 +12,10 @@ namespace Dotbot.Infrastructure;
 
 public class DotbotContext : DbContext, IUnitOfWork
 {
-    public DbSet<CustomCommand> CustomCommands { get; set; }
-    public DbSet<Guild> Guilds { get; set; }
-    public DbSet<CommandAttachment> Attachments { get; set; }
-    public DbSet<Xkcd> Xkcds { get; set; }
+    public DbSet<CustomCommand> CustomCommands { get; set; } = null!;
+    public DbSet<Guild> Guilds { get; set; } = null!;
+    public DbSet<CommandAttachment> Attachments { get; set; } = null!;
+    public DbSet<Xkcd> Xkcds { get; set; } = null!;
 
 
     private readonly IMediator _mediator = null!;

@@ -21,15 +21,15 @@ public static class SlashCommandApi
     }
 
     public static async Task<InteractionMessageProperties> XkcdCommandAsync(
-        IXkcdService xkcdService, 
-        ILoggerFactory loggerFactory, 
+        IXkcdService xkcdService,
+        ILoggerFactory loggerFactory,
         HttpApplicationCommandContext context,
         [SlashCommandParameter(Name = "comic", Description = "Comic number to fetch (blank picks latest)")] int? comicNumber = null)
     {
         var logger = loggerFactory.CreateLogger("XkcdCommand");
         var xkcdComic = await xkcdService.GetXkcdComicAsync(comicNumber, CancellationToken.None);
-        
-        logger.LogInformation($"Fetching XKCD: {comicNumber.ToString() ?? "latest"}");
+
+        logger.LogInformation("Fetching XKCD: {ComicNumber}", comicNumber.ToString() ?? "latest");
 
         if (comicNumber is null && xkcdComic is null)
             return "There was an issue fetching the XKCD";
@@ -58,7 +58,7 @@ public static class SlashCommandApi
                     }
                 }));
     }
-    
+
     public static InteractionMessageProperties AvatarCommandAsync(
         GuildUser user,
         [SlashCommandParameter(Name = "global", Description = "Optional flag if you want the user's global avatar instead of the server")] bool globalAvatar = false)
@@ -84,10 +84,10 @@ public static class SlashCommandApi
         var guildId = context.Interaction.GuildId?.ToString();
         if (guildId is null)
         {
-            await context.Interaction.SendResponseAsync(InteractionCallback.Message("Cannot use this command outside of a server") );
+            await context.Interaction.SendResponseAsync(InteractionCallback.Message("Cannot use this command outside of a server"));
             return;
         }
-        
+
         await context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
 
         var customCommandResponse = await customCommandService.GetCustomCommandAsync(guildId, commandName);
@@ -95,6 +95,6 @@ public static class SlashCommandApi
             await context.Interaction.SendFollowupMessageAsync(string.Join(" ", customCommandResponse.Errors));
         else
             await context.Interaction.SendFollowupMessageAsync(new InteractionMessageProperties().WithContent(customCommandResponse.Value.Content).AddAttachments(customCommandResponse.Value.Attachments));
-        
+
     }
 }
