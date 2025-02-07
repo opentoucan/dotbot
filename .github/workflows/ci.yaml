@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-python@v5
 
       - name: Merge sarif files
-        run:  uvx --from sarif-tools@latest sarif copy ../dotbot/src/**/*.sarif --out dotbot.sarif
+        run:  uvx --from sarif-tools@latest sarif copy src/**/*.sarif --out dotbot.sarif
         
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
