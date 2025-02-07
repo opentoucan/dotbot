@@ -76,7 +76,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         if: success() || failure()
         with:
-            sarif_file: dotbot.sarif
+            sarif_file: src/**/*.sarif
 
   build:
     runs-on: ubuntu-24.04
