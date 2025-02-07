@@ -40,6 +40,10 @@
     {
       "matchManagers": ["nuget"],
       "addLabels": ["renovate/nuget"]
+    }, 
+    {
+      "matchManagers": ["python-version"],
+      "addLabels": ["renovate/python"]
     }
   ]
 }
