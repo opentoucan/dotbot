@@ -40,7 +40,7 @@
     <PackageVersion Include="Google.Protobuf" Version="3.29.3" />
     <!-- Miscellaneous -->
     <PackageVersion Include="Ardalis.Result" Version="10.1.0" />
-    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.5.0" />
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.5.1" />
     <PackageVersion Include="libsodium" Version="1.0.20.1" />
     <PackageVersion Include="MimeTypes" Version="2.5.2" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.0" />
