@@ -17,11 +17,11 @@
   color: "027fa0"
 - name: renovate/helm
   color: "027fa0"
-- name: renovate/dotnet-version
+- name: renovate/dotnet
   color: "5319E7"
 - name: renovate/nuget
   color: "0052CC"
-- name: renovate/python-version
+- name: renovate/python
   color: "0e8a16"
 # Semantic Types
 - name: type/digest
