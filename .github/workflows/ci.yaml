@@ -41,10 +41,7 @@ jobs:
   tests:
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
-      packages: write
-      id-token: write
-      pull-requests: write
+      security-events: write
 
     steps:
       - name: Checkout
