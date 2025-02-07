@@ -7,7 +7,7 @@
         <UserSecretsId>aea46887-1dad-4bb6-a4a3-63c361371309</UserSecretsId>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-        <ErrorLog>dotbot.sarif,version=2.1</ErrorLog>
+        <ErrorLog>api.sarif,version=2.1</ErrorLog>
     </PropertyGroup>
 
     <ItemGroup>
