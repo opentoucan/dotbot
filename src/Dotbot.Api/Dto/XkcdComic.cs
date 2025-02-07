@@ -1,4 +1,4 @@
-﻿namespace Dotbot.Api.Dto;
+namespace Dotbot.Api.Dto;
 
 public class XkcdComic
 {

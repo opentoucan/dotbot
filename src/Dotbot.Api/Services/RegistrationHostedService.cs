@@ -9,7 +9,7 @@ public class RegistrationHostedService(IServiceScopeFactory serviceScopeFactory)
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using IServiceScope scope = serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
 
         var guildRepository = scope.ServiceProvider.GetRequiredService<IGuildRepository>();
         var restClient = scope.ServiceProvider.GetRequiredService<RestClient>();

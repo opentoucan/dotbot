@@ -1,8 +1,6 @@
 # Dotbot
 
-A bot to interact with VoIP and instant messaging platforms. At the moment this is just used for Discord, but there is scope in the future to decoupling this.
-The core components are written in C# with a MongoDB database for persistence.
-Discord interaction uses [Discord.Net](https://www.nuget.org/packages/Discord.Net) to create a websocket connection via the [Discord API](https://discord.com/developers/docs/intro).
+A custom Discord bot used for HTTP interactions only. This allows the bot to scale for redundancy if needed.
 
 # Local Development
 

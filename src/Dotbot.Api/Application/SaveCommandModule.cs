@@ -38,11 +38,11 @@ public class SaveCommandModule(ICustomCommandService customCommandService) : App
         var guildId = Context.Interaction.GuildId?.ToString();
         if (guildId is null)
         {
-            await Context.Interaction.SendResponseAsync(InteractionCallback.Message("Cannot use this command outside of a server") );
+            await Context.Interaction.SendResponseAsync(InteractionCallback.Message("Cannot use this command outside of a server"));
             return;
         }
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
-        
+
         var result = await customCommandService.SaveCustomCommandAsync(guildId, Context.Interaction.User.Id.ToString(), commandName, content, file);
         if (!result.IsSuccess)
             await Context.Interaction.SendFollowupMessageAsync(string.Join(" ", result.Errors));

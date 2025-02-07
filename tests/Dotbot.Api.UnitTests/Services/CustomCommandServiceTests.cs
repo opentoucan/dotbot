@@ -23,10 +23,10 @@ public class CustomCommandServiceTests
     private static readonly IAmazonS3 AmazonS3ClientMock = Substitute.For<IAmazonS3>();
     private static readonly ILogger<CustomCommandService> LoggerMock = Substitute.For<ILogger<CustomCommandService>>();
     private static readonly IGuildRepository GuildRepositoryMock = Substitute.For<IGuildRepository>();
-    
+
     //Fakes
     private static readonly IFileUploadService FileUploadService = new FileUploadService(AmazonS3ClientMock, Substitute.For<ILogger<FileUploadService>>());
-    private static readonly IOptions<DiscordSettings> DiscordSettings = Options.Create(new DiscordSettings{BucketEnvPrefix = "test", Token = "some_token"});
+    private static readonly IOptions<DiscordSettings> DiscordSettings = Options.Create(new DiscordSettings { BucketEnvPrefix = "test", Token = "some_token" });
     private DotbotContext _dbContext = null!;
     private HttpClient _httpClient = null!;
     private readonly MockHttpMessageHandler _handler = new();
@@ -36,9 +36,9 @@ public class CustomCommandServiceTests
     [Before(Test)]
     public async Task Before()
     {
-        
+
         _httpClient = new HttpClient(_handler);
-        _dbContext = new (
+        _dbContext = new(
             new DbContextOptionsBuilder<DotbotContext>()
                 .UseInMemoryDatabase(TestContext.Current!.TestDetails.TestId)
                 .Options);
@@ -67,34 +67,34 @@ public class CustomCommandServiceTests
     }
 
     #region GetCustomCommandAsync tests
-    
+
     [Test]
     public async Task GetCustomCommandAsync_NoMatchingCommands_ReturnsErrorMsg()
     {
         ulong guildId = 123;
         var commandName = "image5";
-        
+
         var sut = new CustomCommandService(LoggerMock, _guildQueries, FileUploadService, DiscordSettings, GuildRepositoryMock, _httpClient);
-        
+
         var result = await sut.GetCustomCommandAsync(guildId.ToString(), commandName);
 
         await Assert.That(result.IsSuccess).IsFalse();
     }
-    
+
     [Test]
     public async Task GetCustomCommandAsync_TextCommandInMatchingGuild_ReturnsMatchingTextCommand()
     {
         ulong guildId = 123;
         var commandName = "text1";
-        
+
         var sut = new CustomCommandService(LoggerMock, _guildQueries, FileUploadService, DiscordSettings, GuildRepositoryMock, _httpClient);
-        
+
         var result = await sut.GetCustomCommandAsync(guildId.ToString(), commandName);
 
         await Assert.That(result.IsSuccess).IsTrue();
         await Assert.That(result.Value.Content).IsEqualTo("some_content_on_server1");
     }
-    
+
     [Test]
     public async Task GetCustomCommandAsync_ImageOnlyCommandInMatchingGuild_ReturnsImageOnly()
     {
@@ -102,19 +102,19 @@ public class CustomCommandServiceTests
         var commandName = "image1";
         var fileBucketName = $"{DiscordSettings.Value.BucketEnvPrefix}-discord-{guildId}";
         var fileName = "file1_on_server1";
-        
+
         AmazonS3ClientMock.GetObjectAsync(Arg.Is<GetObjectRequest>(x => x.BucketName == fileBucketName && x.Key == fileName), Arg.Any<CancellationToken>())
-            .Returns(new GetObjectResponse{ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName});
-        
+            .Returns(new GetObjectResponse { ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName });
+
         var sut = new CustomCommandService(LoggerMock, _guildQueries, FileUploadService, DiscordSettings, GuildRepositoryMock, _httpClient);
-        
+
         var result = await sut.GetCustomCommandAsync(guildId.ToString(), commandName);
 
         await Assert.That(result.IsSuccess).IsTrue();
         await Assert.That(result.Value.Content).IsNull();
         await Assert.That(result.Value.Attachments.All(x => x.FileName == "file1_on_server1")).IsTrue();
     }
-    
+
     [Test]
     public async Task GetCustomCommandAsync_TextAndImageCommandInMatchingGuild_ReturnsBothTextAndImage()
     {
@@ -122,21 +122,21 @@ public class CustomCommandServiceTests
         var commandName = "textandimage1";
         var fileBucketName = $"{DiscordSettings.Value.BucketEnvPrefix}-discord-{guildId}";
         var fileName = "file2_on_server1";
-        
+
         AmazonS3ClientMock.GetObjectAsync(Arg.Is<GetObjectRequest>(x => x.BucketName == fileBucketName && x.Key == fileName), Arg.Any<CancellationToken>())
-            .Returns(new GetObjectResponse{ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName});
-        
+            .Returns(new GetObjectResponse { ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName });
+
         var sut = new CustomCommandService(LoggerMock, _guildQueries, FileUploadService, DiscordSettings, GuildRepositoryMock, _httpClient);
-        
+
         var result = await sut.GetCustomCommandAsync(guildId.ToString(), commandName);
 
         await Assert.That(result.IsSuccess).IsTrue();
         await Assert.That(result.Value.Content).IsEqualTo("some_more_content_on_server1");
         await Assert.That(result.Value.Attachments.All(x => x.FileName == "file2_on_server1")).IsTrue();
     }
-    
+
     #endregion
-    
+
     [Test]
     [Arguments("text1", "some_text_content", false)]
     [Arguments("text1", null, true)]
@@ -173,7 +173,7 @@ public class CustomCommandServiceTests
             _handler
                 .Expect(HttpMethod.Get, attachment!.Url)
                 .Respond(HttpStatusCode.OK, Array.Empty<KeyValuePair<string, string>>(), "application/json", new MemoryStream());
-        
+
         var sut = new CustomCommandService(LoggerMock, _guildQueries, Substitute.For<IFileUploadService>(), DiscordSettings, _guildRepository, _httpClient);
         var result = await sut.SaveCustomCommandAsync(guildId.ToString(), userId.ToString(), commandName, content, attachment);
 
@@ -182,7 +182,7 @@ public class CustomCommandServiceTests
             .Include(g => g.CustomCommands)
             .ThenInclude(cc => cc.Attachments)
             .FirstOrDefault(g => g.ExternalId == guildId.ToString())!.CustomCommands.FirstOrDefault(c => c.Name == commandName);
-        
+
         using (Assert.Multiple())
         {
             await Assert.That(result.IsSuccess).IsTrue();
@@ -190,9 +190,9 @@ public class CustomCommandServiceTests
             await Assert.That(savedCommand!.Name).IsEqualTo(commandName);
             await Assert.That(savedCommand.Content).IsEqualTo(content);
             await Assert.That(savedCommand.CreatorId).IsEqualTo(userId.ToString());
-            if(sendAttachment)
+            if (sendAttachment)
                 await Assert.That(savedCommand.Attachments.First().Url).IsEqualTo(attachment!.Url);
         }
     }
-    
+
 }

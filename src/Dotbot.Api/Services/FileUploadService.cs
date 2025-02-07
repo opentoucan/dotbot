@@ -2,6 +2,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Dotbot.Api.Dto;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace Dotbot.Api.Services;
 
@@ -25,11 +26,17 @@ public class FileUploadService(IAmazonS3 amazonS3Client, ILogger<FileUploadServi
             if (bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
                 await amazonS3Client.PutBucketAsync(parentName, token);
 
+            if (!new FileExtensionContentTypeProvider().TryGetContentType(attachmentName, out var contentType))
+            {
+                logger.LogError("Failed to save attachment ({attachmentName}) into bucket", attachmentName);
+                throw new Exception($"File type {attachmentName} is not supported");
+            }
+
             var transferRequest = new TransferUtilityUploadRequest
             {
                 BucketName = parentName,
                 InputStream = content,
-                ContentType = MimeTypes.GetMimeType(attachmentName),
+                ContentType = contentType,
                 Key = attachmentName,
                 DisablePayloadSigning = amazonS3Client.Config.ServiceURL.StartsWith("https")
             };

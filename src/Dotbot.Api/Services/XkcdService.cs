@@ -29,12 +29,7 @@ public class XkcdService : IXkcdService
             if (httpResponse.IsSuccessStatusCode)
             {
                 var xkcdContent = await JsonSerializer.DeserializeAsync<XkcdContent>(
-                    await httpResponse.Content.ReadAsStreamAsync(cancellationToken), new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        NumberHandling = JsonNumberHandling.AllowReadingFromString
-                    }, cancellationToken);
+                    await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken);
                 return MapFromXkcdContent(xkcdContent!);
             }
         }
@@ -58,7 +53,7 @@ public class XkcdService : IXkcdService
         public int Day { get; set; }
     }
 
-    private XkcdComic MapFromXkcdContent(XkcdContent xkcdResponse)
+    private static XkcdComic MapFromXkcdContent(XkcdContent xkcdResponse)
     {
         return new XkcdComic
         {
@@ -69,4 +64,11 @@ public class XkcdService : IXkcdService
             DatePosted = new DateTime(xkcdResponse.Year, xkcdResponse.Month, xkcdResponse.Day)
         };
     }
+
+    private static readonly JsonSerializerOptions SReadOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString
+    };
 }
