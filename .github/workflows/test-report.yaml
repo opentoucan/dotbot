@@ -10,11 +10,7 @@ on:
 
 jobs:
   report:
-    strategy:
-      fail-fast: false
-
     runs-on: ubuntu-latest
-
     permissions:
       actions: read
       checks: write
