@@ -20,5 +20,8 @@
   "suppressNotifications": ["prEditedNotification", "prIgnoreNotification"],
   "onboarding": false,
   "requireConfig": "ignored",
-  "allowedPostUpgradeCommands": ["^scripts"]
+  "allowedPostUpgradeCommands": ["^scripts"],
+  "helm-values": {
+    "pinDigests": true
+  }
 }
