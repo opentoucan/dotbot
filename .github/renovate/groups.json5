@@ -9,6 +9,15 @@
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"
       }
+    },
+    {
+      "description": ["Dotbot helm chart Group"],
+      "groupName": "Dotbot Helm Chart",
+      "matchPackagePatterns": ["dotbot"],
+      "matchDatasources": ["helm-values", "regex"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      }
     }
   ]
 }
