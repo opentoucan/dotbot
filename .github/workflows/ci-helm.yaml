@@ -99,6 +99,7 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Run chart-releaser
+        id: release-chart
         uses: helm/chart-releaser-action@v1
         env:
           CR_TOKEN: "${{ secrets.PAT }}"
@@ -113,6 +114,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push charts to GHCR
+      - name: Push Charts to GHCR
         run: |
-          helm push ".cr-release-packages/dotbot-*.tgz" "oci://ghcr.io/${{ github.repository_owner }}/charts"
+          for pkg in .cr-release-packages/*; do
+            if [ -z "${pkg:-}" ]; then
+              break
+            fi
+            helm push "${pkg}" oci://ghcr.io/${{ github.repository_owner }}/charts
+          done
