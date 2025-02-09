@@ -36,7 +36,7 @@ migrator:
   image:
     registry: ghcr.io
     repository: opentoucan/dotbot.migration
-    tag: 3.0.1
+    tag: 3.0.2
     digest: sha256:4d1050797f0a4766ea385c790d412e10f266d6113673559a016210d3a7bdc6c7
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
