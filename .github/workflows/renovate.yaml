@@ -24,6 +24,10 @@ on:
     paths:
       - .github/renovate.json5
       - .github/renovate/**.json5
+  workflow_run:
+    workflows: ['ci']
+    types:
+      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}

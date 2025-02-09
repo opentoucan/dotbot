@@ -84,16 +84,8 @@ jobs:
       id-token: write # needed for keyless signing
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: pull
-
-      - name: Checkout Default Branch
-        uses: actions/checkout@v4
-        with:
-          ref: "${{ github.event.repository.default_branch }}"
-          path: default
 
       - name: Fetch history
         run: git fetch --prune --unshallow
