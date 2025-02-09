@@ -13,8 +13,8 @@
     {
       "description": ["Dotbot helm chart Group"],
       "groupName": "Dotbot Helm Chart",
-      "matchPackagePatterns": ["/dotbot/"],
-      "matchDatasources": ["helm-values", "regex"],
+      "matchPackagePatterns": ["dotbot"],
+      "matchDatasources": ["helm-values", "regex", "docker"],
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"
       }
