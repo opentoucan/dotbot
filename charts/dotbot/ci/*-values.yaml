@@ -1,2 +1,5 @@
 existingAppSecret: 'dotbot-secret'
 existingMigratorSecret: 'dotbot-migrator-secret'
+service:
+  type: NodePort
+  nodePort: 30003
