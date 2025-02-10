@@ -1,4 +1,4 @@
 remote: origin
 chart-dirs:
   - charts
-helm-extra-args: --timeout 30s
+helm-extra-args: --timeout 60s
