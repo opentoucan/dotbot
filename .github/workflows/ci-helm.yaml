@@ -74,7 +74,7 @@ jobs:
           kubectl create secret generic dotbot-migrator-secret \
             --from-literal=CONNECTIONSTRING='Host=postgresql;Port=5432;Database=test;Username=test;Password=test;'
 
-          helm install -f ./charts/dotbot/values.yaml -f ./charts/dotbot/ci/\*-values.yaml dotbot ./charts/dotbot/
+          helm install -f ./charts/dotbot/values.yaml -f ./charts/dotbot/ci/\*-values.yaml dotbot ./charts/dotbot/ --debug
 
       # - name: Run chart-testing (install)
       #   if: steps.list-changed.outputs.changed == 'true'
