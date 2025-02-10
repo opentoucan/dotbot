@@ -13,7 +13,6 @@ spec:
       targetPort: {{ .targetPort }}
       protocol: {{ .protocol }}
       name: {{ .name }}
-      nodePort: {{ .nodePort }}
   selector:
     {{- include "dotbot.selectorLabels" $ | nindent 4 }}
 {{- end }}
