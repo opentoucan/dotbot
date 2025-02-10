@@ -1,5 +1,4 @@
 existingAppSecret: 'dotbot-secret'
 existingMigratorSecret: 'dotbot-migrator-secret'
 service:
-  type: NodePort
-  nodePort: 30003
+  type: ClusterIP
