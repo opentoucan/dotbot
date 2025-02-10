@@ -55,12 +55,6 @@ jobs:
           helm install rabbitmq oci://registry-1.docker.io/bitnamicharts/rabbitmq --set auth.username=test --set auth.password=test
           helm install minio oci://registry-1.docker.io/bitnamicharts/minio
 
-          kubectl create configmap dotbot \
-            --from-literal=RabbitMQ__Endpoint='rabbitmq' \
-            --from-literal=RabbitMQ__port=5672 \
-            --from-literal=S3__ServiceUrl='minio:9000' \
-            --from-literal=OTEL_EXPORTER_OTLP_ENDPOINT='http://opentelemetry-operator.default.svc.cluster.local:8080'
-
           kubectl create secret generic dotbot-secret \
             --from-literal=TestMode=true \
             --from-literal=AWS_ACCESS_KEY_ID='test' \
@@ -74,11 +68,9 @@ jobs:
           kubectl create secret generic dotbot-migrator-secret \
             --from-literal=CONNECTIONSTRING='Host=postgresql;Port=5432;Database=test;Username=test;Password=test;'
 
-          helm install -f ./charts/dotbot/values.yaml -f ./charts/dotbot/ci/\*-values.yaml dotbot ./charts/dotbot/ --debug
-
-      # - name: Run chart-testing (install)
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #   run: ct install --config ct.yaml --namespace default
+      - name: Run chart-testing (install)
+        if: steps.list-changed.outputs.changed == 'true'
+        run: ct install --config ct.yaml --namespace default
 
   helm-release:
     if: github.ref_name == github.event.repository.default_branch && github.event_name != 'pull_request'
