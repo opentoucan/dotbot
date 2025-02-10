@@ -1,27 +1,32 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "docker:enableMajor",
-    ":automergeBranch",
-    ":disableRateLimiting",
-    ":dependencyDashboard",
-    ":semanticCommits",
-    ":separatePatchReleases",
-    ":skipStatusChecks",
-    ":timezone(Europe/London)",
-    "github>opentoucan/dotbot//.github/renovate/labels.json5",
-    "github>opentoucan/dotbot//.github/renovate/semanticCommits.json5",
-    "github>opentoucan/dotbot//.github/renovate/groups.json5",
-    "github>opentoucan/dotbot//.github/renovate/packageRules.json5",
-    "github>opentoucan/dotbot//.github/renovate/customManagers.json5"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    'docker:enableMajor',
+    ':automergeBranch',
+    ':disableRateLimiting',
+    ':dependencyDashboard',
+    ':semanticCommits',
+    ':separatePatchReleases',
+    ':skipStatusChecks',
+    ':timezone(Europe/London)',
+    'github>opentoucan/dotbot//.github/renovate/labels.json5',
+    'github>opentoucan/dotbot//.github/renovate/semanticCommits.json5',
+    'github>opentoucan/dotbot//.github/renovate/groups.json5',
+    'github>opentoucan/dotbot//.github/renovate/packageRules.json5',
+    'github>opentoucan/dotbot//.github/renovate/customManagers.json5',
   ],
-  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
-  "suppressNotifications": ["prEditedNotification", "prIgnoreNotification"],
-  "onboarding": false,
-  "requireConfig": "ignored",
-  "allowedPostUpgradeCommands": ["^scripts"],
-  "helm-values": {
-    "pinDigests": true
-  }
+  dependencyDashboardTitle: 'Renovate Dashboard 🤖',
+  suppressNotifications: [
+    'prEditedNotification',
+    'prIgnoreNotification',
+  ],
+  onboarding: false,
+  requireConfig: 'ignored',
+  allowedCommands: [
+    '^scripts',
+  ],
+  'helm-values': {
+    pinDigests: true,
+  },
 }
