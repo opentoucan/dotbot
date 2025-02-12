@@ -23,5 +23,6 @@ public class Instrumentation : IDisposable
     {
         ActivitySource.Dispose();
         _meter.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
