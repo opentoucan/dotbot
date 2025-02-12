@@ -72,11 +72,13 @@ jobs:
         
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.30"
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-            python-version: '3.13.1'
+            python-version: '3.13'
       - name: Merge sarif files
         run: uvx --no-cache --no-config --from sarif-tools@latest sarif copy src/**/*.sarif --out dotbot.sarif
         
