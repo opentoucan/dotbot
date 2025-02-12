@@ -35,12 +35,31 @@ services:
     networks:
       - com
 
+  dotbot:
+    container_name: dotbot
+    build:
+      context: ../..
+      dockerfile: ./src/Dotbot.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - ngrok
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ConnectionStrings__dotbot=Host=postgres;Port=5432;Database=dotbot;Username=dotbot;Password=yourWeak(!)Password
+        - RabbitMQ__Endpoint=rabbitmq
+        - S3__ServiceURL=http://minio
+    networks:
+        - com
+
   ngrok:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:alpine
     env_file: .env
-    command: 'http 127.0.0.1:5292'
-    network_mode: "host"
+    command: 'http dotbot:8080'
+    networks:
+        - com
     
   # ********************
   # Telemetry Components
@@ -55,6 +74,7 @@ services:
       - "--prometheus.server-url=http://prometheus:9090"
       - "--prometheus.query.normalize-calls=true"
       - "--prometheus.query.normalize-duration=true"
+      - "--collector.otlp.enabled"
     deploy:
       resources:
         limits:
@@ -62,7 +82,7 @@ services:
     restart: unless-stopped
     ports:
       - "16686:16686"         # Jaeger UI
-      - "4317"
+      - "4317:4317"
     environment:
       - METRICS_STORAGE_TYPE=prometheus
     networks:
@@ -80,29 +100,9 @@ services:
       - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
     volumes:
       - ../grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ../grafana/provisioning/:/etc/grafana/provisioning/:U
+      - ../grafana/provisioning/:/etc/grafana/provisioning
     ports:
       - "3000:3000"
-
-  # OpenTelemetry Collector
-  otelcol:
-    image: docker.io/otel/opentelemetry-collector-contrib:0.119.0
-    container_name: otel-col
-    deploy:
-      resources:
-        limits:
-          memory: 125M
-    restart: unless-stopped
-    command: [ "--config=/etc/otelcol-config.yml" ]
-    volumes:
-      - ../otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
-    ports:
-      - "4317:4317"
-      - "4318:4318"
-    depends_on:
-      - jaeger
-    networks:
-      - com
 
   # Prometheus
   prometheus:
