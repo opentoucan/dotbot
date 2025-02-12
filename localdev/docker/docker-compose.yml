@@ -46,10 +46,7 @@ services:
       - postgres
       - ngrok
     environment:
-        - ASPNETCORE_ENVIRONMENT=Development
-        - ConnectionStrings__dotbot=Host=postgres;Port=5432;Database=dotbot;Username=dotbot;Password=yourWeak(!)Password
-        - RabbitMQ__Endpoint=rabbitmq
-        - S3__ServiceURL=http://minio
+        - ASPNETCORE_ENVIRONMENT=local
     networks:
         - com
 

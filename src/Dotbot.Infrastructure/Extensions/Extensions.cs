@@ -15,7 +15,7 @@ public static class Extensions
             options.UseNpgsql(builder.Configuration.GetConnectionString("dotbot"));
         });
 
-        if (builder.Environment.IsDevelopment())
+        if (builder.Environment.EnvironmentName == "local")
         {
             using var scope = builder.Services.BuildServiceProvider().CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<DotbotContext>();
