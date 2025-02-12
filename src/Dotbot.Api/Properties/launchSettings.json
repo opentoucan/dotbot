@@ -12,7 +12,7 @@
         "AWS_ACCESS_KEY_ID": "dev",
         "AWS_SECRET_ACCESS_KEY": "dev",
         "AWS_PROFILE": "dev",
-        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://127.0.0.1:4317"
+        "OTLP_ENDPOINT_URL": "http://127.0.0.1:4317"
       }
     }
   }

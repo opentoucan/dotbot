@@ -1,18 +1,11 @@
-using System.Reflection;
 using System.Text.Json.Serialization;
 using Amazon.Runtime;
 using Amazon.S3;
-using MassTransit;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -59,27 +52,8 @@ public static partial class Extensions
 
     private static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
     {
-        var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-        var isOtlpEnabled = !string.IsNullOrWhiteSpace(otlpEndpoint);
-        builder.Services.Configure<OpenTelemetryLoggerOptions>(logging =>
-        {
-            if (isOtlpEnabled)
-                logging.AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint!));
-        });
-        builder.Logging.AddOpenTelemetry(logging =>
-        {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-            if (isOtlpEnabled)
-                logging.AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(otlpEndpoint!);
-                    options.Protocol = OtlpExportProtocol.Grpc;
-                });
-            else
-                builder.Logging.AddConsole();
-        });
-
+        builder.Services.AddSingleton<Instrumentation>();
+        var otlpEndpoint = builder.Configuration["OTLP_ENDPOINT_URL"];
         var otel = builder.Services.AddOpenTelemetry();
 
         // Configure OpenTelemetry Resources with the application name
@@ -90,46 +64,35 @@ public static partial class Extensions
         otel.WithMetrics(metrics =>
         {
             metrics.AddRuntimeInstrumentation()
-                // Metrics provider from OpenTelemetry
-                .AddAspNetCoreInstrumentation()
-                // Metrics provides by ASP.NET Core in .NET 8
+                // Metrics provides by ASP.NET Core
                 .AddMeter("Microsoft.AspNetCore.Hosting")
                 .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-                .AddMeter("Microsoft.AspNetCore.Http.Connections")
-                .AddMeter("Microsoft.AspNetCore.Routing")
-                .AddMeter("Microsoft.AspNetCore.Diagnostics")
-                .AddMeter("Microsoft.AspNetCore.RateLimiting")
-                .AddMeter("Dotbot");
-
-            if (isOtlpEnabled)
-                metrics.AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(otlpEndpoint!);
-                    options.Protocol = OtlpExportProtocol.Grpc;
-                });
-            else
-                metrics.AddConsoleExporter();
-
+                // Metrics provided by System.Net libraries
+                .AddMeter("System.Net.Http")
+                .AddMeter("System.Net.NameResolution")
+                .AddMeter(Instrumentation.MeterName)
+                .SetExemplarFilter(ExemplarFilterType.TraceBased)
+                .AddRuntimeInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+                .AddPrometheusExporter();
         });
 
         // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
         otel.WithTracing(tracing =>
         {
             tracing.AddAspNetCoreInstrumentation()
-                   .AddHttpClientInstrumentation();
-            //Add sources here
-            tracing.AddSource(builder.Environment.ApplicationName);
-            tracing.ConfigureResource(resource =>
-                resource.AddService(serviceName: builder.Environment.ApplicationName));
-            if (isOtlpEnabled)
-                tracing.AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(otlpEndpoint!);
-                    options.Protocol = OtlpExportProtocol.Grpc;
-                });
+                .AddSource(Instrumentation.ActivitySourceName)
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation();
+            if (otlpEndpoint != null)
+            {
+                tracing.AddOtlpExporter(options => { options.Endpoint = new Uri(otlpEndpoint); });
+            }
             else
+            {
                 tracing.AddConsoleExporter();
-
+            }
         });
 
         return builder;
@@ -148,6 +111,7 @@ public static partial class Extensions
         app.MapHealthChecks("/health")
             .AllowAnonymous();
 
+        app.MapPrometheusScrapingEndpoint();
         return app;
     }
 
