@@ -86,7 +86,7 @@ public static class SlashCommandApi
         string commandName)
     {
         using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
-        
+
         var guildId = context.Interaction.GuildId?.ToString();
         if (guildId is null)
         {
@@ -95,17 +95,17 @@ public static class SlashCommandApi
         }
 
         await context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
-        
+
         var tags = new TagList { { "member", context.User.Username }, { "command", commandName } };
-        
+
         foreach (var tag in tags)
             activity?.SetTag(tag.Key, tag.Value);
-        
+
         instrumentation.CustomCommandsCounter.Add(1, tags);
-        
+
         var logger = loggerFactory.CreateLogger("SlashCommandApi");
         logger.LogInformation("Member {member} is retrieving custom command {command}", context.User.Username, commandName);
-        
+
         var customCommandResponse = await customCommandService.GetCustomCommandAsync(guildId, commandName);
         if (!customCommandResponse.IsSuccess)
             await context.Interaction.SendFollowupMessageAsync(string.Join(" ", customCommandResponse.Errors));

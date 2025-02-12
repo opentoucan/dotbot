@@ -4,6 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <ErrorLog>servicedefaults.sarif,version=2.1</ErrorLog>
     </PropertyGroup>
 
     <ItemGroup>
