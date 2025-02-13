@@ -29,13 +29,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
-            # renovate: datasource=dotnet-version depName=dotnet-sdk
-            dotnet-version: '9.0.101'
-            
+          global-json-file: global.json
+
       - name: Verify formatting
         run: dotnet format --verify-no-changes
 
@@ -62,14 +61,14 @@ jobs:
 
       - name: Test with dotnet
         run: dotnet test -- --report-trx
-        
+
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-results
           path: ./tests/**/TestResults
         if: ${{ always() }}
-        
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -81,7 +80,7 @@ jobs:
             python-version: '3.13'
       - name: Merge sarif files
         run: uvx --no-cache --no-config --from sarif-tools@latest sarif copy src/**/*.sarif --out dotbot.sarif
-        
+
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         if: success() || failure()
@@ -141,6 +140,8 @@ jobs:
           push: ${{ github.ref_type == 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.semver_tag.outputs.TAG }}
 
   output-migration:
     runs-on: ubuntu-latest

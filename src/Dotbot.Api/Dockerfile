@@ -10,6 +10,7 @@ USER 2048
 
 FROM ${DOTNET_SDK} AS build
 ARG BUILD_CONFIGURATION=Release
+ARG BUILD_VERSION=1.0.0
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Directory.Build.props", "."]
@@ -25,8 +26,9 @@ RUN dotnet restore "Dotbot.Api/Dotbot.Api.csproj"
 RUN dotnet build "Dotbot.Api/Dotbot.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
+ARG BUILD_VERSION=1.0.0
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "Dotbot.Api/Dotbot.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Dotbot.Api/Dotbot.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:Version=${BUILD_VERSION}
 
 FROM base AS final
 WORKDIR /app
