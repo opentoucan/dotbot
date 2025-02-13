@@ -50,8 +50,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
-          # renovate: datasource=dotnet-version depName=dotnet-sdk
-          dotnet-version: '9.0.101'
+          global-json-file: global.json
 
       - name: Install dependencies
         run: dotnet restore
@@ -160,8 +159,7 @@ jobs:
         - name: Setup dotnet
           uses: actions/setup-dotnet@v4
           with:
-            # renovate: datasource=dotnet-version depName=dotnet-sdk
-            dotnet-version: '9.0.101'
+            global-json-file: global.json
 
         - name: Install EF Tool
           run: |
