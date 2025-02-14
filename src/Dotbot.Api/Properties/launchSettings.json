@@ -6,9 +6,8 @@
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5292",
+      "applicationUrl": "http://0.0.0.0:8080",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
         "AWS_ACCESS_KEY_ID": "dev",
         "AWS_SECRET_ACCESS_KEY": "dev",
         "AWS_PROFILE": "dev",

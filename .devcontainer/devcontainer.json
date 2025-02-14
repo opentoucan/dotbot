@@ -1,0 +1,14 @@
+{
+	"name": "Dotbot workspace",
+	"dockerComposeFile": ["docker-compose.workspace.yml", "docker-compose.deps.yml"],
+  "service": "workspace",
+	"workspaceFolder": "/workspace",
+
+	"shutdownAction": "stopCompose",
+	"containerUser": "vscode",
+	"remoteUser": "vscode",
+	"updateRemoteUserUID": true,
+	"containerEnv": {
+	  "HOME": "/home/vscode"
+	}
+}
