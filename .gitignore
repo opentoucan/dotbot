@@ -1,10 +1,12 @@
 bin/
 obj/
 /packages/
-riderModule.iml
 /_ReSharper.Caches/
-CliWrap.dll
-ffmpeg.exe
-libsodium.dll
-opus.dll
+.idea
 devcontainer.env
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sarif
+*.DotSettings.user
