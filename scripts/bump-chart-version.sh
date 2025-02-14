@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 HELM_DOCS_VERSION="1.13.1"
 
 set -euo pipefail
