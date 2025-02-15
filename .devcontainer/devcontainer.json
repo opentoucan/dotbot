@@ -1,6 +1,6 @@
 {
 	"name": "Dotbot workspace",
-	"dockerComposeFile": ["docker-compose.yaml"],
+	"dockerComposeFile": ["compose.yaml"],
   "service": "workspace",
 	"workspaceFolder": "/workspace",
 
