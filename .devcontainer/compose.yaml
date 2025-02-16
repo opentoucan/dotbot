@@ -6,7 +6,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: localhost/dotbotdevcontainer_workspace
     container_name: workspace
     env_file: devcontainer.env
     environment:
@@ -16,7 +15,7 @@ services:
     ports:
       - 8080:8080
     command: sleep infinity
-    user: 1000:1000
+    user: vscode
     userns_mode: keep-id:uid=1000,gid=1000
   rabbitmq:
     container_name: rabbitmq
