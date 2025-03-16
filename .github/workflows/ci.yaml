@@ -152,6 +152,7 @@ jobs:
             VERSION=${{ steps.semver_tag.outputs.TAG }}
 
       - name: Sign the image with Cosign
+        if: ${{ github.ref_type == 'tag' }}
         run: |
           cosign sign --yes ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project.image }}@${{ steps.build.outputs.DIGEST }}
 
