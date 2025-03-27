@@ -1,31 +1,87 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    'config:recommended',
-    'docker:enableMajor',
-    'helpers:pinGitHubActionDigests',
-    ':automergeBranch',
-    ':disableRateLimiting',
-    ':dependencyDashboard',
-    ':semanticCommits',
-    ':timezone(Europe/London)',
-    'github>opentoucan/dotbot//.renovate/labels.json5',
-    'github>opentoucan/dotbot//.renovate/semanticCommits.json5',
-    'github>opentoucan/dotbot//.renovate/groups.json5',
-    'github>opentoucan/dotbot//.renovate/packageRules.json5',
-    'github>opentoucan/dotbot//.renovate/customManagers.json5',
-  ],
-  dependencyDashboardTitle: 'Renovate Dashboard 🤖',
-  suppressNotifications: [
-    'prEditedNotification',
-    'prIgnoreNotification',
-  ],
-  onboarding: false,
-  requireConfig: 'ignored',
-  allowedCommands: [
-    '^scripts',
+    'local>opentoucan/renovate-config'
   ],
   'helm-values': {
     pinDigests: true,
   },
+  customManagers: [
+    {
+      customType: "regex",
+      datasourceTemplate: "docker",
+      fileMatch: ["(^|/)Chart\\.yaml$"],
+      matchStrings: [
+        "#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*[\"']?(?<currentValue>[\\w+\\.\\-]*)"
+      ]
+    }
+  ],
+  packageRules: [
+    {
+      description: "patch/minor updates: automerges. Bump helm chart versions by a patch when updating values files. Digests, pins, rollbacks, replacements and pinDigest updates are deliberately ignored since in our use case, these need a manual decision about the version bump for the chart. This can be removed when https://github.com/renovatebot/renovate/issues/8231 is implemented and enabled.",
+      matchManagers: ["helm-values", "regex"],
+      postUpgradeTasks: {
+        commands: [
+          "scripts/bump-chart-version.sh '{{{parentDir}}}' '{{{updateType}}}'"
+        ],
+        fileFilters: ["**/Chart.yaml"],
+        executionMode: "branch"
+      },
+      matchUpdateTypes: ["patch", "minor"]
+    },
+    {
+      description: "major updates: (no automerge) Bump helm chart versions by a patch when updating values files. Digests, pins, rollbacks, replacements and pinDigest updates are deliberately ignored since in our use case, these need a manual decision about the version bump for the chart. This can be removed when https://github.com/renovatebot/renovate/issues/8231 is implemented and enabled.",
+      matchManagers: ["helm-values", "regex"],
+      postUpgradeTasks: {
+        commands: [
+          "scripts/bump-chart-version.sh '{{{parentDir}}}' '{{{updateType}}}'"
+        ],
+        fileFilters: ["**/Chart.yaml"],
+        executionMode: "branch"
+      },
+      matchUpdateTypes: ["major"]
+    },
+    {
+      matchDatasources: ["helm"],
+      semanticCommitScope: "helm",
+      commitMessageTopic: "chart {{depName}}",
+      addLabels: ["renovate/helm"]
+    },
+    {
+      matchDatasources: ["nuget"],
+      semanticCommitScope: "nuget",
+      commitMessageTopic: "package {{depName}}",
+      addLabels: ["renovate/nuget"]
+    },
+    {
+      matchDatasources: ["dotnet-version"],
+      semanticCommitScope: "dotnet",
+      commitMessageTopic: "dotnet {{depName}}",
+      addLabels: ["renovate/dotnet"]
+    },
+    {
+      matchManagers: ["python-version"],
+      semanticCommitScope: "python",
+      commitMessageTopic: "python {{depName}}",
+      addLabels: ["renovate/python"]
+    },
+    {
+      description: ["NetCord Group"],
+      groupName: "NetCord",
+      matchPackagePatterns: ["^NetCord"],
+      matchDatasources: ["nuget"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group"
+      }
+    },
+    {
+      description: ["Dotbot helm chart Group"],
+      groupName: "Dotbot Helm Chart",
+      matchPackagePatterns: ["dotbot"],
+      matchDatasources: ["helm-values", "regex", "docker"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group"
+      }
+    }
+  ]
 }
