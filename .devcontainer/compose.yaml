@@ -19,7 +19,7 @@ services:
     userns_mode: keep-id:uid=1000,gid=1000
   rabbitmq:
     container_name: rabbitmq
-    image: docker.io/masstransit/rabbitmq:4.0.2
+    image: docker.io/masstransit/rabbitmq:4.0.7
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
