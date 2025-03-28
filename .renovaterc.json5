@@ -60,12 +60,6 @@
       addLabels: ["renovate/dotnet"]
     },
     {
-      matchManagers: ["python-version"],
-      semanticCommitScope: "python",
-      commitMessageTopic: "python {{depName}}",
-      addLabels: ["renovate/python"]
-    },
-    {
       description: ["NetCord Group"],
       groupName: "NetCord",
       matchPackagePatterns: ["^NetCord"],
