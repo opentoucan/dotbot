@@ -81,7 +81,7 @@ jobs:
         run: uvx --no-cache --no-config --from sarif-tools@latest sarif copy src/**/*.sarif --out dotbot.sarif
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@1b549b9259bda1cb5ddde3b41741a82a2d15a841 # v3.28.13
+        uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
         if: success() || failure()
         with:
             sarif_file: dotbot.sarif
