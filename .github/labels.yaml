@@ -2,12 +2,6 @@
 # Areas
 - name: area/docs
   color: "0e8a16"
-- name: area/github
-  color: "0e8a16"
-- name: area/helm
-  color: "1D76DB"
-- name: area/code
-  color: "D93F0B"
 # Renovate Types
 - name: renovate/container
   color: "027fa0"
