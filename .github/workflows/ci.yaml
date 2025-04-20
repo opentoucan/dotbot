@@ -154,7 +154,7 @@ jobs:
       - name: Sign the image with Cosign
         if: ${{ github.ref_type == 'tag' }}
         run: |
-          cosign sign --yes ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project.image }}@${{ steps.build-push-action.outputs.digest }}
+          cosign sign --yes ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project.image }}@${{ steps.build-and-push.outputs.digest }}
 
   output-migration:
     runs-on: ubuntu-latest
