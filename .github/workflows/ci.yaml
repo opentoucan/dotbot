@@ -120,14 +120,6 @@ jobs:
         id: bake-options
         uses: ./.github/actions/bake-options
 
-      - name: Extract image list
-        id: extract-images
-        run: |
-          images=$(echo '${{ steps.bake-options.outputs.targets }}' | jq -r -c '. |= map("ghcr.io/opentoucan/dotbot." + .) | .[]')
-          echo 'images<<EOF' >> $GITHUB_OUTPUT
-          echo $images >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
-
       - name: Build Application Metadata
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         id: meta
@@ -135,8 +127,6 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           flavor: latest=false
-          images: |
-            ${{ steps.extract-images.outputs.images }}
           tags: |
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
@@ -191,6 +181,8 @@ jobs:
       - name: Build
         uses: docker/bake-action@4ba453fbc2db7735392b93edf935aaf9b1e8f747 # v6.5.0
         id: bake
+        env:
+          TAG_BASE: ghcr.io/${{ github.repository_owner }}
         with:
           files: |
             ./docker-bake.hcl
@@ -206,7 +198,6 @@ jobs:
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
             ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, github.event.repository.name) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
-            *.tags=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}.${{ matrix.image }}
           targets: ${{ matrix.image }}
 
       - if: needs.prepare.outputs.valid-release
