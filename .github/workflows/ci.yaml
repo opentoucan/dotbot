@@ -123,8 +123,8 @@ jobs:
       - name: Extract image list
         id: extract-images
         run: |
-          IMAGES=$(echo '${{ steps.bake-options.outputs.targets }}' | jq -r -c '. |= map("ghcr.io/opentoucan/dotbot." + .) | .[]')
-          echo "images=${IMAGES}" >> $GITHUB_OUTPUT
+          images=$(echo '${{ steps.bake-options.outputs.targets }}' | jq -r -c '. |= map("ghcr.io/opentoucan/dotbot." + .) | .[]')
+          echo "$images" >> $GITHUB_OUTPUT
 
       - name: Build Application Metadata
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
