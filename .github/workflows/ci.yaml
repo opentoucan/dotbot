@@ -167,7 +167,7 @@ jobs:
         if: needs.prepare.outputs.valid-release
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -189,16 +189,16 @@ jobs:
             cwd://${{ runner.temp }}/docker-metadata-action-bake.json
           set: |
             *.args.VENDOR=${{ github.repository_owner }}
-            *.cache-from=${{ format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) }}
-            *.cache-to=${{ needs.prepare.outputs.valid-release && format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max,compression=zstd,force-compression=true', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) || '' }}
+            *.cache-from=${{ format('type=registry,ref=${{ env.REGISTRY }}/{0}/build_cache:{1}-{2},mode=max', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) }}
+            *.cache-to=${{ needs.prepare.outputs.valid-release && format('type=registry,ref=${{ env.REGISTRY }}/{0}/build_cache:{1}-{2},mode=max,compression=zstd,force-compression=true', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) || '' }}
             *.labels.org.opencontainers.image.title=${{ github.event.repository.name }}
-            *.labels.org.opencontainers.image.url=https://ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+            *.labels.org.opencontainers.image.url=https://${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, github.event.repository.name) || '*.output=type=docker' }}
+            ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=${{ env.REGISTRY }}/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, github.event.repository.name) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
-            *.tags=
+            *.tags=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}.${{ matrix.image }}
           targets: ${{ matrix.image }}
 
       - if: needs.prepare.outputs.valid-release
@@ -278,7 +278,7 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
@@ -286,18 +286,18 @@ jobs:
         working-directory: ${{ runner.temp }}/digests
         run: |
           docker buildx imagetools create \
-              $(jq --raw-output --compact-output '.target."docker-metadata-action".tags | map(select(startswith("ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name  }}")) | "-t " + .) | join(" ")' ${{ runner.temp }}/docker-metadata-action-bake.json) \
-              $(printf 'ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name  }}@sha256:%s ' *)
+              $(jq --raw-output --compact-output '.target."docker-metadata-action".tags | map(select(startswith("${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name  }}")) | "-t " + .) | join(" ")' ${{ runner.temp }}/docker-metadata-action-bake.json) \
+              $(printf '${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name  }}@sha256:%s ' *)
 
       - name: Inspect Image
         run: |
-          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name  }}:$(jq --raw-output '.target."docker-metadata-action".args.DOCKER_META_VERSION' ${{ runner.temp }}/docker-metadata-action-bake.json)
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name  }}:$(jq --raw-output '.target."docker-metadata-action".args.DOCKER_META_VERSION' ${{ runner.temp }}/docker-metadata-action-bake.json)
 
       - name: Export Digest
         id: digest
         run: |
           TAG=$(jq --raw-output '.target."docker-metadata-action".args.DOCKER_META_VERSION' ${{ runner.temp }}/docker-metadata-action-bake.json)
-          DIGEST=$(docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${TAG} --format '{{ json . }}' | jq --raw-output '.manifest.digest')
+          DIGEST=$(docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${TAG} --format '{{ json . }}' | jq --raw-output '.manifest.digest')
           echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
 
       - name: Generate Token
@@ -333,7 +333,7 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
@@ -341,17 +341,17 @@ jobs:
         uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
         with:
           dependency-snapshot: true
-          image: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}@${{ needs.release.outputs.digest }}
+          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}@${{ needs.release.outputs.digest }}
 
       - name: Attestation
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         with:
           push-to-registry: true
-          subject-name: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          subject-name: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}
           subject-digest: ${{ needs.release.outputs.digest }}
 
       - name: Verify Attestation
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}@${{ needs.release.outputs.digest }}
+          gh attestation verify --repo ${{ github.repository }} oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ github.event.repository.name }}@${{ needs.release.outputs.digest }}
