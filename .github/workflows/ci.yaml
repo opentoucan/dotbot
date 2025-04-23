@@ -123,7 +123,7 @@ jobs:
       - name: Extract image list
         id: extract-images
         run: |
-          images=$(echo '${{ steps.bake-options.outputs.targets }}' | jq -r -c '. |= map("ghcr.io/opentoucan/dotbot." + .) | .[]')
+          images=$(echo '${{ steps.bake-options.outputs.targets }}' | jq -r -c '. |= map("ghcr.io/opentoucan/dotbot." + .)')
           echo "$images" >> $GITHUB_OUTPUT
 
       - name: Build Application Metadata
@@ -134,7 +134,7 @@ jobs:
         with:
           flavor: latest=false
           images: |
-            ${{steps.extract-images.outputs.images}}
+            ${{ steps.extract-images.outputs.images }}
           tags: |
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
