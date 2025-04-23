@@ -145,7 +145,7 @@ jobs:
           retention-days: 1
 
   build-docker:
-    name: Build (${{ matrix.platform }})
+    name: Build (${{ matrix.image }} - ${{ matrix.platform }})
     runs-on: ${{ startsWith(matrix.platform, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: prepare
     strategy:
@@ -199,7 +199,7 @@ jobs:
             ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, github.event.repository.name) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
             *.tags=
-          targets: image
+          targets: ${{ matrix.image }}
 
       - if: needs.prepare.outputs.valid-release
         name: Export Digest
