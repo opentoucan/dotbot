@@ -120,6 +120,12 @@ jobs:
         id: bake-options
         uses: ./.github/actions/bake-options
 
+      - name: Extract image list
+        id: extract-images
+        run: |
+          IMAGES=$(echo '${{ steps.bake-options.outputs.targets }}' | jq -r -c '. |= map("ghcr.io/opentoucan/dotbot." + .) | .[]')
+          echo "images=${IMAGES}" >> $GITHUB_OUTPUT
+
       - name: Build Application Metadata
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         id: meta
@@ -127,6 +133,8 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           flavor: latest=false
+          images: |
+            ${{steps.extract-images.outputs.images}}
           tags: |
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
@@ -167,7 +175,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: Download Bake Metadata
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
