@@ -29,12 +29,10 @@ target "image-all" {
 
 target "api" {
   inherits = ["image-release"]
-  context = "./src/Dotbot.Api"
-  dockerfile = "Dockerfile"
+  dockerfile = "./src/Dotbot.Api/Dockerfile"
 }
 
 target "migrator" {
   inherits = ["image-release"]
-  context = "./src/Dotbot.Infrastructure"
-  dockerfile = "migration.Dockerfile"
+  dockerfile = "./src/Dotbot.Infrastructure/migration.Dockerfile"
 }
