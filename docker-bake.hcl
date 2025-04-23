@@ -1,4 +1,6 @@
-target "docker-metadata-action" {}
+target "docker-metadata-action" {
+  tags = []
+}
 
 variable "TAG_BASE" {}
 
