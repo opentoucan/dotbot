@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Bake Options
+description: Returns various fields from a docker-bake.hcl file
+
+outputs:
+  targets:
+    description: Targets
+    value: ${{ steps.options.outputs.targets }}
+  platforms:
+    description: Platforms
+    value: ${{ steps.options.outputs.platforms }}
+
+runs:
+  using: composite
+  steps:
+    - name: Application Options
+      id: options
+      shell: bash
+      run: |
+        TARGETS=$(\
+          docker buildx bake image-all --print --progress=quiet \
+            | jq -r -c '.group."image-all".targets'
+        )
+        PLATFORMS=$(\
+            docker buildx bake image-release --print --progress=quiet \
+                | jq --raw-output --compact-output '.target."image-release".platforms' \
+        )
+        echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+        echo "platforms=${PLATFORMS}" >> $GITHUB_OUTPUT
