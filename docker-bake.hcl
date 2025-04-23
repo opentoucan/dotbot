@@ -23,12 +23,14 @@ group "image-all" {
 
 target "api" {
   inherits = ["image-release"]
+  name = "dotbot.api"
   context = "./src/Dotbot.Api"
   dockerfile = "Dockerfile"
 }
 
 target "migrator" {
   inherits = ["image-release"]
+  name = "dotbot.migrator"
   context = "./src/Dotbot.Infrastructure"
   dockerfile = "migration.Dockerfile"
 }
