@@ -1,5 +1,7 @@
 target "docker-metadata-action" {}
 
+variable "TAG_BASE" {}
+
 target "image" {
   inherits = ["docker-metadata-action"]
 }
@@ -18,7 +20,7 @@ target "image-release" {
 }
 
 target "image-all" {
-  name = "dotbot.${tgt}"
+  name = "dotbot-${tgt}"
   matrix = {
     tgt = ["api", "migrator"]
   }
@@ -27,14 +29,12 @@ target "image-all" {
 
 target "api" {
   inherits = ["image-release"]
-  name = "dotbot.api"
   context = "./src/Dotbot.Api"
   dockerfile = "Dockerfile"
 }
 
 target "migrator" {
   inherits = ["image-release"]
-  name = "dotbot.migrator"
   context = "./src/Dotbot.Infrastructure"
   dockerfile = "migration.Dockerfile"
 }
