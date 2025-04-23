@@ -160,6 +160,7 @@ jobs:
         with:
           script: |
             core.setOutput('target-arch', '${{ matrix.platform }}'.split('/').pop());
+            core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
 
       - name: Login to Github Packages
         if: needs.prepare.outputs.valid-release
@@ -189,14 +190,14 @@ jobs:
             cwd://${{ runner.temp }}/docker-metadata-action-bake.json
           set: |
             *.args.VENDOR=${{ github.repository_owner }}
-            *.cache-from=${{ format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) }}
-            *.cache-to=${{ needs.prepare.outputs.valid-release && format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max,compression=zstd,force-compression=true', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) || '' }}
-            *.labels.org.opencontainers.image.title=${{ github.event.repository.name }}
+            *.cache-from=${{ format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max', github.repository_owner, steps.vars.output.target-image, steps.vars.outputs.target-arch) }}
+            *.cache-to=${{ needs.prepare.outputs.valid-release && format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2}.matrix.image,mode=max,compression=zstd,force-compression=true', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) || '' }}
+            *.labels.org.opencontainers.image.title=steps.vars.output.target-image
             *.labels.org.opencontainers.image.url=https://ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, github.event.repository.name) || '*.output=type=docker' }}
+            ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.output.target-image) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
           targets: ${{ matrix.image }}
 
