@@ -199,6 +199,7 @@ jobs:
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
             ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.output.target-image) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
+            *.tags=
           targets: ${{ matrix.image }}
 
       - if: needs.prepare.outputs.valid-release
