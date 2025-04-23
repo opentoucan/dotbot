@@ -30,9 +30,11 @@ target "image-all" {
 target "api" {
   inherits = ["image-release"]
   dockerfile = "./src/Dotbot.Api/Dockerfile"
+  tags = [for tag in target.docker-metadata-action.tags : "${TAG_BASE}/dotbot.api:${tag}"]
 }
 
 target "migrator" {
   inherits = ["image-release"]
   dockerfile = "./src/Dotbot.Infrastructure/migration.Dockerfile"
+  tags = [for tag in target.docker-metadata-action.tags : "${TAG_BASE}/dotbot.migrator:${tag}"]
 }
