@@ -131,9 +131,9 @@ jobs:
           flavor: latest=false
           tags: |
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.is-valid-semver }}
-            type=semver,pattern={{major}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.is-valid-semver }}
-            type=raw,value=${{ steps.image-version.outputs.raw }},enable=${{ steps.image-version.outputs.is-valid-semver }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
+            type=semver,pattern={{major}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
+            type=raw,value=${{ steps.image-version.outputs.raw }},enable=${{ steps.image-version.outputs.valid-release }}
             type=raw,value=rolling
 
       - name: Upload Bake Metadata
