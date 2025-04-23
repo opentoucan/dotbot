@@ -17,8 +17,12 @@ target "image-release" {
   ]
 }
 
-group "image-all" {
-  targets = ["api", "migrator"]
+target "image-all" {
+  name = "dotbot.${tgt}"
+  matrix = {
+    tgt = ["api", "migrator"]
+  }
+  target = tgt
 }
 
 target "api" {
