@@ -127,6 +127,9 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           flavor: latest=false
+          images: |
+            ghcr.io/${{ github.repository_owner }}/dotbot.api
+            ghcr.io/${{ github.repository_owner }}/dotbot.migrator
           tags: |
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
