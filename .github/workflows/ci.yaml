@@ -210,7 +210,7 @@ jobs:
         name: Export Digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
-          DIGEST="${{ steps.bake.outputs.metadata }} | jq -r .[].containerimage.digest"
+          DIGEST=$(echo "${{ steps.bake.outputs.metadata }}" | jq -r .[].containerimage.digest)
           touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
 
       - if: needs.prepare.outputs.valid-release
