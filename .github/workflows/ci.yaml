@@ -127,9 +127,6 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           flavor: latest=false
-          images: |
-            ghcr.io/${{ github.repository_owner }}/dotbot.api
-            ghcr.io/${{ github.repository_owner }}/dotbot.migrator
           tags: |
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
@@ -200,7 +197,7 @@ jobs:
           set: |
             *.args.VENDOR=${{ github.repository_owner }}
             *.cache-from=${{ format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max', github.repository_owner, steps.vars.outputs.target-image, steps.vars.outputs.target-arch) }}
-            *.cache-to=${{ needs.prepare.outputs.valid-release && format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max,compression=zstd,force-compression=true', github.repository_owner, github.event.repository.name, steps.vars.outputs.target-arch) || '' }}
+            *.cache-to=${{ needs.prepare.outputs.valid-release && format('type=registry,ref=ghcr.io/{0}/build_cache:{1}-{2},mode=max,compression=zstd,force-compression=true', github.repository_owner, steps.vars.outputs.target-image, steps.vars.outputs.target-arch) || '' }}
             *.labels.org.opencontainers.image.title=${{ steps.vars.outputs.target-image }}
             *.labels.org.opencontainers.image.url=https://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
