@@ -32,7 +32,7 @@ RUN dotnet ef migrations bundle -s /src/Dotbot.Api -p /src/Dotbot.Infrastructure
 
 FROM ${DOTNET_RUNTIME} AS initcontainer
 ENV CONNECTIONSTRING=""
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ["./src/Dotbot.Infrastructure/entrypoint.sh", "/entrypoint.sh"]
 COPY --from=migrationbuilder /migrations /migrations
 RUN chmod 755 /migrations/migration
 WORKDIR /migrations
