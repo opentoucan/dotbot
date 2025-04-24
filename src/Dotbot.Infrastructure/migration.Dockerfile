@@ -24,15 +24,17 @@ COPY ["src/Dotbot.Infrastructure/", "Dotbot.Infrastructure"]
 COPY ["src/ServiceDefaults/", "ServiceDefaults"]
 
 # Build the migrationbundle here
-FROM build as migrationbuilder
-ENV PATH $PATH:/root/.dotnet/tools
+FROM build AS migrationbuilder
+ENV PATH=$PATH:/root/.dotnet/tools
 RUN dotnet tool install --global dotnet-ef
 RUN mkdir /migrations
 RUN dotnet ef migrations bundle -s /src/Dotbot.Api -p /src/Dotbot.Infrastructure -c DotbotContext --self-contained -r linux-x64 -o /migrations/migration
 
-FROM ${DOTNET_RUNTIME} as initcontainer
+FROM ${DOTNET_RUNTIME} AS initcontainer
 ENV CONNECTIONSTRING=""
+COPY ./entrypoint.sh /entrypoint.sh
 COPY --from=migrationbuilder /migrations /migrations
 RUN chmod 755 /migrations/migration
 WORKDIR /migrations
-ENTRYPOINT ./migration --connection "$CONNECTIONSTRING"
+
+ENTRYPOINT ["/entrypoint.sh"]
