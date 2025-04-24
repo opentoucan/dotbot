@@ -105,7 +105,7 @@ jobs:
       - name: Set input version
         id: input_version
         env:
-          SOURCE_TAG: ${GITHUB_REF#refs/tags/}
+          SOURCE_TAG: ${{ github.ref_name }}
           INPUT_VERSION: ${{ inputs.version }}
         run: |
           echo "VERSION=${INPUT_VERSION:-$SOURCE_TAG}" >> $GITHUB_OUTPUT
@@ -131,7 +131,7 @@ jobs:
             type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
             type=semver,pattern={{major}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
-            type=raw,value=${{ steps.image-version.outputs.raw }},enable=${{ steps.image-version.outputs.valid-release }}
+            type=raw,value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
             type=raw,value=rolling
 
       - name: Upload Bake Metadata
@@ -145,7 +145,7 @@ jobs:
   build-docker:
     name: Build (${{ matrix.image }} - ${{ matrix.platform }})
     runs-on: ${{ startsWith(matrix.platform, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    needs: prepare
+    needs: [prepare]
     permissions:
       attestations: write
       contents: write
@@ -169,7 +169,7 @@ jobs:
             core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
 
       - name: Login to Github Packages
-        if: needs.prepare.outputs.valid-release
+        if: ${{ needs.prepare.outputs.valid-release }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
