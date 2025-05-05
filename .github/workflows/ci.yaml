@@ -111,7 +111,7 @@ jobs:
         uses: ./.github/actions/image-versions
         id: image-version
         with:
-          version-to-parse: ${{ steps.input-version.outputs.VERSION }}
+          input-version: ${{ steps.input-version.outputs.VERSION }}
 
       - name: Get Bake Options
         id: bake-options
