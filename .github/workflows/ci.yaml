@@ -321,6 +321,7 @@ jobs:
       - name: Create Release
         shell: bash
         continue-on-error: true
+        if: ${{ matrix.image == 'api' }}
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         run: |
