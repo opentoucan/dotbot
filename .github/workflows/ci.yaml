@@ -89,6 +89,7 @@ jobs:
       valid-release: ${{ steps.image-version.outputs.valid-release }}
       version: ${{ steps.image-version.outputs.semantic }}
       platforms: ${{ steps.bake-options.outputs.platforms }}
+      images: ${{ steps.bake-options.outputs.targets }}
       original-tag: ${{ steps.input-version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
