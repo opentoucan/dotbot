@@ -4,11 +4,6 @@ name: ci
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        type: string
-        description: Release version
-        required: false
   push:
     branches: [ 'main' ]
     tags:
@@ -28,7 +23,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -42,7 +37,7 @@ jobs:
         run: dotnet format --verify-no-changes
 
   tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
 
@@ -73,13 +68,10 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
-        with:
-          version: "0.5.30"
 
       - name: Setup Python
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
-        with:
-            python-version: '3.13'
+
       - name: Merge sarif files
         run: uvx --no-cache --no-config --from sarif-tools@latest sarif copy src/**/*.sarif --out dotbot.sarif
 
@@ -94,50 +86,49 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, tests]
     outputs:
+      valid-release: ${{ steps.image-version.outputs.valid-release }}
       version: ${{ steps.image-version.outputs.semantic }}
       platforms: ${{ steps.bake-options.outputs.platforms }}
-      valid-release: ${{ steps.image-version.outputs.valid-release }}
-      images: ${{ steps.bake-options.outputs.targets }}
+      original-tag: ${{ steps.input-version.outputs.VERSION }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Setup Vars
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        id: vars
+        with:
+          script: |
+            core.setOutput('repository-owner', '${{ github.repository_owner }}'.toLowerCase());
+            core.setOutput('repository-name', '${{ github.event.repository.name }}'.toLowerCase());
 
       - name: Set input version
-        id: input_version
-        env:
-          SOURCE_TAG: ${{ github.ref_name }}
-          INPUT_VERSION: ${{ inputs.version }}
+        id: input-version
         run: |
-          echo "VERSION=${INPUT_VERSION:-$SOURCE_TAG}" >> $GITHUB_OUTPUT
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Get semantic version
         uses: ./.github/actions/image-versions
         id: image-version
         with:
-          input-version: ${{ steps.input_version.outputs.VERSION }}
+          version-to-parse: ${{ steps.input-version.outputs.VERSION }}
 
       - name: Get Bake Options
         id: bake-options
         uses: ./.github/actions/bake-options
 
-      - name: Build Application Metadata
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+      - name: Extract Docker metadata
         id: meta
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
-          flavor: latest=false
+          images: ghcr.io/${{ steps.vars.outputs.repository-owner }}/${{ steps.vars.outputs.repository-name }}
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.image-version.outputs.semantic }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
-            type=semver,pattern={{major}},value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
-            type=raw,value=${{ steps.image-version.outputs.semantic }},enable=${{ steps.image-version.outputs.valid-release }}
-            type=raw,value=rolling
+            type=raw,value=latest
+            type=raw,value=${{ steps.image-version.outputs.semantic }}
 
       - name: Upload Bake Metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ github.event.repository.name }}-bake-metadata
+          name: ${{ steps.vars.outputs.repository-name }}-bake-metadata
           path: ${{ steps.meta.outputs.bake-file }}
           if-no-files-found: error
           retention-days: 1
@@ -169,7 +160,7 @@ jobs:
             core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
 
       - name: Login to Github Packages
-        if: ${{ needs.prepare.outputs.valid-release }}
+        if: ${{ needs.prepare.outputs.valid-release == 'true'}}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
@@ -201,19 +192,19 @@ jobs:
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
+            ${{ needs.prepare.outputs.valid-release == 'true' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
             *.tags=
           targets: ${{ matrix.image }}
 
-      - if: needs.prepare.outputs.valid-release
+      - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
         name: Export Digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
           DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r .${{ matrix.image }}.containerimage.digest)
           touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
 
-      - if: needs.prepare.outputs.valid-release
+      - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
         name: Upload Digest
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -257,7 +248,7 @@ jobs:
           if: ${{ always() }}
 
   release:
-    if: needs.prepare.outputs.valid-release
+    if: ${{ needs.prepare.outputs.valid-release == 'true' }}
     name: Release
     runs-on: ubuntu-latest
     needs: ["prepare", "build-docker"]
@@ -327,8 +318,19 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Create Release
+        shell: bash
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        run: |
+          gh release create "${{ needs.prepare.outputs.original-tag }}" \
+              --repo="${GITHUB_REPOSITORY}" \
+              --title="${{ needs.prepare.outputs.original-tag }}" \
+              --generate-notes
+
   attest:
-    if: ${{ needs.prepare.outputs.valid-release }}
+    if: ${{ needs.prepare.outputs.valid-release == 'true' }}
     name: Attest
     needs: release
     runs-on: ubuntu-latest
