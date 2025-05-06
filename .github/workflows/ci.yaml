@@ -121,7 +121,6 @@ jobs:
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
-          images: ghcr.io/${{ steps.vars.outputs.repository-owner }}/${{ steps.vars.outputs.repository-name }}
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.image-version.outputs.semantic }}
