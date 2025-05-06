@@ -107,6 +107,10 @@ jobs:
         with:
           input-version: ${{ steps.input-version.outputs.VERSION }}
 
+      - name: Get Bake Options
+        id: bake-options
+        uses: ./.github/actions/bake-options
+
   create-docker-tags:
     name: Create docker tags
     runs-on: ubuntu-latest
@@ -124,10 +128,6 @@ jobs:
         with:
           script: |
             core.setOutput('repository-name', '${{ github.event.repository.name }}'.toLowerCase());
-
-      - name: Get Bake Options
-        id: bake-options
-        uses: ./.github/actions/bake-options
 
       - name: Extract Docker metadata
         id: meta
