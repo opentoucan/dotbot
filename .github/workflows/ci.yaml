@@ -23,6 +23,7 @@ on:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,6 +38,7 @@ jobs:
         run: dotnet format --verify-no-changes
 
   tests:
+    name: Tests
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -94,14 +96,6 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Setup Vars
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        id: vars
-        with:
-          script: |
-            core.setOutput('repository-owner', '${{ github.repository_owner }}'.toLowerCase());
-            core.setOutput('repository-name', '${{ github.event.repository.name }}'.toLowerCase());
-
       - name: Set input version
         id: input-version
         run: |
@@ -113,6 +107,24 @@ jobs:
         with:
           input-version: ${{ steps.input-version.outputs.VERSION }}
 
+  create-docker-tags:
+    name: Create docker tags
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.prepare.outputs.images) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Setup Vars
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        id: vars
+        with:
+          script: |
+            core.setOutput('repository-name', '${{ github.event.repository.name }}'.toLowerCase());
+
       - name: Get Bake Options
         id: bake-options
         uses: ./.github/actions/bake-options
@@ -121,14 +133,16 @@ jobs:
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.repository-name }}.${{ matrix.image }}
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ steps.image-version.outputs.semantic }}
+            type=raw,value=${{ needs.prepare.outputs.version }}
 
       - name: Upload Bake Metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ steps.vars.outputs.repository-name }}-bake-metadata
+          name: ${{ matrix.image }}-bake-metadata
           path: ${{ steps.meta.outputs.bake-file }}
           if-no-files-found: error
           retention-days: 1
@@ -136,7 +150,7 @@ jobs:
   build-docker:
     name: Build (${{ matrix.image }} - ${{ matrix.platform }})
     runs-on: ${{ startsWith(matrix.platform, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    needs: [prepare]
+    needs: [prepare, create-docker-tags]
     permissions:
       attestations: write
       contents: write
@@ -251,7 +265,7 @@ jobs:
     if: ${{ needs.prepare.outputs.valid-release == 'true' }}
     name: Release
     runs-on: ubuntu-latest
-    needs: ["prepare", "build-docker"]
+    needs: ["prepare", "create-docker-tags", "build-docker"]
     permissions:
       contents: write
       id-token: write
@@ -276,7 +290,7 @@ jobs:
       - name: Download Bake Metadata
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
-          name: ${{ github.event.repository.name }}-bake-metadata
+          name: ${{ matrix.image }}-bake-metadata
           path: ${{ runner.temp }}
 
       - name: Download Digests
