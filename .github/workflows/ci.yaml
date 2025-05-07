@@ -215,7 +215,7 @@ jobs:
         name: Export Digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
-          DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r .${{ matrix.image }}.containerimage.digest)
+          DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r '.${{ matrix.image }}."containerimage.digest"')
           touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
 
       - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
