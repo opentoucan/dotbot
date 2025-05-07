@@ -347,7 +347,7 @@ jobs:
   attest:
     if: ${{ needs.prepare.outputs.valid-release == 'true' }}
     name: Attest
-    needs: release
+    needs: ["prepare", "release"]
     runs-on: ubuntu-latest
     permissions:
       attestations: write
