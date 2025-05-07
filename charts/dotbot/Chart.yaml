@@ -7,5 +7,5 @@ maintainers:
 name: dotbot
 version: 1.0.4
 # renovate: image=ghcr.io/opentoucan/dotbot.api
-appVersion: "3.0.2"
+appVersion: "356.0.0"
 home: https://github.com/opentoucan/dotbot
