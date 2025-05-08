@@ -385,11 +385,11 @@ jobs:
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         with:
           push-to-registry: true
-          subject-name: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}
           subject-digest: ${{ needs.release.outputs.digest }}
 
       - name: Verify Attestation
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}@${{ needs.release.outputs.digest }}
+          gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ needs.release.outputs.digest }}
