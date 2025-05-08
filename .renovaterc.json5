@@ -16,13 +16,12 @@
       ]
     }
   ],
-  "bumpVersions": [
+  bumpVersions: [
     {
-     "fileMatch": "(^|/)Chart\\.yaml$",
-     "semverLevel": "patch",
-     "matchStrings": [
-       "version:\\s+(?<version>\\S*)"
-     ]
+      name: "Updating Helm Chart Version",
+      filePatterns: ["(^|/)Chart\\.yaml$"],
+      bumpType: "patch",
+      matchStrings: ["version:\\s+(?<version>\\S*)"]
     }
   ],
   packageRules: [
