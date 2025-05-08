@@ -34,8 +34,8 @@ api:
 migrator:
   image:
     registry: ghcr.io
-    repository: opentoucan/dotbot.migration
-    tag: 3.0.2@sha256:affdaf89d86312f3eea49e15eb0db88c64a79ad8b8709c0d9cb6918d40f8e031
+    repository: opentoucan/dotbot.migrator
+    tag: 3.0.4@sha256:329c6df3d3ab9084e3881a4b51e223680d9754db2b4d34e6add75e40c56ddcc9
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
   podLabels: {}
