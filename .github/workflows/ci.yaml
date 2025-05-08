@@ -174,7 +174,7 @@ jobs:
             core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
 
       - name: Login to Github Packages
-        if: ${{ needs.prepare.outputs.valid-release == 'true'}}
+        if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
@@ -206,19 +206,19 @@ jobs:
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release == 'true' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
+            ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
             *.tags=
           targets: ${{ matrix.image }}
 
-      - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+      - if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
         name: Export Digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
           DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r '.${{ matrix.image }}."containerimage.digest"')
           touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
 
-      - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+      - if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
         name: Upload Digest
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -262,7 +262,7 @@ jobs:
           if: ${{ always() }}
 
   release:
-    if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+    if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
     name: Release
     runs-on: ubuntu-latest
     needs: ["prepare", "create-docker-tags", "build-docker"]
@@ -345,7 +345,7 @@ jobs:
               --generate-notes
 
   attest:
-    if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+    if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
     name: Attest
     needs: ["prepare", "release"]
     runs-on: ubuntu-latest
