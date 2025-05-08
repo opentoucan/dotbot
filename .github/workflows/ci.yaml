@@ -23,6 +23,7 @@ on:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,6 +38,7 @@ jobs:
         run: dotnet format --verify-no-changes
 
   tests:
+    name: Tests
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -67,16 +69,16 @@ jobs:
         if: ${{ always() }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
 
       - name: Setup Python
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
 
       - name: Merge sarif files
         run: uvx --no-cache --no-config --from sarif-tools@latest sarif copy src/**/*.sarif --out dotbot.sarif
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
+        uses: github/codeql-action/upload-sarif@60168efe1c415ce0f5521ea06d5c2062adbeed1b # v3.28.17
         if: success() || failure()
         with:
             sarif_file: dotbot.sarif
@@ -94,14 +96,6 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Setup Vars
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        id: vars
-        with:
-          script: |
-            core.setOutput('repository-owner', '${{ github.repository_owner }}'.toLowerCase());
-            core.setOutput('repository-name', '${{ github.event.repository.name }}'.toLowerCase());
-
       - name: Set input version
         id: input-version
         run: |
@@ -117,19 +111,38 @@ jobs:
         id: bake-options
         uses: ./.github/actions/bake-options
 
+  create-docker-tags:
+    name: Create docker tags
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.prepare.outputs.images) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Setup Vars
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        id: vars
+        with:
+          script: |
+            core.setOutput('repository-name', '${{ github.event.repository.name }}'.toLowerCase());
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
-          images: ghcr.io/${{ steps.vars.outputs.repository-owner }}/${{ steps.vars.outputs.repository-name }}
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.repository-name }}.${{ matrix.image }}
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ steps.image-version.outputs.semantic }}
+            type=raw,value=${{ needs.prepare.outputs.version }}
 
       - name: Upload Bake Metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ steps.vars.outputs.repository-name }}-bake-metadata
+          name: ${{ matrix.image }}-bake-metadata
           path: ${{ steps.meta.outputs.bake-file }}
           if-no-files-found: error
           retention-days: 1
@@ -137,7 +150,7 @@ jobs:
   build-docker:
     name: Build (${{ matrix.image }} - ${{ matrix.platform }})
     runs-on: ${{ startsWith(matrix.platform, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    needs: [prepare]
+    needs: [prepare, create-docker-tags]
     permissions:
       attestations: write
       contents: write
@@ -161,7 +174,7 @@ jobs:
             core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
 
       - name: Login to Github Packages
-        if: ${{ needs.prepare.outputs.valid-release == 'true'}}
+        if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
@@ -169,16 +182,16 @@ jobs:
           password: ${{ github.token }}
 
       - name: Download Bake Metadata
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: ${{ github.event.repository.name }}-bake-metadata
+          name: ${{ matrix.image }}-bake-metadata
           path: ${{ runner.temp }}
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
       - name: Build
-        uses: docker/bake-action@4ba453fbc2db7735392b93edf935aaf9b1e8f747 # v6.5.0
+        uses: docker/bake-action@76f9fa3a758507623da19f6092dc4089a7e61592 # v6.6.0
         id: bake
         env:
           TAG_BASE: ghcr.io/${{ github.repository_owner }}
@@ -193,19 +206,19 @@ jobs:
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release == 'true' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
+            ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
             *.platform=${{ matrix.platform }}
             *.tags=
           targets: ${{ matrix.image }}
 
-      - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+      - if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
         name: Export Digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
-          DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r .${{ matrix.image }}.containerimage.digest)
+          DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r '.${{ matrix.image }}."containerimage.digest"')
           touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
 
-      - if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+      - if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
         name: Upload Digest
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -249,10 +262,10 @@ jobs:
           if: ${{ always() }}
 
   release:
-    if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+    if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
     name: Release
     runs-on: ubuntu-latest
-    needs: ["prepare", "build-docker"]
+    needs: ["prepare", "create-docker-tags", "build-docker"]
     permissions:
       contents: write
       id-token: write
@@ -275,13 +288,13 @@ jobs:
             core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
 
       - name: Download Bake Metadata
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: ${{ github.event.repository.name }}-bake-metadata
+          name: ${{ matrix.image }}-bake-metadata
           path: ${{ runner.temp }}
 
       - name: Download Digests
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           path: ${{ runner.temp }}/digests
           pattern: ${{ github.event.repository.name }}-${{ matrix.image }}-digests-*
@@ -332,9 +345,9 @@ jobs:
               --generate-notes
 
   attest:
-    if: ${{ needs.prepare.outputs.valid-release == 'true' }}
+    if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
     name: Attest
-    needs: release
+    needs: ["prepare", "release"]
     runs-on: ubuntu-latest
     permissions:
       attestations: write
@@ -363,7 +376,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Upload Dependency Snapshot
-        uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
+        uses: anchore/sbom-action@9f7302141466aa6482940f15371237e9d9f4c34a # v0.19.0
         with:
           dependency-snapshot: true
           image: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}@${{ needs.release.outputs.digest }}
@@ -372,11 +385,11 @@ jobs:
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         with:
           push-to-registry: true
-          subject-name: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}
           subject-digest: ${{ needs.release.outputs.digest }}
 
       - name: Verify Attestation
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}@${{ needs.release.outputs.digest }}
+          gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ needs.release.outputs.digest }}
