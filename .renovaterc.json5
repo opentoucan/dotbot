@@ -51,9 +51,12 @@
       matchDatasources: ["helm-values", "regex", "docker"],
       group: {
         commitMessageTopic: "{{{groupName}}} group"
-      },
+      }
+    },
+    {
+      matchFileNames: ["charts/**"],
       bumpVersions: [{
-        filePatterns: ["(^|/)Chart\\.yaml$"],
+        filePatterns: ["{{packageFileDir}}/Chart.yaml"],
         matchStrings: ["version:\\s(?<version>[^\\s]+)"],
         bumpType: "{{#if isPatch}}patch{{else}}minor{{/if}}"
       }]
