@@ -38,7 +38,7 @@
     {
       description: ["NetCord Group"],
       groupName: "NetCord",
-      matchPackagePatterns: ["^NetCord"],
+      matchPackageNames: ["/^NetCord/"],
       matchDatasources: ["nuget"],
       group: {
         commitMessageTopic: "{{{groupName}}} group"
@@ -47,7 +47,7 @@
     {
       description: ["Dotbot helm chart Group"],
       groupName: "Dotbot Helm Chart",
-      matchPackagePatterns: ["dotbot"],
+      matchPackageNames: ["/dotbot/"],
       matchDatasources: ["helm-values", "regex", "docker"],
       group: {
         commitMessageTopic: "{{{groupName}}} group"
