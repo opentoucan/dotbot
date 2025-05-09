@@ -10,18 +10,10 @@
     {
       customType: "regex",
       datasourceTemplate: "docker",
-      fileMatch: ["(^|/)Chart\\.yaml$"],
+      managerFilePatterns: ["(^|/)Chart\\.yaml$"],
       matchStrings: [
         "#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*[\"']?(?<currentValue>[\\w+\\.\\-]*)"
       ]
-    }
-  ],
-  bumpVersions: [
-    {
-      name: "Updating Helm Chart Version",
-      filePatterns: ["(^|/)Chart\\.yaml$"],
-      bumpType: "patch",
-      matchStrings: ["version:\\s+(?<version>\\S*)"]
     }
   ],
   packageRules: [
@@ -46,7 +38,7 @@
     {
       description: ["NetCord Group"],
       groupName: "NetCord",
-      matchPackagePatterns: ["^NetCord"],
+      matchPackageNames: ["/^NetCord/"],
       matchDatasources: ["nuget"],
       group: {
         commitMessageTopic: "{{{groupName}}} group"
@@ -55,11 +47,19 @@
     {
       description: ["Dotbot helm chart Group"],
       groupName: "Dotbot Helm Chart",
-      matchPackagePatterns: ["dotbot"],
+      matchPackageNames: ["/dotbot/"],
       matchDatasources: ["helm-values", "regex", "docker"],
       group: {
         commitMessageTopic: "{{{groupName}}} group"
       }
+    },
+    {
+      matchFileNames: ["charts/**"],
+      bumpVersions: [{
+        filePatterns: ["{{packageFileDir}}/Chart.yaml"],
+        matchStrings: ["version:\\s(?<version>[^\\s]+)"],
+        bumpType: "{{#if isPatch}}patch{{else}}minor{{/if}}"
+      }]
     }
   ]
 }
