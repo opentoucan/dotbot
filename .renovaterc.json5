@@ -10,7 +10,7 @@
     {
       customType: "regex",
       datasourceTemplate: "docker",
-      fileMatch: ["(^|/)Chart\\.yaml$"],
+      managerFilePatterns: ["(^|/)Chart\\.yaml$"],
       matchStrings: [
         "#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*[\"']?(?<currentValue>[\\w+\\.\\-]*)"
       ]
@@ -53,7 +53,7 @@
         commitMessageTopic: "{{{groupName}}} group"
       },
       bumpVersions: [{
-        filePatterns: "(^|/)Chart\\.yaml$",
+        filePatterns: ["(^|/)Chart\\.yaml$"],
         matchStrings: ["version:\\s(?<version>[^\\s]+)"],
         bumpType: "{{#if isPatch}}patch{{else}}minor{{/if}}"
       }]
