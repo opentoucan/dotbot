@@ -16,14 +16,6 @@
       ]
     }
   ],
-  bumpVersions: [
-    {
-      name: "Updating Helm Chart Version",
-      filePatterns: ["(^|/)Chart\\.yaml$"],
-      bumpType: "patch",
-      matchStrings: ["version:\\s+(?<version>\\S*)"]
-    }
-  ],
   packageRules: [
     {
       matchDatasources: ["helm"],
@@ -59,6 +51,11 @@
       matchDatasources: ["helm-values", "regex", "docker"],
       group: {
         commitMessageTopic: "{{{groupName}}} group"
+      },
+      bumpVersions: {
+        filePatterns: "(^|/)Chart\\.yaml$",
+        matchStrings: ["version:\\s(?<version>[^\\s]+)"],
+        bumpType: "{{#if isPatch}}patch{{else}}minor{{/if}}"
       }
     }
   ]
