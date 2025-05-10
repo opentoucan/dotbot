@@ -5,7 +5,7 @@ maintainers:
   - name: sillock1
     url: https://github.com/sillock1
 name: dotbot
-version: 1.0.6
+version: 1.1.0
 # renovate: image=ghcr.io/opentoucan/dotbot.api
 appVersion: "3.0.5"
 home: https://github.com/opentoucan/dotbot
