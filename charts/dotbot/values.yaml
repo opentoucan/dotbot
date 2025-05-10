@@ -78,19 +78,19 @@ configMapAnnotations: {}
 # Secrets
 existingAppSecret: ''
 existingMigratorSecret: ''
-# discord:
-#   publicKey: ''
-#   botToken: ''
-#   webhooks:
-#     xkcd: ''
-# appUserDBConnectionString: ''
-# migratorUserDBConnectionString: ''
-# rabbitMQCredentials:
-#   user: 'test'
-#   password: 'test'
-# objectStorageCredentials:
-#   accessKeyId: 'dev'
-#   secretAccessKey: 'dev'
+discord:
+  publicKey: ''
+  botToken: ''
+  webhooks:
+    xkcd: ''
+appUserDBConnectionString: ''
+migratorUserDBConnectionString: ''
+rabbitMQCredentials:
+  user: 'test'
+  password: 'test'
+objectStorageCredentials:
+  accessKeyId: 'dev'
+  secretAccessKey: 'dev'
 
 service:
   name: http
@@ -112,5 +112,3 @@ ingress:
   hosts:
     - dotbot.local
   tls: []
-
-jobs: []
