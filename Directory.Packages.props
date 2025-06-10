@@ -71,9 +71,9 @@
     <!-- Testing -->
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.7.1" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
-    <PackageVersion Include="Testcontainers.LocalStack" Version="4.4.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.4.0" />
-    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.4.0" />
+    <PackageVersion Include="Testcontainers.LocalStack" Version="4.5.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.5.0" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.5.0" />
     <PackageVersion Include="TUnit" Version="0.25.21" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Bogus" Version="35.6.3" />
