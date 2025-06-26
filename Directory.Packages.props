@@ -46,7 +46,7 @@
     <PackageVersion Include="MediatR" Version="12.5.0" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     <PackageVersion Include="Respawn" Version="6.2.1" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.3" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.418.2" />
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.400" />
