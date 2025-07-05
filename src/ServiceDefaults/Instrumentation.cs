@@ -7,17 +7,17 @@ public class Instrumentation : IDisposable
 {
     internal const string ActivitySourceName = "dotbot";
     internal const string MeterName = "dotbot";
-    private readonly Meter _meter;
 
-    public Instrumentation()
-    {
-        ActivitySource = new ActivitySource(ActivitySourceName);
-        _meter = new Meter(MeterName);
-        CustomCommandsCounter = _meter.CreateCounter<int>($"{MeterName}.custom.commands.count", description: "The number of custom commands used");
-    }
+    public ActivitySource ActivitySource => new(ActivitySourceName);
+    private static Meter _meter => new Meter(MeterName);
 
-    public ActivitySource ActivitySource { get; }
-    public Counter<int> CustomCommandsCounter { get; }
+    public Counter<long> GuildsCounter => _meter.CreateCounter<long>($"{MeterName}.guilds", description: "Counts the number of guilds the bot is in");
+    public Counter<long> SavedCustomCommandsCounter => _meter.CreateCounter<long>($"{MeterName}.saved.custom.commands", description: "Counts the number of custom commands saved");
+    public Counter<long> CustomCommandsFetchedCounter => _meter.CreateCounter<long>($"{MeterName}.fetched.custom.commands", description: "Counts the number of custom commands fetched");
+    public Counter<long> CustomCommandsDeletedCounter => _meter.CreateCounter<long>($"{MeterName}.deleted.custom.commands", description: "Counts the number of custom commands deleted");
+    public Counter<long> XkcdCounter => _meter.CreateCounter<long>($"{MeterName}.xkcd", description: "Counts the number of XKCD comics fetched");
+    public Counter<long> AvatarCounter => _meter.CreateCounter<long>($"{MeterName}.avatar", description: "Counts the number of avatar requests");
+    public Counter<long> ExceptionCounter = _meter.CreateCounter<long>($"{MeterName}.exceptions", description: "Total exceptions thrown");
 
     public void Dispose()
     {
