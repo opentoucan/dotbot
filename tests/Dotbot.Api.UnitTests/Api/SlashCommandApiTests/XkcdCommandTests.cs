@@ -16,6 +16,7 @@ namespace Dotbot.Api.UnitTests.Api.SlashCommandApiTests;
 public class XkcdCommandTests
 {
     private static readonly Instrumentation Instrumentation = new();
+    private static readonly IRestRequestHandler RestRequestHandlerMock = Substitute.For<IRestRequestHandler>();
     private static readonly HttpApplicationCommandContext CommandContext = new(new SlashCommandInteraction(new JsonInteraction
     {
         Data = new JsonInteractionData(),
@@ -25,7 +26,7 @@ public class XkcdCommandTests
         Entitlements =
                     []
     }, new Guild(new JsonGuild(), 1234, new RestClient(new RestClientConfiguration())),
-            (_, _, _, _) => Task.CompletedTask, new RestClient(new RestClientConfiguration { })),
+            (_, _, _, _, _) => Task.FromResult<InteractionCallbackResponse?>(new InteractionCallbackResponse(new NetCord.Rest.JsonModels.JsonInteractionCallbackResponse(), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock }))), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock })),
         new RestClient(new RestClientConfiguration()));
 
     private static readonly ILoggerFactory LoggerFactory = Substitute.For<ILoggerFactory>();
