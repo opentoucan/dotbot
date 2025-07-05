@@ -23,7 +23,7 @@ public class FileUploadService(IAmazonS3 amazonS3Client, ILogger<FileUploadServi
             logger.LogInformation("Saving file {attachment} into bucket {bucket}", attachmentName, parentName);
             using var fileTransferUtility = new TransferUtility(amazonS3Client);
             var bucketsResponse = await amazonS3Client.ListBucketsAsync(token);
-            if (bucketsResponse.Buckets.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
+            if (bucketsResponse.Buckets?.FirstOrDefault(bucket => bucket.BucketName == parentName) == null)
                 await amazonS3Client.PutBucketAsync(parentName, token);
 
             if (!new FileExtensionContentTypeProvider().TryGetContentType(attachmentName, out var contentType))

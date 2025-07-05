@@ -19,6 +19,7 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AWS" />
         <PackageReference Include="OpenTelemetry.Exporter.Console" />
         <PackageReference Include="MassTransit.RabbitMQ" />
         <PackageReference Include="AWSSDK.S3" />

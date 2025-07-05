@@ -71,8 +71,10 @@ public static partial class Extensions
                 .AddRuntimeInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation()
+                .AddAWSInstrumentation()
                 .AddPrometheusExporter();
         });
+
 
         // Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
         otel.WithTracing(tracing =>
@@ -80,7 +82,8 @@ public static partial class Extensions
             tracing.AddAspNetCoreInstrumentation()
                 .AddSource(Instrumentation.ActivitySourceName)
                 .AddHttpClientInstrumentation()
-                .AddAspNetCoreInstrumentation();
+                .AddAspNetCoreInstrumentation()
+                .AddAWSInstrumentation();
             if (otlpEndpoint != null)
             {
                 tracing.AddOtlpExporter(options => { options.Endpoint = new Uri(otlpEndpoint); });
@@ -114,13 +117,17 @@ public static partial class Extensions
 
     public static IHostApplicationBuilder ConfigureAWS(this IHostApplicationBuilder builder)
     {
-        var awsOptions = builder.Configuration.GetAWSOptions<AmazonS3Config>("S3");
-        awsOptions.DefaultClientConfig.RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED;
-        awsOptions.DefaultClientConfig.ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED;
-
-        builder.Services.AddDefaultAWSOptions(awsOptions);
-        builder.Services.AddAWSService<IAmazonS3>();
+        var s3Config = new AmazonS3Config
+        {
+            ServiceURL = builder.Configuration.GetValue<string>("S3:ServiceURL"), // Use get options strong type for this config
+            ForcePathStyle = builder.Configuration.GetValue<bool>("S3:ForcePathStyle"),
+            RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+            ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
+        };
+        builder.Services.AddSingleton<IAmazonS3>(serviceProvider =>
+        {
+            return new AmazonS3Client(s3Config);
+        });
         return builder;
     }
-
 }
