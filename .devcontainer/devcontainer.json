@@ -1,14 +1,18 @@
 {
 	"name": "workspace",
-	"dockerComposeFile": ["compose.yaml"],
+	"dockerComposeFile": ["compose.yaml", "observability-compose.yaml"],
   "service": "workspace",
 	"workspaceFolder": "/workspace",
-
 	"shutdownAction": "stopCompose",
 	"containerUser": "vscode",
 	"remoteUser": "vscode",
 	"updateRemoteUserUID": true,
 	"containerEnv": {
 	  "HOME": "/home/vscode"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": ["ms-dotnettools.csdevkit"]
+		}
 	}
 }

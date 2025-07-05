@@ -63,14 +63,10 @@ public static partial class Extensions
         // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
         otel.WithMetrics(metrics =>
         {
-            metrics.AddRuntimeInstrumentation()
-                // Metrics provides by ASP.NET Core
-                .AddMeter("Microsoft.AspNetCore.Hosting")
-                .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-                // Metrics provided by System.Net libraries
-                .AddMeter("System.Net.Http")
-                .AddMeter("System.Net.NameResolution")
+            metrics
                 .AddMeter(Instrumentation.MeterName)
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(Instrumentation.MeterName))
+                .AddRuntimeInstrumentation()
                 .SetExemplarFilter(ExemplarFilterType.TraceBased)
                 .AddRuntimeInstrumentation()
                 .AddHttpClientInstrumentation()
@@ -107,11 +103,12 @@ public static partial class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+        app.MapGet("/", () => "").AllowAnonymous();
         // All health checks must pass for app to be considered ready to accept traffic after starting
         app.MapHealthChecks("/health")
             .AllowAnonymous();
 
-        app.MapPrometheusScrapingEndpoint();
+        app.MapPrometheusScrapingEndpoint("/metrics");
         return app;
     }
 

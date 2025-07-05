@@ -57,7 +57,7 @@ public class CustomCommandService(
 
     public async Task<Result> SaveCustomCommandAsync(string guildId, string userId, string commandName, string? content = null, Attachment? attachment = null)
     {
-        logger.LogInformation("Saving custom command {command} with files {files}", commandName, attachment == null);
+        logger.LogInformation("Saving custom command {command} with files: {files}", commandName, attachment != null);
         var guild = await guildRepository.GetByExternalIdAsync(guildId);
 
         if (guild is null)
@@ -102,7 +102,7 @@ public class CustomCommandService(
         catch (Exception ex)
         {
             logger.LogError("{Exception}", ex.Message);
-            return Result.Error("Failed to save custom command");
+            return Result.Error(ex.GetType().Name);
         }
     }
 

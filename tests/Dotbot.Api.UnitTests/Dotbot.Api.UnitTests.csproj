@@ -17,13 +17,11 @@
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="RichardSzalay.MockHttp" />
         <PackageReference Include="TUnit" />
-
-        <PackageReference Include="NSubstitute"/>
-
+        <PackageReference Include="NSubstitute" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Dotbot.Api\Dotbot.Api.csproj" />
     </ItemGroup>
-    
+
 </Project>
