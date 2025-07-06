@@ -666,23 +666,22 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "loki",
+        "uid": "loki"
       },
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
       "gridPos": {
-        "h": 19,
-        "w": 24,
+        "h": 8,
+        "w": 12,
         "x": 0,
-        "y": 23
+        "y": 0
       },
-      "id": 1,
+      "id": 13,
       "options": {
         "dedupStrategy": "none",
-        "enableInfiniteScrolling": false,
         "enableLogDetails": true,
         "prettifyLogMessage": false,
         "showCommonLabels": false,
@@ -715,6 +714,10 @@
   "templating": {
     "list": [
       {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "label_values(dotbot_guilds_total,guild_id)",
         "label": "Server",
         "name": "server",
