@@ -7,5 +7,5 @@ maintainers:
 name: dotbot
 version: 1.2.1
 # renovate: datasource=docker depName=ghcr.io/opentoucan/dotbot.api
-appVersion: "3.1.0"
+appVersion: "3.1.1"
 home: https://github.com/opentoucan/dotbot
