@@ -14,7 +14,7 @@ WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
-COPY ["Dotbot.sln", "."]
+COPY ["Dotbot.slnx", "."]
 COPY ["src/Dotbot.Api/Dotbot.Api.csproj", "Dotbot.Api/Dotbot.Api.csproj"]
 COPY ["src/Dotbot.Infrastructure/Dotbot.Infrastructure.csproj", "Dotbot.Infrastructure/Dotbot.Infrastructure.csproj"]
 COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefaults.csproj"]
