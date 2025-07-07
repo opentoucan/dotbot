@@ -88,10 +88,6 @@ public static partial class Extensions
             {
                 tracing.AddOtlpExporter(options => { options.Endpoint = new Uri(otlpEndpoint); });
             }
-            else
-            {
-                tracing.AddConsoleExporter();
-            }
         });
 
         return builder;
