@@ -12,7 +12,7 @@
       datasourceTemplate: "docker",
       managerFilePatterns: ["(^|/)Chart\\.yaml$"],
       matchStrings: [
-        "#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*[\"']?(?<currentValue>[\\w+\\.\\-]*)"
+        "#\\s*renovate:\\s*datasource=docker depName=(?<depName>.*?)\\s*([\\s\\S]*?)appVersion:\\s*[\"']?(?<currentValue>[\\w+\\.\\-]*)"
       ]
     }
   ],
