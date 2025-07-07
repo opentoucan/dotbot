@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Dotbot.Api/Dotbot.Api.csproj" />
+    <Project Path="src/Dotbot.Infrastructure/Dotbot.Infrastructure.csproj" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Dotbot.Api.UnitTests/Dotbot.Api.UnitTests.csproj" />
+  </Folder>
+</Solution>
