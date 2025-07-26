@@ -59,7 +59,7 @@ jobs:
       - name: Output sarif paths
         id: output-sarif
         run: |
-          echo "SARIF_PATHS=$(find -iname "*.csproj" | xargs -I % sh -c 'echo $(dotnet msbuild % -getProperty:ErrorLog | cut -d "." -f 1) | jq -Rn "{category: inputs, path: \"%\"} | select(.category != \"\")"') >> "$GITHUB_OUTPUT"
+          echo 'SARIF_PATHS=$(find -iname "*.csproj" | xargs -I % sh -c \'echo $(dotnet msbuild % -getProperty:ErrorLog | cut -d "." -f 1)\' | jq -Rn \'{category: inputs, path: "%"} | select(.category != "")\')' >> $GITHUB_OUTPUT
 
   code-analysis:
     needs: [sarif-prepare]
