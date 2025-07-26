@@ -39,8 +39,8 @@ jobs:
       - name: Verify formatting
         run: dotnet format --verify-no-changes
 
-  build:
-    name: build
+  sarif-prepare:
+    name: sarif-prepare
     runs-on: ubuntu-latest
     outputs:
       sarif-paths: ${{ steps.output-sarif.outputs.SARIF_PATHS }}
@@ -56,19 +56,13 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Install dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build
-
       - name: Output sarif paths
         id: output-sarif
         run: |
-          echo "SARIF_PATHS=$(find -iname "*.sarif") >> "$GITHUB_OUTPUT"
+          echo "SARIF_PATHS=$(find -iname "*.csproj" | xargs -I % sh -c 'echo $(dotnet msbuild % -getProperty:ErrorLog | cut -d "." -f 1) | jq -Rn "{category: inputs, path: \"%\"} | select(.category != \"\")"') >> "$GITHUB_OUTPUT"
 
   code-analysis:
-    needs: [build]
+    needs: [sarif-prepare]
     name: Code Analysis
     runs-on: ubuntu-latest
     permissions:
@@ -76,17 +70,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sarif-path: ${{ fromJson(needs.build.outputs.sarif-paths) }}
+        sarif-path: ${{ fromJson(needs.sarif-prepare.outputs.sarif-paths) }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-
-      - name: Output category
-        id: sarif-category
-        run: |
-          echo "category=$( ${{ matrix.sarif-path }} | awk -F/ '{ print $NF }' | cut -d "." -f 1)" >> "$GITHUB_OUTPUT"
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
@@ -100,12 +89,11 @@ jobs:
         uses: github/codeql-action/upload-sarif@d6bbdef45e766d081b84a2def353b0055f728d3e # v3.29.3
         if: success() || failure()
         with:
-            sarif_file: ${{ matrix.sarif-path }}
-            category: ${{ steps.sarif-category.outputs.category }}
+            sarif_file: ${{ matrix.sarif-path.path }}
+            category: ${{ matrix.sarif-path.category }}
 
   tests:
     name: Tests
-    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
