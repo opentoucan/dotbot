@@ -85,12 +85,20 @@ jobs:
       - name: Build
         run: dotnet build
 
+      - name: Parse Sarif Config
+        id: parse-sarif-config
+        run: |
+          PATH=$(jq -r '.path' <<< '${{ matrix.sarif-path }}')
+          echo "PATH=$PATH" >> $GITHUB_OUTPUT
+          CATEGORY=$(jq -r '.category' <<< '${{ matrix.sarif-path }}')
+          echo "CATEGORY=$CATEGORY" >> $GITHUB_OUTPUT
+
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@d6bbdef45e766d081b84a2def353b0055f728d3e # v3.29.3
         if: success() || failure()
         with:
-            sarif_file: ${{ matrix.sarif-path.path }}
-            category: ${{ matrix.sarif-path.category }}
+            sarif_file: ${{ steps.parse-sarif-config.outputs.PATH }}
+            category: ${{ steps.parse-sarif-config.outputs.CATEGORY }}
 
   tests:
     name: Tests
