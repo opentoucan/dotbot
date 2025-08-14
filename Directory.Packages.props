@@ -49,7 +49,7 @@
     <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.6.9" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.6.4" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.6.5" />
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.1" />
     <PackageVersion Include="FuzzySharp" Version="2.0.2" />
     <PackageVersion Include="Azure.Identity" Version="1.15.0" />
