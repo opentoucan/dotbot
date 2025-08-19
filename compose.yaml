@@ -35,7 +35,8 @@ services:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:3-debian
     env_file: .env
-    command: 'http workspace:8080'
+    command: 'http 127.0.0.1:8080'
+    network_mode: host
   grafana:
     image: grafana/grafana
     container_name: grafana

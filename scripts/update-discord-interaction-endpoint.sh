@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-curl -s ngrok:4040/api/tunnels | \
+curl -s localhost:4040/api/tunnels | \
   jq .tunnels[].public_url | \
   xargs -I '$' curl -X PATCH \
     -d '{"interactions_endpoint_url": "$/interactions"}' \
