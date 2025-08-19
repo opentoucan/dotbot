@@ -4,6 +4,14 @@ An opinionated scalable Discord bot. Instead of using a long lived websocket con
 
 # Instructions
 
+Create a .env file in the root directory with the required environment variables
+
+```
+NGROK_AUTHTOKEN=<Your ngrok auth token>
+Discord__PublicKey=<Discord app public key>
+Discord__Token=<Discord app token>
+```
+
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/opentoucan/dotbot)
 
 This project contains a dev container with all necessary pre-requisites for running the application yourself.

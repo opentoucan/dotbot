@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: workspace
-    env_file: devcontainer.env
+    env_file: ../.env
     environment:
       - ASPNETCORE_ENVIRONMENT=local
     volumes:
@@ -17,37 +17,3 @@ services:
     command: sleep infinity
     user: vscode
     userns_mode: keep-id:uid=1000,gid=1000
-  rabbitmq:
-    container_name: rabbitmq
-    image: docker.io/masstransit/rabbitmq:4.0.7
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-  localstack:
-    container_name: localstack
-    image: docker.io/localstack/localstack:latest
-    ports:
-      - "127.0.0.1:4566:4566"            # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
-    environment:
-      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
-      - DEBUG=${DEBUG:-0}
-    volumes:
-      - "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock"
-  postgres:
-    container_name: postgres
-    image: docker.io/library/postgres:17.6
-    ports:
-      - '5432:5432'
-    environment:
-      POSTGRES_USER: "dotbot"
-      POSTGRES_PASSWORD: "yourWeak(!)Password"
-      POSTGRES_DB: "dotbot"
-  ngrok:
-    container_name: ngrok
-    image: docker.io/ngrok/ngrok:3-debian
-    env_file: devcontainer.env
-    command: 'http workspace:8080'

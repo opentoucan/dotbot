@@ -1,0 +1,82 @@
+x-podman:
+  in_pod: false
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: docker.io/masstransit/rabbitmq:4.0.7
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  localstack:
+    container_name: localstack
+    image: docker.io/localstack/localstack:latest
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+      - DEBUG=${DEBUG:-0}
+    volumes:
+      - "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock"
+  postgres:
+    container_name: postgres
+    image: docker.io/library/postgres:17.6
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: "dotbot"
+      POSTGRES_PASSWORD: "yourWeak(!)Password"
+      POSTGRES_DB: "dotbot"
+  ngrok:
+    container_name: ngrok
+    image: docker.io/ngrok/ngrok:3-debian
+    env_file: .env
+    command: 'http workspace:8080'
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    configs:
+      - source: grafana.yaml
+        target: /etc/grafana/provisioning/dashboards/main.yaml
+    volumes:
+      - ./dashboards:/var/lib/grafana/dashboards
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    configs:
+      - source: prometheus.yaml
+        target: /etc/prometheus/prometheus.yml
+    ports:
+      - '9090:9090'
+configs:
+  grafana.yaml:
+    content: |
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        org_id: 1
+        folder: ''
+        type: 'file'
+        options:
+          folder: '/var/lib/grafana/dashboards'
+      datasources:
+        - name: 'Prometheus'
+          type: prometheus
+          access: proxy
+          url: http://prometheus:9090
+          isDefault: true
+  prometheus.yaml:
+    content: |
+      global:
+        scrape_interval: 10s
+      scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets:
+            - localhost:8080
