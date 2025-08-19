@@ -30,6 +30,8 @@
               ngrok
               go-task
               pre-commit
+              postgresql
+              pgadmin4
               act;
             combinedSdk = pkgs.buildEnv {
                   name = "combinedSdk";
