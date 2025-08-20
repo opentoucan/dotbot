@@ -22,6 +22,7 @@ public static partial class Extensions
             cfg.AddOpenBehavior(typeof(TransactionBehaviour<,>));
         });
         builder.ConfigureXkcd();
+        builder.ConfigureMot();
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IGuildRepository, GuildRepository>();
         builder.Services.AddScoped<IGuildQueries, GuildQueries>();
@@ -38,6 +39,17 @@ public static partial class Extensions
         builder.Services.AddHttpClient<IXkcdService, XkcdService>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
+            })
+            .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
+
+        return builder;
+    }
+
+    public static IHostApplicationBuilder ConfigureMot(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddHttpClient<IMotService, MotService>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("MotUrl")!);
             })
             .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
 

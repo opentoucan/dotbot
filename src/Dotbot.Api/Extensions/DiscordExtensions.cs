@@ -14,12 +14,15 @@ public static class DiscordExtensions
     {
         var section = builder.Configuration.GetSection("Discord");
         var discordSettings = section.Get<DiscordSettings>();
+        var botToken = new BotToken(discordSettings!.Token);
+        var restClient = new RestClient(botToken);
         builder.Services.AddOptions<DiscordSettings>().Bind(section);
         builder.Services.AddHostedService<RegistrationHostedService>();
-        builder.Services.AddScoped<RestClient>(_ => new RestClient(new BotToken(discordSettings!.Token)));
+        builder.Services.AddScoped<RestClient>(_ => restClient);
 
         builder.Services.AddDiscordRest()
             .AddApplicationCommands<ApplicationCommandInteraction, HttpApplicationCommandContext, AutocompleteInteractionContext>();
+
         return builder;
     }
 }

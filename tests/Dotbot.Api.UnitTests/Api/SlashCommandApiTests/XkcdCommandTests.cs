@@ -25,7 +25,7 @@ public class XkcdCommandTests
         Channel = new JsonChannel(),
         Entitlements =
                     []
-    }, new Guild(new JsonGuild(), 1234, new RestClient(new RestClientConfiguration())),
+    }, new Guild(new JsonGuild(), 1234, new RestClient(new RestClientConfiguration()), IDictionaryProvider.OfDictionary),
             (_, _, _, _, _) => Task.FromResult<InteractionCallbackResponse?>(new InteractionCallbackResponse(new NetCord.Rest.JsonModels.JsonInteractionCallbackResponse(), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock }))), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock })),
         new RestClient(new RestClientConfiguration()));
 

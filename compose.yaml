@@ -31,6 +31,12 @@ services:
       POSTGRES_USER: "dotbot"
       POSTGRES_PASSWORD: "yourWeak(!)Password"
       POSTGRES_DB: "dotbot"
+  motur:
+    container_name: motur
+    image: ghcr.io/opentoucan/motur:1.0.0
+    ports:
+      - '8081:8080'
+    env_file: .env
   ngrok:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:3-debian

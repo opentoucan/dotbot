@@ -23,7 +23,7 @@ public class AvatarCommandTests
         Channel = new JsonChannel(),
         Entitlements =
                     []
-    }, new Guild(new JsonGuild(), GuildId, new RestClient(new RestClientConfiguration())),
+    }, new Guild(new JsonGuild(), GuildId, new RestClient(new RestClientConfiguration()), IDictionaryProvider.OfDictionary),
             (_, _, _, _, _) => Task.FromResult<InteractionCallbackResponse?>(new InteractionCallbackResponse(new NetCord.Rest.JsonModels.JsonInteractionCallbackResponse(), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock }))), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock })),
         new RestClient(new RestClientConfiguration()));
 
