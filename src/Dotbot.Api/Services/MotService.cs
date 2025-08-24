@@ -53,7 +53,7 @@ public class MotService : IMotService
         try
         {
             var httpResponse = await _httpClient.PostAsync("/link", new StringContent(JsonSerializer.Serialize(new LinkRequestBody(advertUrl), options: SReadOptions), Encoding.UTF8, "application/json"), cancellationToken);
-            _logger.LogInformation($"MOT Endpoint response {await httpResponse.Content.ReadAsStringAsync()}");
+            _logger.LogInformation("MOT Endpoint response {reason phrase}", httpResponse.ReasonPhrase);
             if (httpResponse.IsSuccessStatusCode)
             {
                 var motHistory = await JsonSerializer.DeserializeAsync<MoturResponse>(
