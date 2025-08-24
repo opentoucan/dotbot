@@ -3,7 +3,7 @@ obj/
 /packages/
 /_ReSharper.Caches/
 .idea
-*.env
+local.env
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
