@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using System.Text.Json;
 using Ardalis.Result;
+using Dotbot.Api.Helpers;
 using Dotbot.Api.Services;
 using NetCord;
 using NetCord.Rest;
@@ -10,7 +10,7 @@ using ServiceDefaults;
 namespace Dotbot.Api.Application;
 
 [SlashCommand("mot", "Retrieves MOT history")]
-public class MotHistoryCommandModule(IMotService motService, Instrumentation instrumentation, ILogger<MotHistoryCommandModule> logger) : ApplicationCommandModule<HttpApplicationCommandContext>
+public class MotHistoryCommandModule(IMotService motService, Instrumentation instrumentation) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("plate", "Registration plate to search")]
     public async Task RetreiveByPlate(
@@ -34,8 +34,7 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
         await RetrieveMotHistoryAsync(activity, result);
     }
 
-
-    private async Task RetrieveMotHistoryAsync(Activity? activity, Result<MotHistory> result)
+    private async Task RetrieveMotHistoryAsync(Activity? activity, Result<MoturResponse> result)
     {
 
         if (!result.IsSuccess)
@@ -48,84 +47,39 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
         }
         else
         {
-            var embed = new EmbedProperties();
-            var green = new Color(0, 128, 0);
-            var orange = new Color(255, 140, 0);
-            var red = new Color(255, 0, 0);
-            embed.WithTitle("Vehicle Information");
-            var hasRecordedMotTestDate = DateTime.TryParse(result.Value.motTests?.OrderByDescending(x => x.completedDate).FirstOrDefault()?.expiryDate, out var lastMotExpiryDate);
-            var hasValidMot = hasRecordedMotTestDate && lastMotExpiryDate > DateTimeOffset.UtcNow;
-            var motDescription = "";
-            Color vehicleEmbedColor;
-            var registrationDateTime = DateTime.Parse(result.Value.registrationDate);
-            var firstMotRequiredDate = registrationDateTime.AddYears(3);
-            if (firstMotRequiredDate > DateTimeOffset.UtcNow)
+            var moturResponse = result.Value;
+            var embeds = new List<EmbedProperties>();
+            var vehicleSummaryEmbed = new EmbedProperties();
+            if (result.Value.MotResponse?.ErrorDetails?.HttpStatusCode != null && result.Value.RegistrationResponse?.ErrorDetails != null)
             {
-                vehicleEmbedColor = green;
-                motDescription = $"No MOT required until {firstMotRequiredDate.ToShortDateString()} (in {(int)Math.Round((firstMotRequiredDate - DateTimeOffset.UtcNow).TotalDays)} days)";
-            }
-            else if (hasValidMot)
-            {
-                vehicleEmbedColor = green;
-                motDescription = $"MOT valid until {lastMotExpiryDate.ToShortDateString()} (for {(int)Math.Round((lastMotExpiryDate - DateTimeOffset.UtcNow).TotalDays)} days)";
+                vehicleSummaryEmbed.WithTitle("Could not retrieve information about this vehicle");
+                if (result.Value.MotResponse?.ErrorDetails?.HttpStatusCode == 404 && (result.Value.RegistrationResponse?.ErrorDetails?.HttpStatusCode == 404 || result.Value.RegistrationResponse?.ErrorDetails?.HttpStatusCode == 400))
+                {
+                    vehicleSummaryEmbed.AddFields(new EmbedFieldProperties().WithName("DVLA").WithValue(moturResponse.RegistrationResponse?.ErrorDetails?.Reason));
+                    vehicleSummaryEmbed.AddFields(new EmbedFieldProperties().WithName("DVSA").WithValue(moturResponse.MotResponse?.ErrorDetails?.Reason));
+                }
+                else
+                {
+                    vehicleSummaryEmbed.AddFields(new EmbedFieldProperties().WithName("This error was unexpected, try again later"));
+                }
             }
             else
             {
-                vehicleEmbedColor = red;
-                var lastRecordedMotOrRegistrationDate = hasRecordedMotTestDate ? lastMotExpiryDate : registrationDateTime.AddYears(3);
-                motDescription = $"MOT expired on {lastRecordedMotOrRegistrationDate.ToShortDateString()} ({(int)Math.Round((DateTimeOffset.UtcNow - lastRecordedMotOrRegistrationDate).TotalDays)} days ago)";
-            }
-            var motTestsOrderedByDate = result.Value.motTests?.OrderByDescending(test => test.completedDate);
-            var latestMot = motTestsOrderedByDate?.FirstOrDefault();
-            embed.WithDescription(motDescription);
-            embed.WithColor(vehicleEmbedColor);
-
-            var hasEngineSize = decimal.TryParse(result.Value.engineSize, out var engineSizeDecimal);
-            embed.AddFields(new EmbedFieldProperties().WithName("Registration plate").WithValue(result.Value.registration.ToUpper()).WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Make").WithValue(result.Value.make).WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Model").WithValue(result.Value.model).WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Colour").WithValue(result.Value.primaryColour).WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Fuel Type").WithValue(result.Value.fuelType).WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Engine Size").WithValue(hasEngineSize ? $"{decimal.Round(engineSizeDecimal / 1000, 1)}L" : "Unknown").WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Registration date").WithValue(result.Value.registrationDate).WithInline());
-            embed.AddFields(new EmbedFieldProperties().WithName("Odometer").WithValue(latestMot is not null ? $"{latestMot?.odometerValue} {latestMot?.odometerUnit}" : "Unknown").WithInline());
-
-            var motEmbeds = new List<EmbedProperties> { embed };
-            foreach (var test in motTestsOrderedByDate?.Take(5) ?? [])
-            {
-                var motEmbed = new EmbedProperties();
-                var motEmbedColor = test.testResult == "PASSED" && test.defects.Count == 0 ? green :
-                                        test.testResult == "PASSED" ? orange :
-                                         red;
-
-                motEmbed.WithColor(motEmbedColor);
-                motEmbed.WithTitle($"MOT {test.completedDate.ToShortDateString()} - {test.testResult}");
-                if (test.testResult == "PASSED")
-                    motEmbed.AddFields(new EmbedFieldProperties().WithName("Expires").WithValue(DateTime.Parse(test.expiryDate!).ToLongDateString()).WithInline());
-                motEmbed.AddFields(new EmbedFieldProperties().WithName("Odometer reading").WithValue($"{test.odometerValue} {test.odometerUnit}").WithInline());
-
-                var groupedDefects = test.defects
-                    .OrderBy(defect => defect.type)
-                    .GroupBy(defect => defect.type);
-                foreach (var defectGroup in groupedDefects)
-                {
-                    var embedFieldLengthLimit = 1024;
-                    var defectText = string.Join("\n", defectGroup.Select(x => $"- {x.text}"));
-
-                    var defectChunks = defectGroup.Chunk(defectGroup.Count() / defectText.Chunk(embedFieldLengthLimit).Count());
-
-                    foreach (var chunk in defectChunks)
-                    {
-                        motEmbed.AddFields(new EmbedFieldProperties().WithName(chunk.FirstOrDefault()?.type.ToString()).WithValue(string.Join("\n", chunk.Select(x => $"- {x.text}"))));
-                    }
-                }
-
-                motEmbeds.Add(motEmbed);
+                vehicleSummaryEmbed = DiscordEmbedHelper.BuildVehicleInformationEmbed(moturResponse);
             }
 
-            var interactionResponse = new InteractionMessageProperties().WithEmbeds(motEmbeds);
-            logger.LogInformation($"Message length: {JsonSerializer.Serialize(interactionResponse).Length}");
-            await Context.Interaction.SendFollowupMessageAsync(interactionResponse);
+            embeds.Add(vehicleSummaryEmbed);
+
+            var reg = moturResponse?.RegistrationResponse?.Details?.RegistrationPlate ?? moturResponse?.MotResponse?.Details?.RegistrationPlate;
+            var motTests = moturResponse?.MotResponse?.Details?.MotTests ?? [];
+
+            embeds.Add(DiscordEmbedHelper.BuildMotSummaryEmbed(motTests));
+
+            var interactionResponse = new InteractionMessageProperties()
+                .WithEmbeds(embeds)
+                .WithComponents([new ActionRowProperties().AddButtons(new LinkButtonProperties($"https://www.check-mot.service.gov.uk/results?registration={reg}", label: "Link to full MOT History"))]);
+            await Context.Interaction.SendFollowupMessageAsync(interactionResponse.WithEmbeds(embeds));
+
             var displayName = (Context.Interaction.User as GuildUser)?.Nickname ?? Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
 
             var tags = new TagList

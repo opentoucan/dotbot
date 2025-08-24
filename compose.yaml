@@ -31,12 +31,22 @@ services:
       POSTGRES_USER: "dotbot"
       POSTGRES_PASSWORD: "yourWeak(!)Password"
       POSTGRES_DB: "dotbot"
+  dragonfly:
+    container_name: dragonfly
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    ports:
+        - '6379:6379'
+    environment:
+      DFLY_requirepass: local
   motur:
     container_name: motur
-    image: ghcr.io/opentoucan/motur:1.0.0
+    image: ghcr.io/opentoucan/motur:2.0.0
     ports:
       - '8081:8080'
     env_file: .env
+    configs:
+        - source: motur.yaml
+          target: /app/config.yaml
   ngrok:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:3-debian
@@ -87,3 +97,20 @@ configs:
         static_configs:
           - targets:
             - localhost:8080
+  motur.yaml:
+    content: |
+        enabled_sites:
+            - www.autotrader.co.uk
+            - www.carandclassic.com
+            - www.pistonheads.com
+            - www.facebook.com
+            - www.gumtree.com
+        redis:
+            host: dragonfly
+            port: 6379
+            ttl: 300
+            password: local
+        scraper:
+            chrome_binary_location: /usr/bin/chromium
+            disable_sandbox: True
+            image_path: /tmp

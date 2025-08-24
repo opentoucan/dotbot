@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ardalis.Result;
@@ -6,12 +7,14 @@ namespace Dotbot.Api.Services;
 
 public interface IMotService
 {
-    Task<Result<MotHistory>> GetMotByRegistrationPlate(string registrationPlate, CancellationToken cancellationToken = default);
-    Task<Result<MotHistory>> GetMotByVehicleAdvert(string url, CancellationToken cancellationToken = default);
+    Task<Result<MoturResponse>> GetMotByRegistrationPlate(string registrationPlate, CancellationToken cancellationToken = default);
+    Task<Result<MoturResponse>> GetMotByVehicleAdvert(string url, CancellationToken cancellationToken = default);
 }
 
 public class MotService : IMotService
 {
+    private record LinkRequestBody(string Url);
+
     private readonly HttpClient _httpClient;
     private readonly ILogger<XkcdService> _logger;
 
@@ -21,19 +24,19 @@ public class MotService : IMotService
         _logger = logger;
     }
 
-    public async Task<Result<MotHistory>> GetMotByRegistrationPlate(string registrationPlate, CancellationToken cancellationToken = default)
+    public async Task<Result<MoturResponse>> GetMotByRegistrationPlate(string registrationPlate, CancellationToken cancellationToken = default)
     {
-        var url = $"/reg?reg={registrationPlate}";
+        var url = $"/reg/{registrationPlate}";
         try
         {
             var httpResponse = await _httpClient.GetAsync(url, cancellationToken);
             _logger.LogInformation($"MOT Endpoint response {await httpResponse.Content.ReadAsStringAsync()}");
             if (httpResponse.IsSuccessStatusCode)
             {
-                var motHistory = await JsonSerializer.DeserializeAsync<MotHistory>(
+                var motHistory = await JsonSerializer.DeserializeAsync<MoturResponse>(
                     await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken);
                 if (motHistory is not null)
-                    return Result<MotHistory>.Success(motHistory);
+                    return Result<MoturResponse>.Success(motHistory);
                 return Result.Error($"No MOT history found for {registrationPlate}");
             }
         }
@@ -45,25 +48,24 @@ public class MotService : IMotService
         return Result.Error("Failed to retrieve MOT History");
     }
 
-    public async Task<Result<MotHistory>> GetMotByVehicleAdvert(string advertUrl, CancellationToken cancellationToken = default)
+    public async Task<Result<MoturResponse>> GetMotByVehicleAdvert(string advertUrl, CancellationToken cancellationToken = default)
     {
-        var url = $"/link?url={advertUrl}";
         try
         {
-            var httpResponse = await _httpClient.GetAsync(url, cancellationToken);
+            var httpResponse = await _httpClient.PostAsync("/link", new StringContent(JsonSerializer.Serialize(new LinkRequestBody(advertUrl), options: SReadOptions), Encoding.UTF8, "application/json"), cancellationToken);
             _logger.LogInformation($"MOT Endpoint response {await httpResponse.Content.ReadAsStringAsync()}");
             if (httpResponse.IsSuccessStatusCode)
             {
-                var motHistory = await JsonSerializer.DeserializeAsync<MotHistory>(
+                var motHistory = await JsonSerializer.DeserializeAsync<MoturResponse>(
                     await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken);
                 if (motHistory is not null)
-                    return Result<MotHistory>.Success(motHistory);
+                    return Result<MoturResponse>.Success(motHistory);
             }
             return Result.Error(httpResponse.ReasonPhrase);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to fetch MOT history from endpoint: {url} with error: {exception}", url, ex);
+            _logger.LogError("Failed to fetch MOT history from endpoint: {url} with error: {exception}", advertUrl, ex);
         }
 
         return Result.Error("Failed to retrieve MOT History");
@@ -72,66 +74,103 @@ public class MotService : IMotService
     private static readonly JsonSerializerOptions SReadOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         NumberHandling = JsonNumberHandling.AllowReadingFromString
     };
 }
 
-public enum DefectType
+public class MoturResponse
 {
-    [JsonStringEnumMemberName("DANGEROUS")]
-    DANGEROUS = 0,
-    [JsonStringEnumMemberName("MAJOR")]
-    MAJOR = 1,
-    [JsonStringEnumMemberName("MINOR")]
-    MINOR = 2,
-    [JsonStringEnumMemberName("FAIL")]
-    FAIL = 3,
-    [JsonStringEnumMemberName("ADVISORY")]
-    ADVISORY = 4,
-    [JsonStringEnumMemberName("NON SPECIFIC")]
-    NONSPECIFIC = 5,
-    [JsonStringEnumMemberName("SYSTEM GENERATED")]
-    SYSTEMGENERATED = 6,
-    [JsonStringEnumMemberName("USER ENTERED")]
-    USERENTERED = 7,
-    [JsonStringEnumMemberName("PRS")]
-    PRS = 8
+    public RegistrationResponse? RegistrationResponse { get; set; }
+    public MotResponse? MotResponse { get; set; }
 }
 
-public class Defect
+public class ErrorDetails
 {
-    public required bool dangerous { get; set; }
-    public required string text { get; set; }
-    [JsonConverter(typeof(JsonStringEnumConverter<DefectType>))]
-    public required DefectType type { get; set; }
+    public string? InternalCode { get; set; }
+    public int HttpStatusCode { get; set; }
+    public required string Reason { get; set; }
 }
 
-public class MotTest
+public class RegistrationResponse
 {
-    public object? registrationAtTimeOfTest { get; set; }
-    public string? motTestNumber { get; set; }
-    public DateTime completedDate { get; set; }
-    public string? expiryDate { get; set; }
-    public string? odometerValue { get; set; }
-    public string? odometerUnit { get; set; }
-    public string? odometerResultType { get; set; }
-    public string? testResult { get; set; }
-    public string? dataSource { get; set; }
-    public required List<Defect> defects { get; set; }
+    public class RegistrationDetails
+    {
+        public required string RegistrationPlate { get; set; }
+        public string? TaxStatus { get; set; }
+        public DateTime? TaxDueDate { get; set; }
+        public string? MotStatus { get; set; }
+        public DateTime? MotExpiryDate { get; set; }
+        public string? Make { get; set; }
+        public int? YearOfManufacture { get; set; }
+        public int? EngineCapacityInCc { get; set; }
+        public int? Co2EmissionsInGramPerKm { get; set; }
+        public string? FuelType { get; set; }
+        public string? Colour { get; set; }
+        public string? ApprovalCategory { get; set; }
+        public string? Wheelplan { get; set; }
+        public int? RevenueWeightInKg { get; set; }
+        public DateTime? DateOfLastV5cIssued { get; set; }
+    }
+    public RegistrationDetails? Details { get; set; }
+    public ErrorDetails? ErrorDetails { get; set; }
 }
 
-public class MotHistory
+public class MotResponse
 {
-    public required string registration { get; set; }
-    public required string make { get; set; }
-    public required string model { get; set; }
-    public string? firstUsedDate { get; set; }
-    public required string fuelType { get; set; }
-    public required string primaryColour { get; set; }
-    public required string registrationDate { get; set; }
-    public required string manufactureDate { get; set; }
-    public string? engineSize { get; set; }
-    public required string hasOutstandingRecall { get; set; }
-    public List<MotTest>? motTests { get; set; }
+    public class MotDetails
+    {
+        public class MotTest
+        {
+            public class Defect
+            {
+                public enum DefectType
+                {
+                    [JsonStringEnumMemberName("DANGEROUS")]
+                    DANGEROUS = 0,
+                    [JsonStringEnumMemberName("MAJOR")]
+                    MAJOR = 1,
+                    [JsonStringEnumMemberName("MINOR")]
+                    MINOR = 2,
+                    [JsonStringEnumMemberName("FAIL")]
+                    FAIL = 3,
+                    [JsonStringEnumMemberName("ADVISORY")]
+                    ADVISORY = 4,
+                    [JsonStringEnumMemberName("NON SPECIFIC")]
+                    NONSPECIFIC = 5,
+                    [JsonStringEnumMemberName("SYSTEM GENERATED")]
+                    SYSTEMGENERATED = 6,
+                    [JsonStringEnumMemberName("USER ENTERED")]
+                    USERENTERED = 7,
+                    [JsonStringEnumMemberName("PRS")]
+                    PRS = 8
+                }
+                public bool? Dangerous { get; set; }
+                public string? Text { get; set; }
+                [JsonConverter(typeof(JsonStringEnumConverter<DefectType>))]
+                public DefectType? Type { get; set; }
+            }
+            public DateTime? CompletedDate { get; set; }
+            public string? TestResult { get; set; }
+            public string? OdometerReadResult { get; set; }
+            public string? DataSource { get; set; }
+            public DateTime? ExpiryDate { get; set; }
+            public string? OdometerValue { get; set; }
+            public string? OdometerUnit { get; set; }
+            public string? MotTestNumber { get; set; }
+            public required List<Defect> Defects { get; set; }
+        }
+        public string? RegistrationPlate { get; set; }
+        public string? Make { get; set; }
+        public string? Model { get; set; }
+        public string? FuelType { get; set; }
+        public string? Colour { get; set; }
+        public string? EngineSize { get; set; }
+        public DateTime? RegistrationDate { get; set; }
+        public DateTime? ManufactureDate { get; set; }
+        public DateTime? FirstMotTestDueDate { get; set; }
+        public List<MotTest>? MotTests { get; set; }
+    }
+    public MotDetails? Details { get; set; }
+    public ErrorDetails? ErrorDetails { get; set; }
 }

@@ -3,6 +3,7 @@ using Dotbot.Api.Settings;
 using NetCord;
 using NetCord.Hosting.Rest;
 using NetCord.Hosting.Services.ApplicationCommands;
+using NetCord.Hosting.Services.ComponentInteractions;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
@@ -20,8 +21,10 @@ public static class DiscordExtensions
         builder.Services.AddHostedService<RegistrationHostedService>();
         builder.Services.AddScoped<RestClient>(_ => restClient);
 
-        builder.Services.AddDiscordRest()
-            .AddApplicationCommands<ApplicationCommandInteraction, HttpApplicationCommandContext, AutocompleteInteractionContext>();
+        builder.Services
+            .AddDiscordRest()
+            .AddHttpApplicationCommands()
+            .AddHttpComponentInteractions();
 
         return builder;
     }
