@@ -43,14 +43,14 @@ services:
     image: ghcr.io/opentoucan/motur:2.0.0
     ports:
       - '8081:8080'
-    env_file: local.env
+    env_file: .env
     configs:
         - source: motur.yaml
           target: /app/config.yaml
   ngrok:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:3-debian
-    env_file: local.env
+    env_file: .env
     command: 'http 127.0.0.1:8080'
     network_mode: host
   grafana:
