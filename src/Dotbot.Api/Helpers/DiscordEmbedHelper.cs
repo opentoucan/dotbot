@@ -86,7 +86,7 @@ public static class DiscordEmbedHelper
     public static EmbedProperties BuildMotSummaryEmbed(List<MotTest> motTests)
     {
         var orderedMotTests = motTests.OrderByDescending(test => test.CompletedDate).ToList();
-            
+
         var embed = new EmbedProperties();
         embed.WithTitle("MOT Information");
         embed.WithDescription("Summary for all MOT tests on this vehicle");
@@ -98,10 +98,10 @@ public static class DiscordEmbedHelper
                 .WithName($"{motTest.CompletedDate.GetValueOrDefault():dd MMM yyyy} - {motTest.TestResult}")
                 .WithValue($"{string.Join("\n", distinctDefects.Select(x => $" {motTest.Defects.Count(defect => defect.Type == x.Type)} x {x.Type.ToString()}"))}"));
         }
-        
+
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Stats"));
-        
+
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Number of MOT tests performed")
             .WithValue(motTests.Count.ToString())
@@ -167,7 +167,7 @@ public static class DiscordEmbedHelper
             .WithName("Average amount of days from a test failure until pass")
             .WithValue(motTestDifferencesBetweenSuccessAndFailureCycles.Any() ? motTestDifferencesBetweenSuccessAndFailureCycles.Average(dt => dt.Item2.Days).ToString(CultureInfo.InvariantCulture) : "0")
             .WithInline());
-        
+
         return embed;
     }
 
