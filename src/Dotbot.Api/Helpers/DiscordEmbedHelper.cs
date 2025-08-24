@@ -9,10 +9,10 @@ namespace Dotbot.Api.Helpers;
 
 public static class DiscordEmbedHelper
 {
-    public static Color Green = new(0, 128, 0);
-    public static Color Orange = new(255, 140, 0);
-    public static Color Red = new(255, 0, 0);
-    public static Color Black = new(0, 0, 0);
+    private static readonly Color Green = new(0, 128, 0);
+    private static readonly Color Orange = new(255, 140, 0);
+    private static readonly Color Red = new(255, 0, 0);
+    private static readonly Color Black = new(0, 0, 0);
     public static EmbedProperties BuildVehicleInformationEmbed(MoturResponse moturResponse)
     {
         var registrationDetails = moturResponse.RegistrationResponse?.Details;
@@ -138,7 +138,7 @@ public static class DiscordEmbedHelper
         {
             int? previousOdometerReadingInMiles = null;
             DateTime? previousCompletedDate = null;
-            bool inFailureCycle = false;
+            var inFailureCycle = false;
 
             for (var index = motTest.i + 1; index < motTests.Count - 1; index++)
             {
@@ -165,7 +165,7 @@ public static class DiscordEmbedHelper
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Average amount of days from a test failure until pass")
-            .WithValue(motTestDifferencesBetweenSuccessAndFailureCycles.Any() ? motTestDifferencesBetweenSuccessAndFailureCycles.Average(dt => dt.Item2.Days).ToString(CultureInfo.InvariantCulture) : "0")
+            .WithValue(motTestDifferencesBetweenSuccessAndFailureCycles.Count > 0 ? motTestDifferencesBetweenSuccessAndFailureCycles.Average(dt => dt.Item2.Days).ToString(CultureInfo.InvariantCulture) : "0")
             .WithInline());
 
         return embed;
