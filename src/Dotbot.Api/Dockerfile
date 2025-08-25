@@ -33,5 +33,6 @@ RUN dotnet publish "Dotbot.Api/Dotbot.Api.csproj" -c $BUILD_CONFIGURATION -o /ap
 FROM base AS final
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:8080
+ENV LANG=en_GB.UTF-8
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Dotbot.Api.dll"]
