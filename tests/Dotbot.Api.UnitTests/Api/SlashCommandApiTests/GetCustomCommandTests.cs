@@ -27,7 +27,7 @@ public class GetCustomCommandTests
         Channel = new JsonChannel(),
         Entitlements =
                     []
-    }, new Guild(new JsonGuild(), GuildId, new RestClient(new RestClientConfiguration())),
+    }, new Guild(new JsonGuild(), GuildId, new RestClient(new RestClientConfiguration()), IDictionaryProvider.OfDictionary),
             (_, _, _, _, _) => Task.FromResult<InteractionCallbackResponse?>(null), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock })),
         new RestClient(new RestClientConfiguration()));
 

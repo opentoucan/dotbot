@@ -1,6 +1,6 @@
 {
 	"name": "workspace",
-	"dockerComposeFile": ["compose.yaml", "observability-compose.yaml"],
+	"dockerComposeFile": ["compose.yaml", "../compose.yaml"],
   "service": "workspace",
 	"workspaceFolder": "/workspace",
 	"shutdownAction": "stopCompose",

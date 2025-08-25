@@ -9,7 +9,7 @@ public static partial class Extensions
 {
     public static IApplicationBuilder UseDefaultOpenApi(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "local")
         {
             app.MapOpenApi();
             app.MapScalarApiReference();
