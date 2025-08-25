@@ -6,8 +6,6 @@ using Dotbot.Infrastructure.Behaviours;
 using Dotbot.Infrastructure.Extensions;
 using Dotbot.Infrastructure.Repositories;
 using MassTransit;
-using Polly;
-using Polly.Extensions.Http;
 using ServiceDefaults;
 
 namespace Dotbot.Api.Extensions;
@@ -37,11 +35,11 @@ public static partial class Extensions
     public static IHostApplicationBuilder ConfigureXkcd(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHttpClient<IXkcdService, XkcdService>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
-            })
-            .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
-
+        {
+            client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
+        })
+        .AddStandardResilienceHandler();
+        
         return builder;
     }
 
@@ -50,8 +48,15 @@ public static partial class Extensions
         builder.Services.AddHttpClient<IMotService, MotService>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("MotUrl")!);
+                client.Timeout = Timeout.InfiniteTimeSpan;
             })
-            .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(3));
+            .AddStandardResilienceHandler(options =>
+            {
+                var timeSpan = TimeSpan.FromSeconds(30);
+                options.AttemptTimeout.Timeout = timeSpan;
+                options.CircuitBreaker.SamplingDuration = timeSpan * 2;
+                options.TotalRequestTimeout.Timeout = timeSpan * 3;
+            });
 
         return builder;
     }

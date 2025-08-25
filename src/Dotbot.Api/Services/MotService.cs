@@ -30,7 +30,7 @@ public class MotService : IMotService
         try
         {
             var httpResponse = await _httpClient.GetAsync(url, cancellationToken);
-            _logger.LogInformation($"MOT Endpoint response {await httpResponse.Content.ReadAsStringAsync()}");
+            _logger.LogInformation("MOT Endpoint response {reason phrase}", httpResponse.ReasonPhrase);
             if (httpResponse.IsSuccessStatusCode)
             {
                 var motHistory = await JsonSerializer.DeserializeAsync<MoturResponse>(

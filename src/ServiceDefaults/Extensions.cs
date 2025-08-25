@@ -23,12 +23,6 @@ public static partial class Extensions
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
 
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            // Turn on resilience by default
-            http.AddStandardResilienceHandler();
-
-        });
         builder.AddDefaultOpenApi();
         return builder;
     }
