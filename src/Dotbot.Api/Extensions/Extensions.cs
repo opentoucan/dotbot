@@ -39,7 +39,7 @@ public static partial class Extensions
             client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
         })
         .AddStandardResilienceHandler();
-        
+
         return builder;
     }
 
