@@ -91,6 +91,11 @@ public static class DiscordEmbedHelper
         embed.WithTitle("MOT Information");
         embed.WithDescription("Summary for all MOT tests on this vehicle");
 
+        if (orderedMotTests.Count == 0)
+        {
+            embed.WithDescription("No MOTs Found");
+            return embed;
+        }
         foreach (var motTest in orderedMotTests.Take(5))
         {
             var distinctDefects = motTest.Defects.DistinctBy(x => x.Type).ToList();
@@ -101,6 +106,10 @@ public static class DiscordEmbedHelper
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Stats"));
+
+        embed.AddFields(new EmbedFieldProperties()
+            .WithName("Latest odometer reading")
+            .WithValue($"{orderedMotTests.First().OdometerValue} {orderedMotTests.First().OdometerUnit}"));
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Number of MOT tests performed")
