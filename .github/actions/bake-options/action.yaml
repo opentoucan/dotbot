@@ -19,7 +19,7 @@ runs:
       shell: bash
       run: |
         TARGETS=$(\
-          docker buildx bake ./docker-bake.hcl image-all --print --progress=quiet \
+          docker buildx bake --file ./docker-bake.hcl image-all --print --progress=quiet \
             | jq -r -c '.target.[].target | split(" ")' | jq -c -s 'map(.[])'
         )
         PLATFORMS=$(\
