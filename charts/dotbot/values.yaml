@@ -8,7 +8,7 @@ api:
   image:
     registry: ghcr.io
     repository: opentoucan/dotbot.api
-    tag: 3.1.1@sha256:740c8d340645994d984a97097720b26c32c025cdaa6e221f499b27240c84f2e4
+    tag: 3.2.0@sha256:84a998924406b9efbffdfaac36724b30566e9e53b2926a46f46a70d852424c3d
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
   podLabels: {}
@@ -36,7 +36,7 @@ migrator:
   image:
     registry: ghcr.io
     repository: opentoucan/dotbot.migrator
-    tag: 3.1.1@sha256:3f32a0f55f2115f2956ad68db5479419c0272f69b07fe8efec21b0af3a7ba98d
+    tag: 3.2.0@sha256:0a4953650a06d02d904e3bfb06358db90704b7090aac29a646719b94368ca3f2
     imagePullPolicy: IfNotPresent
   podAnnotations: {}
   podLabels: {}
