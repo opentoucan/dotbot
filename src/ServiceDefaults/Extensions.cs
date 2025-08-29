@@ -47,7 +47,7 @@ public static partial class Extensions
     private static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
     {
         builder.Services.AddSingleton<Instrumentation>();
-        var otlpEndpoint = builder.Configuration["OTLP_ENDPOINT_URL"];
+        var otlpEndpoint = builder.Configuration.GetValue<string>("OTLP_ENDPOINT_URL");
         var otel = builder.Services.AddOpenTelemetry();
 
         // Configure OpenTelemetry Resources with the application name
