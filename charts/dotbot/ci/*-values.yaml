@@ -1,9 +1,0 @@
-existingAppSecret: 'dotbot-secret'
-existingMigratorSecret: 'dotbot-migrator-secret'
-service:
-  type: ClusterIP
-env:
-  RabbitMQ__Endpoint: 'rabbitmq'
-  RabbitMQ__port: '5672'
-  S3__ServiceUrl: 'minio:9000'
-  OTEL_EXPORTER_OTLP_ENDPOINT: 'http://opentelemetry-operator.default.svc.cluster.local:8080'

@@ -12,14 +12,12 @@ on:
       - '.github/**'
       - 'docs/**'
       - '**.md'
-      - 'charts/**'
   pull_request:
     branches: [ 'main' ]
     paths-ignore:
       - '.github/**'
       - 'docs/**'
       - '**.md'
-      - 'charts/**'
 
 jobs:
   lint:
