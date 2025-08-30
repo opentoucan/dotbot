@@ -54,35 +54,35 @@ public static class DiscordExtensions
         {
             var httpClient = httpClientFactory.CreateClient();
             var ngrokUrl = "http://localhost:4040/api/tunnels";
-            
+
             logger.LogInformation("Reading tunnel from ngrok {ngrokUrl}", ngrokUrl);
-            
+
             var response = await httpClient.GetAsync(ngrokUrl, cancellationToken);
-            
+
             var ngrokStream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var jsonNode = await JsonNode.ParseAsync(ngrokStream, cancellationToken: cancellationToken);
             var publicUrl = jsonNode?["tunnels"]?[0]?["public_url"]?.GetValue<string?>();
-            
+
             if (!response.IsSuccessStatusCode || string.IsNullOrEmpty(publicUrl))
                 throw new Exception($"Ngrok failed to return a public url ({response.StatusCode}: {response.ReasonPhrase}). Is ngrok running?");
-            
+
             logger.LogInformation("Ngrok API returned: {publicUrl}", publicUrl);
 
             var interactionsEndpointUrl = $"{publicUrl}{InteractionEndpoint}";
             var discordInteractionPatch = new JsonObject([KeyValuePair.Create<string, JsonNode?>("interactions_endpoint_url", interactionsEndpointUrl)]);
-            
+
             var content = JsonContent.Create(discordInteractionPatch);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             content.Headers.TryAddWithoutValidation("Authorization", $"Bot {settings.Value.Token}");
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bot", settings.Value.Token);
-            
+
             logger.LogInformation("Updating Discord bot endpoint with: {interactionEndpoint}", interactionsEndpointUrl);
-            
+
             var discordApiResponse = await httpClient.PatchAsync("https://discord.com/api/applications/@me", content, cancellationToken);
 
-            if(!discordApiResponse.IsSuccessStatusCode)
+            if (!discordApiResponse.IsSuccessStatusCode)
                 throw new Exception($"Failed to update Discord bot interaction endpoint ({response.StatusCode}: {response.ReasonPhrase}). Is the endpoint publicly accessible and is the token valid?");
-            
+
             logger.LogInformation("Successfully updated the discord bot interaction endpoint");
         }
 
@@ -90,7 +90,7 @@ public static class DiscordExtensions
         {
             return Task.CompletedTask;
         }
-        
+
         public Task StartingAsync(CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
