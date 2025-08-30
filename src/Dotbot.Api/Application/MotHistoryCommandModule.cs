@@ -77,7 +77,7 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
 
             var interactionResponse = new InteractionMessageProperties()
                 .WithEmbeds(embeds)
-                .WithComponents([new ActionRowProperties().AddButtons(new LinkButtonProperties($"https://www.check-mot.service.gov.uk/results?registration={reg}", label: "Link to full MOT History"))]);
+                .WithComponents([new ActionRowProperties().AddComponents(new LinkButtonProperties($"https://www.check-mot.service.gov.uk/results?registration={reg}", label: "Link to full MOT History"))]);
             await Context.Interaction.SendFollowupMessageAsync(interactionResponse.WithEmbeds(embeds));
 
             var displayName = (Context.Interaction.User as GuildUser)?.Nickname ?? Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
