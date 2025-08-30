@@ -15,7 +15,7 @@ namespace Dotbot.Api.Extensions;
 
 public static class DiscordExtensions
 {
-    const string InteractionEndpoint = "/interactions";
+    private const string InteractionEndpoint = "/interactions";
     public static IHostApplicationBuilder ConfigureDiscordServices(this IHostApplicationBuilder builder)
     {
         var section = builder.Configuration.GetSection("Discord");
