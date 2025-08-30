@@ -375,64 +375,30 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Create Release
-        shell: bash
-        continue-on-error: true
-        if: ${{ matrix.image == 'api' }}
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        run: |
-          gh release create "${{ needs.prepare.outputs.original-tag }}" \
-              --repo="${GITHUB_REPOSITORY}" \
-              --title="${{ needs.prepare.outputs.original-tag }}" \
-              --generate-notes
-
-  attest:
-    if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
-    name: Attest
-    needs: ["prepare", "release"]
-    runs-on: ubuntu-latest
-    permissions:
-      attestations: write
-      contents: write
-      id-token: write
-      packages: write
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        image: ${{ fromJson(needs.prepare.outputs.images) }}
-    steps:
-
-      - name: Setup Vars
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        id: vars
-        with:
-          script: |
-            core.setOutput('target-image', 'dotbot.${{ matrix.image }}')
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
       - name: Upload Dependency Snapshot
         uses: anchore/sbom-action@da167eac915b4e86f08b264dbdbc867b61be6f0c # v0.20.5
         with:
-          dependency-snapshot: true
-          image: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ needs.release.outputs.digest }}
+            dependency-snapshot: true
+            image: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
+            output-file: /tmp/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.original-tag }}.sbom.spdx
 
       - name: Attestation
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
-          push-to-registry: true
-          subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}
-          subject-digest: ${{ needs.release.outputs.digest }}
+            push-to-registry: true
+            subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}
+            subject-digest: ${{ steps.digest.outputs.digest }}
 
       - name: Verify Attestation
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+            GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ needs.release.outputs.digest }}
+            gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
+            
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+            name: ${{ format('{0}-{1}', matrix.image, needs.prepare.outputs.original-tag) }}
+            generate_release_notes: true
+            files: |
+                /tmp/**/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.original-tag }}.sbom.spdx
