@@ -8,9 +8,6 @@
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore"/>
-        <PackageReference Include="MassTransit.Grpc"  />
-        <PackageReference Include="MassTransit.RabbitMQ" />
-        <PackageReference Include="MediatR" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     </ItemGroup>

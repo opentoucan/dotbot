@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Dotbot.Infrastructure.Entities;
 using Dotbot.Infrastructure.Repositories;
-using MassTransit.Internals;
 using NetCord.Rest;
 using ServiceDefaults;
 
@@ -16,10 +15,10 @@ public class SaveDiscordServersHostedService(IServiceScopeFactory serviceScopeFa
         var guildRepository = scope.ServiceProvider.GetRequiredService<IGuildRepository>();
         var restClient = scope.ServiceProvider.GetRequiredService<RestClient>();
         var instrumentation = scope.ServiceProvider.GetRequiredService<Instrumentation>();
-        var restGuilds = await restClient.GetCurrentUserGuildsAsync().ToListAsync(cancellationToken);
+        var restGuilds = restClient.GetCurrentUserGuildsAsync();
         var tagList = new TagList();
 
-        foreach (var registeredGuild in restGuilds)
+        await foreach (var registeredGuild in restGuilds)
         {
             tagList.Clear();
             tagList.Add("guild_id", registeredGuild.Id.ToString());

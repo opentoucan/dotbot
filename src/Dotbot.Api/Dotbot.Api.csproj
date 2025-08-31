@@ -16,11 +16,8 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
         <PackageReference Include="Microsoft.Extensions.Options" />
-        <PackageReference Include="MediatR" />
         <PackageReference Include="AWSSDK.S3" />
         <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
-        <PackageReference Include="MassTransit.RabbitMQ" />
-        <PackageReference Include="MassTransit" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="NetCord" />
         <PackageReference Include="NetCord.Hosting" />
