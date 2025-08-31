@@ -5,9 +5,9 @@ using MassTransit.Internals;
 using NetCord.Rest;
 using ServiceDefaults;
 
-namespace Dotbot.Api.Services;
+namespace Dotbot.Api.Discord.HostedServices;
 
-public class RegistrationHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
+public class SaveDiscordServersHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -16,8 +16,8 @@ public class RegistrationHostedService(IServiceScopeFactory serviceScopeFactory)
         var guildRepository = scope.ServiceProvider.GetRequiredService<IGuildRepository>();
         var restClient = scope.ServiceProvider.GetRequiredService<RestClient>();
         var instrumentation = scope.ServiceProvider.GetRequiredService<Instrumentation>();
-        var restGuilds = await restClient.GetCurrentUserGuildsAsync().ToListAsync();
-        var tagList = new TagList { };
+        var restGuilds = await restClient.GetCurrentUserGuildsAsync().ToListAsync(cancellationToken);
+        var tagList = new TagList();
 
         foreach (var registeredGuild in restGuilds)
         {

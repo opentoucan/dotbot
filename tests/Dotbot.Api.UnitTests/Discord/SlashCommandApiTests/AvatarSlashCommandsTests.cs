@@ -1,4 +1,4 @@
-using Dotbot.Api.Application.Api;
+using Dotbot.Api.Discord.SlashCommandApis;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.JsonModels;
@@ -7,9 +7,9 @@ using NetCord.Services.ApplicationCommands;
 using NSubstitute;
 using ServiceDefaults;
 
-namespace Dotbot.Api.UnitTests.Api.SlashCommandApiTests;
+namespace Dotbot.Api.UnitTests.Discord.SlashCommandApiTests;
 
-public class AvatarCommandTests
+public class AvatarSlashCommandsTests
 {
     private static ulong GuildId => 123;
     private static readonly Instrumentation Instrumentation = new();
@@ -40,7 +40,7 @@ public class AvatarCommandTests
         },
             GuildId, new RestClient());
         var globalAvatarFlag = true;
-        var sut = SlashCommandApi.AvatarCommandAsync(Instrumentation, CommandContext, guildUser, globalAvatarFlag);
+        var sut = AvatarSlashCommands.FetchAvatarAsync(Instrumentation, CommandContext, guildUser, globalAvatarFlag);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.UserAvatar(userId, avatarHash, null).ToString());
@@ -58,7 +58,7 @@ public class AvatarCommandTests
             GuildAvatarHash = guildAvatarHash
         }, GuildId, new RestClient());
         var globalAvatarFlag = false;
-        var sut = SlashCommandApi.AvatarCommandAsync(Instrumentation, CommandContext, guildUser, globalAvatarFlag);
+        var sut = AvatarSlashCommands.FetchAvatarAsync(Instrumentation, CommandContext, guildUser, globalAvatarFlag);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.GuildUserAvatar(GuildId, userId, guildAvatarHash, null).ToString());
@@ -75,7 +75,7 @@ public class AvatarCommandTests
             User = new JsonUser { Id = userId, AvatarHash = avatarHash },
             GuildAvatarHash = guildAvatarHash
         }, GuildId, new RestClient());
-        var sut = SlashCommandApi.AvatarCommandAsync(Instrumentation, CommandContext, guildUser);
+        var sut = AvatarSlashCommands.FetchAvatarAsync(Instrumentation, CommandContext, guildUser);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.GuildUserAvatar(GuildId, userId, guildAvatarHash, null).ToString());
@@ -90,7 +90,7 @@ public class AvatarCommandTests
         {
             User = new JsonUser { Id = userId, AvatarHash = avatarHash }
         }, GuildId, new RestClient());
-        var sut = SlashCommandApi.AvatarCommandAsync(Instrumentation, CommandContext, guildUser);
+        var sut = AvatarSlashCommands.FetchAvatarAsync(Instrumentation, CommandContext, guildUser);
 
         await Assert.That(sut.Embeds?.FirstOrDefault()?.Image?.Url)
             .Contains(ImageUrl.UserAvatar(userId, avatarHash, null).ToString());
@@ -104,7 +104,7 @@ public class AvatarCommandTests
         {
             User = new JsonUser { Id = userId }
         }, GuildId, new RestClient());
-        var sut = SlashCommandApi.AvatarCommandAsync(Instrumentation, CommandContext, guildUser);
+        var sut = AvatarSlashCommands.FetchAvatarAsync(Instrumentation, CommandContext, guildUser);
 
         await Assert.That(sut.Embeds).IsNull();
         await Assert.That(sut.Content).IsEqualTo("No avatar set");

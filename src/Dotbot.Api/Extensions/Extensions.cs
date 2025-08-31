@@ -1,5 +1,6 @@
 using System.Reflection;
 using Dotbot.Api.Application.Queries;
+using Dotbot.Api.Queries;
 using Dotbot.Api.Services;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Behaviours;
@@ -27,7 +28,6 @@ public static partial class Extensions
         builder.Services.AddScoped<ICustomCommandService, CustomCommandService>();
         builder.AddDatabase();
         builder.AddMassTransit();
-        builder.ConfigureDiscordServices();
         builder.ConfigureAWS();
         return builder;
     }

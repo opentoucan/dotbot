@@ -1,26 +1,26 @@
 using System.Diagnostics;
 using Ardalis.Result;
-using Dotbot.Api.Helpers;
+using Dotbot.Api.Dto;
 using Dotbot.Api.Services;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using ServiceDefaults;
 
-namespace Dotbot.Api.Application;
+namespace Dotbot.Api.Discord.Modules;
 
-[SlashCommand("mot", "Retrieves MOT history")]
+[SlashCommand("vehicle", "Retrieves vehicle information and MOT history")]
 public class MotHistoryCommandModule(IMotService motService, Instrumentation instrumentation) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
-    [SubSlashCommand("plate", "Registration plate to search")]
+    [SubSlashCommand("registration", "Registration plate to search")]
     public async Task RetreiveByPlate(
-        [SlashCommandParameter(Name = "plate", Description = "Registration plate")]
+        [SlashCommandParameter(Name = "registration", Description = "Registration plate")]
         string reg)
     {
         using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
         var result = await motService.GetMotByRegistrationPlate(reg);
-        await RetrieveMotHistoryAsync(activity, result);
+        await SendVehicleInformationEmbedAsync(activity, result);
     }
 
     [SubSlashCommand("link", "URL of a vehicle advert i.e. autotrader or carandclassic ad")]
@@ -31,10 +31,10 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
         using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
         var result = await motService.GetMotByVehicleAdvert(link);
-        await RetrieveMotHistoryAsync(activity, result);
+        await SendVehicleInformationEmbedAsync(activity, result);
     }
 
-    private async Task RetrieveMotHistoryAsync(Activity? activity, Result<MoturResponse> result)
+    private async Task SendVehicleInformationEmbedAsync(Activity? activity, Result<MoturResponse> result)
     {
 
         if (!result.IsSuccess)
@@ -65,7 +65,7 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
             }
             else
             {
-                vehicleSummaryEmbed = DiscordEmbedHelper.BuildVehicleInformationEmbed(moturResponse);
+                vehicleSummaryEmbed = VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(moturResponse);
             }
 
             embeds.Add(vehicleSummaryEmbed);
@@ -73,7 +73,7 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
             var reg = moturResponse?.RegistrationResponse?.Details?.RegistrationPlate ?? moturResponse?.MotResponse?.Details?.RegistrationPlate;
             var motTests = moturResponse?.MotResponse?.Details?.MotTests ?? [];
 
-            embeds.Add(DiscordEmbedHelper.BuildMotSummaryEmbed(motTests));
+            embeds.Add(VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(motTests));
 
             var interactionResponse = new InteractionMessageProperties()
                 .WithEmbeds(embeds)

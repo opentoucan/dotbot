@@ -1,4 +1,4 @@
-using Dotbot.Api.Application.Api;
+using Dotbot.Api.Discord.SlashCommandApis;
 using Dotbot.Api.Services;
 using Microsoft.Extensions.Logging;
 using NetCord;
@@ -10,9 +10,9 @@ using NetCord.Services.ApplicationCommands;
 using NSubstitute;
 using ServiceDefaults;
 
-namespace Dotbot.Api.UnitTests.Api.SlashCommandApiTests;
+namespace Dotbot.Api.UnitTests.Discord.SlashCommandApiTests;
 
-public class GetCustomCommandTests
+public class CustomCommandSlashCommandsTests
 {
     private const ulong GuildId = 1234;
     private static readonly IRestRequestHandler RestRequestHandlerMock = Substitute.For<IRestRequestHandler>();
@@ -38,7 +38,7 @@ public class GetCustomCommandTests
     public async Task CustomCommand_NoGuildId_DoesNotReturnsError()
     {
         var commandName = "test";
-        await SlashCommandApi.GetCustomCommandAsync(CustomCommandService, Instrumentation, LoggerFactoryMock, CommandContext, commandName);
+        await CustomCommandSlashCommands.FetchCustomCommandAsync(CustomCommandService, Instrumentation, LoggerFactoryMock, CommandContext, commandName);
 
         await CustomCommandService.DidNotReceive().GetCustomCommandAsync(Arg.Any<string>(), commandName);
     }

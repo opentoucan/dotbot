@@ -1,8 +1,9 @@
+using Dotbot.Api.Application.Queries;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Dotbot.Api.Application.Queries;
+namespace Dotbot.Api.Queries;
 
 public class GuildQueries(DotbotContext context) : IGuildQueries
 {

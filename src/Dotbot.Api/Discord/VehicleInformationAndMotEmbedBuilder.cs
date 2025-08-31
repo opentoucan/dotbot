@@ -1,13 +1,11 @@
 using System.Globalization;
-using Dotbot.Api.Services;
+using Dotbot.Api.Dto;
 using NetCord;
 using NetCord.Rest;
-using static Dotbot.Api.Services.MotResponse.MotDetails;
-using static Dotbot.Api.Services.MotResponse.MotDetails.MotTest.Defect;
 
-namespace Dotbot.Api.Helpers;
+namespace Dotbot.Api.Discord;
 
-public static class DiscordEmbedHelper
+public static class VehicleInformationAndMotEmbedBuilder
 {
     private static readonly Color Green = new(0, 128, 0);
     private static readonly Color Orange = new(255, 140, 0);
@@ -83,7 +81,7 @@ public static class DiscordEmbedHelper
         _ => ""
     };
 
-    public static EmbedProperties BuildMotSummaryEmbed(List<MotTest> motTests)
+    public static EmbedProperties BuildMotSummaryEmbed(List<MotResponse.MotDetails.MotTest> motTests)
     {
         var orderedMotTests = motTests.OrderByDescending(test => test.CompletedDate).ToList();
 
@@ -129,17 +127,17 @@ public static class DiscordEmbedHelper
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Average number of advisories per year")
             .WithValue(
-                motTests.Average(test => test.Defects.Count(defect => defect.Type == DefectType.ADVISORY)).ToString("F", CultureInfo.InvariantCulture))
+                motTests.Average(test => test.Defects.Count(defect => defect.Type == MotResponse.MotDetails.MotTest.Defect.DefectType.ADVISORY)).ToString("F", CultureInfo.InvariantCulture))
             .WithInline());
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Average number of minor/major/dangerous per year")
             .WithValue(
                 motTests.Average(test => test.Defects.Count(defect => defect.Type is
-                    DefectType.DANGEROUS or
-                    DefectType.MAJOR or
-                    DefectType.MINOR or
-                    DefectType.FAIL)).ToString("F", CultureInfo.InvariantCulture))
+                    MotResponse.MotDetails.MotTest.Defect.DefectType.DANGEROUS or
+                    MotResponse.MotDetails.MotTest.Defect.DefectType.MAJOR or
+                    MotResponse.MotDetails.MotTest.Defect.DefectType.MINOR or
+                    MotResponse.MotDetails.MotTest.Defect.DefectType.FAIL)).ToString("F", CultureInfo.InvariantCulture))
             .WithInline());
 
         var motTestDifferencesBetweenSuccessAndFailureCycles = new List<(int, TimeSpan)>();
@@ -191,7 +189,7 @@ public static class DiscordEmbedHelper
         return (int)Math.Ceiling(odometerValueInt / 1.609);
     }
 
-    public static EmbedProperties BuildMotTestEmbed(string? reg, MotTest motTest)
+    public static EmbedProperties BuildMotTestEmbed(string? reg, MotResponse.MotDetails.MotTest motTest)
     {
         var embed = new EmbedProperties();
         embed.WithTitle($"MOT {motTest.CompletedDate}");

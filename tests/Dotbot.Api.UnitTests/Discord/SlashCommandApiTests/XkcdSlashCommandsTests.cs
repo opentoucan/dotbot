@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Dotbot.Api.Application.Api;
+using Dotbot.Api.Discord.SlashCommandApis;
 using Dotbot.Api.Services;
 using Microsoft.Extensions.Logging;
 using NetCord;
@@ -12,8 +12,8 @@ using NSubstitute;
 using RichardSzalay.MockHttp;
 using ServiceDefaults;
 
-namespace Dotbot.Api.UnitTests.Api.SlashCommandApiTests;
-public class XkcdCommandTests
+namespace Dotbot.Api.UnitTests.Discord.SlashCommandApiTests;
+public class XkcdSlashCommandsTests
 {
     private static readonly Instrumentation Instrumentation = new();
     private static readonly IRestRequestHandler RestRequestHandlerMock = Substitute.For<IRestRequestHandler>();
@@ -49,7 +49,7 @@ public class XkcdCommandTests
             .Respond(HttpStatusCode.NotFound, JsonContent.Create(""));
 
 
-        var sut = await SlashCommandApi.XkcdCommandAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext, comicNumber);
+        var sut = await XkcdSlashCommands.FetchXkcdAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext, comicNumber);
         await Assert.That(sut.Content).IsEqualTo($"XKCD comic #{comicNumber} does not exist");
     }
 
@@ -68,7 +68,7 @@ public class XkcdCommandTests
             .Respond(HttpStatusCode.ServiceUnavailable, JsonContent.Create(""));
 
 
-        var sut = await SlashCommandApi.XkcdCommandAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext);
+        var sut = await XkcdSlashCommands.FetchXkcdAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext);
         await Assert.That(sut.Content).IsEqualTo("There was an issue fetching the XKCD");
     }
 
@@ -87,7 +87,7 @@ public class XkcdCommandTests
             .Expect(HttpMethod.Get, $"{_baseAddress}/{comicNumber}/info.0.json")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new XkcdService.XkcdContent { Title = "Comic #1", Num = comicNumber, Alt = "Comic #1", Img = "some_url", Year = 2024, Month = 1, Day = 1 }));
 
-        var sut = await SlashCommandApi.XkcdCommandAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext, comicNumber);
+        var sut = await XkcdSlashCommands.FetchXkcdAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext, comicNumber);
 
         await Assert.That(sut.Embeds?.Count()).IsEqualTo(1);
         await Assert.That(sut.Embeds?.First().Title).Contains($"#{comicNumber}");
@@ -108,7 +108,7 @@ public class XkcdCommandTests
             .Expect(HttpMethod.Get, $"{_baseAddress}/info.0.json")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new XkcdService.XkcdContent { Title = $"Comic #{comicNumber}", Num = comicNumber, Alt = "Comic #1", Img = "some_url", Year = 2024, Month = 1, Day = 1 }));
 
-        var sut = await SlashCommandApi.XkcdCommandAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext);
+        var sut = await XkcdSlashCommands.FetchXkcdAsync(xkcdService, Instrumentation, LoggerFactory, CommandContext);
 
         await Assert.That(sut.Embeds?.Count()).IsEqualTo(1);
         await Assert.That(sut.Embeds?.First().Title).Contains($"Latest comic #{comicNumber}");

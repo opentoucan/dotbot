@@ -1,19 +1,21 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using Dotbot.Api.Application.Api;
+using Dotbot.Api.Discord.HostedServices;
+using Dotbot.Api.Discord.SlashCommandApis;
 using Dotbot.Api.Services;
 using Dotbot.Api.Settings;
 using Microsoft.Extensions.Options;
 using NetCord;
 using NetCord.Hosting.AspNetCore;
 using NetCord.Hosting.Rest;
+using NetCord.Hosting.Services;
 using NetCord.Hosting.Services.ApplicationCommands;
 using NetCord.Hosting.Services.ComponentInteractions;
 using NetCord.Rest;
 
-namespace Dotbot.Api.Extensions;
+namespace Dotbot.Api.Discord.Extensions;
 
-public static class DiscordExtensions
+public static class Extensions
 {
     private const string InteractionEndpoint = "/interactions";
     public static IHostApplicationBuilder ConfigureDiscordServices(this IHostApplicationBuilder builder)
@@ -23,7 +25,7 @@ public static class DiscordExtensions
         var botToken = new BotToken(discordSettings!.Token);
         var restClient = new RestClient(botToken);
         builder.Services.AddOptions<DiscordSettings>().Bind(section);
-        builder.Services.AddHostedService<RegistrationHostedService>();
+        builder.Services.AddHostedService<SaveDiscordServersHostedService>();
         builder.Services.AddScoped<RestClient>(_ => restClient);
 
         builder.Services
@@ -42,7 +44,11 @@ public static class DiscordExtensions
     public static void ConfigureDiscordWebApplication(this WebApplication app)
     {
         app.UseHttpInteractions(InteractionEndpoint);
-        app.MapSlashCommandApi();
+        app.AddSlashCommand("ping", "Welfare check ping", () => "I'm still responding!");
+        app.AddSlashCommand("xkcd", "Fetches an XKCD comic", XkcdSlashCommands.FetchXkcdAsync);
+        app.AddSlashCommand("avatar", "Gets the avatar of the tagged user.", AvatarSlashCommands.FetchAvatarAsync);
+        app.AddSlashCommand("custom", "Retrieves a custom command", CustomCommandSlashCommands.FetchCustomCommandAsync);
+        app.AddModules(typeof(Program).Assembly);
     }
 
     internal class DiscordHttpInteractionSetupService(
