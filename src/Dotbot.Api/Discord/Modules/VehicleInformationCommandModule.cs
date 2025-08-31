@@ -10,10 +10,10 @@ using ServiceDefaults;
 namespace Dotbot.Api.Discord.Modules;
 
 [SlashCommand("vehicle", "Retrieves vehicle information and MOT history")]
-public class MotHistoryCommandModule(IMotService motService, Instrumentation instrumentation) : ApplicationCommandModule<HttpApplicationCommandContext>
+public class VehicleInformationCommandModule(IMotService motService, Instrumentation instrumentation) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("registration", "Registration plate to search")]
-    public async Task RetreiveByPlate(
+    public async Task RetrieveByRegistration(
         [SlashCommandParameter(Name = "registration", Description = "Registration plate")]
         string reg)
     {
@@ -36,7 +36,6 @@ public class MotHistoryCommandModule(IMotService motService, Instrumentation ins
 
     private async Task SendVehicleInformationEmbedAsync(Activity? activity, Result<MoturResponse> result)
     {
-
         if (!result.IsSuccess)
         {
             await Context.Interaction.SendFollowupMessageAsync("An error occurred while retrieving MOT history.");
