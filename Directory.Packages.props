@@ -64,7 +64,7 @@
     <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.421" />
     <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.421" />
     <!-- Testing -->
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.4" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
     <PackageVersion Include="Testcontainers.LocalStack" Version="4.7.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.7.0" />
