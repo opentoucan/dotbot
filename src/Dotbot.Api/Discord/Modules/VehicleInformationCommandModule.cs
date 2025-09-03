@@ -1,6 +1,10 @@
 using System.Diagnostics;
+using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using Ardalis.Result;
 using Dotbot.Api.Dto;
+using Dotbot.Api.Dto.MotApi;
+using Dotbot.Api.Dto.VesApi;
 using Dotbot.Api.Services;
 using NetCord;
 using NetCord.Rest;
@@ -10,17 +14,36 @@ using ServiceDefaults;
 namespace Dotbot.Api.Discord.Modules;
 
 [SlashCommand("vehicle", "Retrieves vehicle information and MOT history")]
-public class VehicleInformationCommandModule(IMotService motService, Instrumentation instrumentation) : ApplicationCommandModule<HttpApplicationCommandContext>
+public class VehicleInformationCommandModule(IMoturService moturService, IVehicleEnquiryService vehicleEnquiryService, IMotHistoryService motHistoryService, Instrumentation instrumentation, ILogger<VehicleInformationCommandModule> logger) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("registration", "Registration plate to search")]
     public async Task RetrieveByRegistration(
         [SlashCommandParameter(Name = "registration", Description = "Registration plate")]
         string reg)
     {
+        var cancellationTokenSource = new CancellationTokenSource();
         using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
-        await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
-        var result = await motService.GetMotByRegistrationPlate(reg);
-        await SendVehicleInformationEmbedAsync(activity, result);
+        await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage(), cancellationToken: cancellationTokenSource.Token);
+        var normalisedRegistrationPlate = Regex.Replace(reg, @"\s+", "").ToUpper();
+        
+        var vehicleRegistrationResult = await vehicleEnquiryService.GetVehicleRegistrationInformation(normalisedRegistrationPlate, cancellationTokenSource.Token);
+        var motHistoryResult = await motHistoryService.GetVehicleMotHistory(normalisedRegistrationPlate, cancellationTokenSource.Token);
+
+        await SendVehicleInformationEmbedAsync(vehicleRegistrationResult, motHistoryResult);
+        
+        var displayName = (Context.Interaction.User as GuildUser)?.Nickname ?? Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
+
+        var tags = new TagList
+        {
+            { "command_name", "vehicle_registration" },
+            { "member_id", Context.Interaction.User.Id },
+            { "member_display_name", displayName }
+        };
+
+        foreach (var tag in tags)
+            activity?.SetTag(tag.Key, tag.Value);
+
+        instrumentation.VehicleRegistrationCounter.Add(1, tags);
     }
 
     [SubSlashCommand("link", "URL of a vehicle advert i.e. autotrader or carandclassic ad")]
@@ -28,71 +51,66 @@ public class VehicleInformationCommandModule(IMotService motService, Instrumenta
         [SlashCommandParameter(Name = "link", Description = "URL")]
         string link)
     {
+        var cancellationTokenSource = new CancellationTokenSource();
         using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
-        await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage());
-        var result = await motService.GetMotByVehicleAdvert(link);
-        await SendVehicleInformationEmbedAsync(activity, result);
+        await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage(), cancellationToken: cancellationTokenSource.Token);
+        try
+        {
+            var registrationPlateResult =
+                await moturService.GetRegistrationPlateByVehicleAdvert(link, cancellationTokenSource.Token);
+            if (!registrationPlateResult.IsSuccess)
+                await Context.Interaction.SendFollowupMessageAsync(
+                    registrationPlateResult.Errors.FirstOrDefault()!,
+                    cancellationToken: cancellationTokenSource.Token);
+
+            var vehicleRegistrationResult =
+                await vehicleEnquiryService.GetVehicleRegistrationInformation(registrationPlateResult.Value,
+                    cancellationTokenSource.Token);
+            var motHistoryResult =
+                await motHistoryService.GetVehicleMotHistory(registrationPlateResult.Value,
+                    cancellationTokenSource.Token);
+
+            await SendVehicleInformationEmbedAsync(vehicleRegistrationResult, motHistoryResult);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to communicate with Motur: {exception}", ex.Message);
+            await Context.Interaction.SendFollowupMessageAsync("An error occurred trying to identify the registration plate", cancellationToken: cancellationTokenSource.Token);
+        }
+
+        var displayName = (Context.Interaction.User as GuildUser)?.Nickname ?? Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
+
+        var tags = new TagList
+        {
+            { "command_name", "vehicle_link" },
+            { "member_id", Context.Interaction.User.Id },
+            { "member_display_name", displayName }
+        };
+
+        foreach (var tag in tags)
+            activity?.SetTag(tag.Key, tag.Value);
+
+        instrumentation.VehicleLinkCounter.Add(1, tags);
     }
 
-    private async Task SendVehicleInformationEmbedAsync(Activity? activity, Result<MoturResponse> result)
+    private async Task SendVehicleInformationEmbedAsync(Result<VesApiResponse> vehicleRegistrationResult, Result<MotApiResponse> motHistoryResult)
     {
-        if (!result.IsSuccess)
+        var embeds = new List<EmbedProperties>();
+        var vehicleSummaryEmbed = VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(vehicleRegistrationResult, motHistoryResult);
+
+        embeds.AddRange(vehicleSummaryEmbed, VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(motHistoryResult));
+
+        var linkButtonComponents = new List<ActionRowProperties>
         {
-            await Context.Interaction.SendFollowupMessageAsync("An error occurred while retrieving MOT history.");
-            instrumentation.ExceptionCounter.Add(1,
-            new KeyValuePair<string, object?>("type", result.Errors.FirstOrDefault()),
-            new KeyValuePair<string, object?>("interaction_name", "mot")
-            );
-        }
-        else
-        {
-            var moturResponse = result.Value;
-            var embeds = new List<EmbedProperties>();
-            var vehicleSummaryEmbed = new EmbedProperties();
-            if (result.Value.MotResponse?.ErrorDetails?.HttpStatusCode != null && result.Value.RegistrationResponse?.ErrorDetails != null)
-            {
-                vehicleSummaryEmbed.WithTitle("Could not retrieve information about this vehicle");
-                if (result.Value.MotResponse?.ErrorDetails?.HttpStatusCode == 404 && (result.Value.RegistrationResponse?.ErrorDetails?.HttpStatusCode == 404 || result.Value.RegistrationResponse?.ErrorDetails?.HttpStatusCode == 400))
-                {
-                    vehicleSummaryEmbed.AddFields(new EmbedFieldProperties().WithName("DVLA").WithValue(moturResponse.RegistrationResponse?.ErrorDetails?.Reason));
-                    vehicleSummaryEmbed.AddFields(new EmbedFieldProperties().WithName("DVSA").WithValue(moturResponse.MotResponse?.ErrorDetails?.Reason));
-                }
-                else
-                {
-                    vehicleSummaryEmbed.AddFields(new EmbedFieldProperties().WithName("This error was unexpected, try again later"));
-                }
-            }
-            else
-            {
-                vehicleSummaryEmbed = VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(moturResponse);
-            }
+            new ActionRowProperties().AddComponents(new LinkButtonProperties(
+                $"https://www.check-mot.service.gov.uk/results?registration={motHistoryResult.Value?.Registration}",
+                label: "Link to full MOT History"))
+        };
+        var interactionResponse = new InteractionMessageProperties().WithEmbeds(embeds);
 
-            embeds.Add(vehicleSummaryEmbed);
-
-            var reg = moturResponse?.RegistrationResponse?.Details?.RegistrationPlate ?? moturResponse?.MotResponse?.Details?.RegistrationPlate;
-            var motTests = moturResponse?.MotResponse?.Details?.MotTests ?? [];
-
-            embeds.Add(VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(motTests));
-
-            var interactionResponse = new InteractionMessageProperties()
-                .WithEmbeds(embeds)
-                .WithComponents([new ActionRowProperties().AddComponents(new LinkButtonProperties($"https://www.check-mot.service.gov.uk/results?registration={reg}", label: "Link to full MOT History"))]);
-            await Context.Interaction.SendFollowupMessageAsync(interactionResponse.WithEmbeds(embeds));
-
-            var displayName = (Context.Interaction.User as GuildUser)?.Nickname ?? Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
-
-            var tags = new TagList
-                {
-                    { "command_name", "mot" },
-                    { "member_id", Context.Interaction.User.Id },
-                    { "member_display_name", displayName }
-                };
-
-            foreach (var tag in tags)
-                activity?.SetTag(tag.Key, tag.Value);
-
-            instrumentation.SavedCustomCommandsCounter.Add(1, tags);
-        }
-
+        if (motHistoryResult.IsSuccess && motHistoryResult.Value != null)
+            interactionResponse.WithComponents(linkButtonComponents);
+        
+        await Context.Interaction.SendFollowupMessageAsync(interactionResponse);
     }
 }

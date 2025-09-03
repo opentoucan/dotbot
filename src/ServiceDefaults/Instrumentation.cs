@@ -17,6 +17,8 @@ public class Instrumentation : IDisposable
     public Counter<long> CustomCommandsDeletedCounter => _meter.CreateCounter<long>($"{MeterName}.deleted.custom.commands", description: "Counts the number of custom commands deleted");
     public Counter<long> XkcdCounter => _meter.CreateCounter<long>($"{MeterName}.xkcd", description: "Counts the number of XKCD comics fetched");
     public Counter<long> AvatarCounter => _meter.CreateCounter<long>($"{MeterName}.avatar", description: "Counts the number of avatar requests");
+    public Counter<long> VehicleRegistrationCounter => _meter.CreateCounter<long>($"{MeterName}.vehicle.registration", description: "Counts the number of vehicle details fetched by registration");
+    public Counter<long> VehicleLinkCounter => _meter.CreateCounter<long>($"{MeterName}.vehicle.link", description: "Counts the number of vehicle details fetched by advert url");
     public Counter<long> ExceptionCounter = _meter.CreateCounter<long>($"{MeterName}.exceptions", description: "Total exceptions thrown");
 
     public void Dispose()

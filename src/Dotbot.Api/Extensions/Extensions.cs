@@ -1,6 +1,7 @@
 using Dotbot.Api.Application.Queries;
 using Dotbot.Api.Queries;
 using Dotbot.Api.Services;
+using Dotbot.Api.Settings;
 using Dotbot.Infrastructure.Extensions;
 using Dotbot.Infrastructure.Repositories;
 using ServiceDefaults;
@@ -12,7 +13,8 @@ public static partial class Extensions
     public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
         builder.ConfigureXkcd();
-        builder.ConfigureMot();
+        builder.ConfigureVehicleService();
+        builder.ConfigureMoturService();
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IGuildRepository, GuildRepository>();
         builder.Services.AddScoped<IGuildQueries, GuildQueries>();
@@ -33,21 +35,41 @@ public static partial class Extensions
         return builder;
     }
 
-    public static IHostApplicationBuilder ConfigureMot(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder ConfigureVehicleService(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddHttpClient<IMotService, MotService>(client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("MotUrl")!);
-                client.Timeout = Timeout.InfiniteTimeSpan;
-            })
-            .AddStandardResilienceHandler(options =>
-            {
-                var timeSpan = TimeSpan.FromSeconds(30);
-                options.AttemptTimeout.Timeout = timeSpan;
-                options.CircuitBreaker.SamplingDuration = timeSpan * 2;
-                options.TotalRequestTimeout.Timeout = timeSpan * 3;
-            });
+        var vehicleEnquirySection = builder.Configuration.GetSection("VehicleEnquiry");
+        var vehicleEnquirySettings = vehicleEnquirySection.Get<VehicleEnquirySettings>();
+        builder.Services.AddOptions<VehicleEnquirySettings>().Bind(vehicleEnquirySection);
 
+        var motHistorySection = builder.Configuration.GetSection("MotHistory");
+        var motHistorySettings = motHistorySection.Get<MotHistorySettings>();
+        builder.Services.AddOptions<MotHistorySettings>().Bind(motHistorySection);
+        
+        builder.Services.AddHttpClient<IVehicleEnquiryService, VehicleEnquiryEnquiryService>(client => 
+            {
+                client.BaseAddress = new Uri(vehicleEnquirySettings!.Url);
+                client.DefaultRequestHeaders.Add("x-api-key", vehicleEnquirySettings.ApiKey);
+            })
+            .AddStandardResilienceHandler();
+        
+        builder.Services.AddHttpClient<IMotHistoryService, MotHistoryService>(client => 
+            {
+                client.BaseAddress = new Uri(motHistorySettings!.Url);
+                client.DefaultRequestHeaders.Add("X-Api-Key", motHistorySettings.ApiKey);
+            })
+            .AddStandardResilienceHandler();
+        
+        return builder;
+    }
+    
+    public static IHostApplicationBuilder ConfigureMoturService(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddHttpClient<IMoturService, MoturService>(client => 
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("MoturUrl")!);
+            })
+            .AddStandardResilienceHandler();
+        
         return builder;
     }
 }
