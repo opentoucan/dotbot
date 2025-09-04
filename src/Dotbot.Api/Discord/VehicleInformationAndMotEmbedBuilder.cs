@@ -17,14 +17,14 @@ public static class VehicleInformationAndMotEmbedBuilder
     public static EmbedProperties BuildVehicleInformationEmbed(Result<VesApiResponse> vesApiResponse, Result<MotApiResponse> motApiResponse)
     {
         var embed = new EmbedProperties();
-        
+
         if (!vesApiResponse.IsSuccess || vesApiResponse.Value == null)
         {
             embed.WithTitle("Failed to retrieve vehicle information");
             embed.WithDescription(string.Join("\n", vesApiResponse.Errors));
             return embed;
         }
-        
+
         var vehicleRegistrationData = vesApiResponse.Value!;
         var registrationPlate = vehicleRegistrationData.RegistrationNumber;
         var make = vehicleRegistrationData.Make ?? "Unknown";
@@ -36,7 +36,7 @@ public static class VehicleInformationAndMotEmbedBuilder
         var engineSize = hasEngineSize ? $"{decimal.Round((engineSizeDecimal) / 1000, 1)}L" : "Unknown";
         var fuelType = vehicleRegistrationData.FuelType?.ToLower() ?? motApiResponse.Value?.FuelType ?? "Unknown";
         var manufactureDate = motApiResponse.Value?.ManufactureDate?.ToShortDateString() ?? vehicleRegistrationData.YearOfManufacture?.ToString();
-        
+
         embed.WithTitle("Vehicle Information");
 
         Color embedColour;
@@ -94,9 +94,9 @@ public static class VehicleInformationAndMotEmbedBuilder
     {
         if (!motApiResponse.IsSuccess || motApiResponse.Value == null)
         {
-            return new  EmbedProperties().WithTitle("Failed to retrieve MOT information").WithDescription(string.Join("\n", motApiResponse.Errors));
+            return new EmbedProperties().WithTitle("Failed to retrieve MOT information").WithDescription(string.Join("\n", motApiResponse.Errors));
         }
-        
+
         var motTests = motApiResponse.Value.MotTests.OrderByDescending(x => x.CompletedDate).ToList();
 
         var embed = new EmbedProperties();

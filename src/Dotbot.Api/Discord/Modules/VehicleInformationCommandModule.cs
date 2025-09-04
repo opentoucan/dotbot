@@ -25,12 +25,12 @@ public class VehicleInformationCommandModule(IMoturService moturService, IVehicl
         using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage(), cancellationToken: cancellationTokenSource.Token);
         var normalisedRegistrationPlate = Regex.Replace(reg, @"\s+", "").ToUpper();
-        
+
         var vehicleRegistrationResult = await vehicleEnquiryService.GetVehicleRegistrationInformation(normalisedRegistrationPlate, cancellationTokenSource.Token);
         var motHistoryResult = await motHistoryService.GetVehicleMotHistory(normalisedRegistrationPlate, cancellationTokenSource.Token);
 
         await SendVehicleInformationEmbedAsync(vehicleRegistrationResult, motHistoryResult);
-        
+
         var displayName = (Context.Interaction.User as GuildUser)?.Nickname ?? Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
 
         var tags = new TagList
@@ -110,7 +110,7 @@ public class VehicleInformationCommandModule(IMoturService moturService, IVehicl
 
         if (motHistoryResult.IsSuccess && motHistoryResult.Value != null)
             interactionResponse.WithComponents(linkButtonComponents);
-        
+
         await Context.Interaction.SendFollowupMessageAsync(interactionResponse);
     }
 }

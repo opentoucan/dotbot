@@ -17,7 +17,7 @@ public class VesApiResponse
     public string? MotStatus { get; set; }
     public DateTime? MotExpiryDate { get; set; }
     public string? Make { get; set; }
-    public string ? MonthOfFirstDvlaRegistration { get; set; }
+    public string? MonthOfFirstDvlaRegistration { get; set; }
     public int? YearOfManufacture { get; set; }
     public int? EngineCapacity { get; set; }
     public int? Co2Emissions { get; set; }
@@ -31,4 +31,3 @@ public class VesApiResponse
     public bool? AutomatedVehicle { get; set; }
     public List<Errors> Errors { get; set; } = [];
 }
-

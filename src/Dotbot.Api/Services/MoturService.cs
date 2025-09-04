@@ -20,7 +20,7 @@ public class MoturService(HttpClient httpClient, ILogger<MoturService> logger) :
         {
             var httpResponse = await httpClient.PostAsync(moturEndpoint, new StringContent(JsonSerializer.Serialize(new MoturLinkRequest(advertUrl), options: SReadOptions), Encoding.UTF8, "application/json"), cancellationToken);
             var registrationPlate = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
-            if(!string.IsNullOrWhiteSpace(registrationPlate))
+            if (!string.IsNullOrWhiteSpace(registrationPlate))
                 return Result<string>.Success(registrationPlate);
             return Result.Error("Failed identify the registration plate in the advert");
         }
@@ -30,7 +30,7 @@ public class MoturService(HttpClient httpClient, ILogger<MoturService> logger) :
             return Result.Error("Could not recognise registration plate from the advert");
         }
     }
-    
+
     private static readonly JsonSerializerOptions SReadOptions = new()
     {
         PropertyNameCaseInsensitive = true,

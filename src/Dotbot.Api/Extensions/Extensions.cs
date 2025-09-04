@@ -44,32 +44,32 @@ public static partial class Extensions
         var motHistorySection = builder.Configuration.GetSection("MotHistory");
         var motHistorySettings = motHistorySection.Get<MotHistorySettings>();
         builder.Services.AddOptions<MotHistorySettings>().Bind(motHistorySection);
-        
-        builder.Services.AddHttpClient<IVehicleEnquiryService, VehicleEnquiryEnquiryService>(client => 
+
+        builder.Services.AddHttpClient<IVehicleEnquiryService, VehicleEnquiryEnquiryService>(client =>
             {
                 client.BaseAddress = new Uri(vehicleEnquirySettings!.Url);
                 client.DefaultRequestHeaders.Add("x-api-key", vehicleEnquirySettings.ApiKey);
             })
             .AddStandardResilienceHandler();
-        
-        builder.Services.AddHttpClient<IMotHistoryService, MotHistoryService>(client => 
+
+        builder.Services.AddHttpClient<IMotHistoryService, MotHistoryService>(client =>
             {
                 client.BaseAddress = new Uri(motHistorySettings!.Url);
                 client.DefaultRequestHeaders.Add("X-Api-Key", motHistorySettings.ApiKey);
             })
             .AddStandardResilienceHandler();
-        
+
         return builder;
     }
-    
+
     public static IHostApplicationBuilder ConfigureMoturService(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddHttpClient<IMoturService, MoturService>(client => 
+        builder.Services.AddHttpClient<IMoturService, MoturService>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("MoturUrl")!);
             })
             .AddStandardResilienceHandler();
-        
+
         return builder;
     }
 }

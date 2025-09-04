@@ -30,11 +30,11 @@ public class MotHistoryService(HttpClient httpClient, ILogger<MotHistoryService>
                 .Build();
 
             var token = await application.AcquireTokenForClient(["https://tapi.dvsa.gov.uk/.default"]).ExecuteAsync(cancellationToken);
-            
+
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
             var httpResponse = await httpClient.GetAsync(motEndpoint, cancellationToken);
             var motResponse = await JsonSerializer.DeserializeAsync<MotApiResponse>(await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken: cancellationToken);
-            if(httpResponse.IsSuccessStatusCode)
+            if (httpResponse.IsSuccessStatusCode)
                 return Result<MotApiResponse>.Success(motResponse!);
             return Result<MotApiResponse>.Error($"{motResponse?.ErrorCode} - {motResponse?.ErrorMessage}");
         }
@@ -45,7 +45,7 @@ public class MotHistoryService(HttpClient httpClient, ILogger<MotHistoryService>
 
         return Result.Error($"An error occurred when retrieving MOT history for registration: {registrationPlate}");
     }
-    
+
     private static readonly JsonSerializerOptions SReadOptions = new()
     {
         PropertyNameCaseInsensitive = true,
