@@ -1,9 +1,7 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using Ardalis.Result;
-using Dotbot.Api.Dto;
 using Dotbot.Api.Dto.MotApi;
 using Dotbot.Api.Settings;
 using Microsoft.Extensions.Options;
@@ -13,12 +11,24 @@ namespace Dotbot.Api.Services;
 
 public interface IMotHistoryService
 {
-    Task<Result<MotApiResponse>> GetVehicleMotHistory(string registrationPlate, CancellationToken cancellationToken = default);
+    Task<ServiceResult<MotApiResponse>> GetVehicleMotHistory(string registrationPlate,
+        CancellationToken cancellationToken = default);
 }
 
-public class MotHistoryService(HttpClient httpClient, ILogger<MotHistoryService> logger, IOptions<MotHistorySettings> motHistorySettings) : IMotHistoryService
+public class MotHistoryService(
+    HttpClient httpClient,
+    ILogger<MotHistoryService> logger,
+    IOptions<MotHistorySettings> motHistorySettings) : IMotHistoryService
 {
-    public async Task<Result<MotApiResponse>> GetVehicleMotHistory(string registrationPlate, CancellationToken cancellationToken = default)
+    private static readonly JsonSerializerOptions SReadOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString
+    };
+
+    public async Task<ServiceResult<MotApiResponse>> GetVehicleMotHistory(string registrationPlate,
+        CancellationToken cancellationToken = default)
     {
         var motEndpoint = $"/v1/trade/vehicles/registration/{registrationPlate}";
         try
@@ -29,27 +39,40 @@ public class MotHistoryService(HttpClient httpClient, ILogger<MotHistoryService>
                 .WithClientSecret(motHistorySettings.Value.ClientSecret)
                 .Build();
 
-            var token = await application.AcquireTokenForClient(["https://tapi.dvsa.gov.uk/.default"]).ExecuteAsync(cancellationToken);
+            var token = await application.AcquireTokenForClient(["https://tapi.dvsa.gov.uk/.default"])
+                .ExecuteAsync(cancellationToken);
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
             var httpResponse = await httpClient.GetAsync(motEndpoint, cancellationToken);
-            var motResponse = await JsonSerializer.DeserializeAsync<MotApiResponse>(await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken: cancellationToken);
+
             if (httpResponse.IsSuccessStatusCode)
-                return Result<MotApiResponse>.Success(motResponse!);
-            return Result<MotApiResponse>.Error($"{motResponse?.ErrorCode} - {motResponse?.ErrorMessage}");
+            {
+                var motResponse = await JsonSerializer.DeserializeAsync<MotApiResponse>(
+                    await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken);
+                return ServiceResult<MotApiResponse>.Success(motResponse!);
+            }
+
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                logger.LogInformation("Failed to retrieve MOT information for the vehicle: {registrationPlate}",
+                    registrationPlate);
+
+                return ServiceResult<MotApiResponse>.Error(HttpStatusCode.NotFound,
+                    $"MOT information not found for the vehicle: {registrationPlate}");
+            }
+
+            logger.LogWarning(
+                "Failed to fetch MOT history from endpoint: {moturEndpoint}/{registrationPlate} with response: {response}",
+                motEndpoint, registrationPlate, httpResponse.StatusCode);
+
+            return ServiceResult<MotApiResponse>.Error(httpResponse.StatusCode,
+                $"Something went wrong retrieving the MOT history for the vehicle: {registrationPlate}");
         }
         catch (Exception ex)
         {
-            logger.LogError("Failed to fetch MOT history from endpoint: {moturEndpoint}/{registrationPlate} with error: {exception}", motEndpoint, registrationPlate, ex);
+            logger.LogError(ex, "Unhandled error occurred when retrieving a response from the MOT History API");
+            return ServiceResult<MotApiResponse>.Error(ex,
+                $"Something went wrong retrieving the MOT history for the vehicle: {registrationPlate}");
         }
-
-        return Result.Error($"An error occurred when retrieving MOT history for registration: {registrationPlate}");
     }
-
-    private static readonly JsonSerializerOptions SReadOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
 }

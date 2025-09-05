@@ -8,7 +8,7 @@ using ServiceDefaults;
 
 namespace Dotbot.Api.Extensions;
 
-public static partial class Extensions
+public static class Extensions
 {
     public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
@@ -27,10 +27,10 @@ public static partial class Extensions
     public static IHostApplicationBuilder ConfigureXkcd(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHttpClient<IXkcdService, XkcdService>(client =>
-        {
-            client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
-        })
-        .AddStandardResilienceHandler();
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("XkcdUrl")!);
+            })
+            .AddStandardResilienceHandler();
 
         return builder;
     }
