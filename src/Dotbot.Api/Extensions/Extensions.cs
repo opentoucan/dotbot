@@ -59,6 +59,8 @@ public static class Extensions
             })
             .AddStandardResilienceHandler();
 
+        builder.Services.AddScoped<IMotHistoryAuthenticationProvider, MotHistoryAuthenticationProvider>();
+
         return builder;
     }
 

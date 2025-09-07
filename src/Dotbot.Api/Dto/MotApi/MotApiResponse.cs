@@ -1,50 +1,7 @@
-using System.Text.Json.Serialization;
-
 namespace Dotbot.Api.Dto.MotApi;
 
 public class MotApiResponse
 {
-    public class MotTest
-    {
-        public class Defect
-        {
-            public enum DefectType
-            {
-                [JsonStringEnumMemberName("DANGEROUS")]
-                DANGEROUS = 0,
-                [JsonStringEnumMemberName("MAJOR")]
-                MAJOR = 1,
-                [JsonStringEnumMemberName("MINOR")]
-                MINOR = 2,
-                [JsonStringEnumMemberName("FAIL")]
-                FAIL = 3,
-                [JsonStringEnumMemberName("ADVISORY")]
-                ADVISORY = 4,
-                [JsonStringEnumMemberName("NON SPECIFIC")]
-                NONSPECIFIC = 5,
-                [JsonStringEnumMemberName("SYSTEM GENERATED")]
-                SYSTEMGENERATED = 6,
-                [JsonStringEnumMemberName("USER ENTERED")]
-                USERENTERED = 7,
-                [JsonStringEnumMemberName("PRS")]
-                PRS = 8
-            }
-            public bool? Dangerous { get; set; }
-            public string? Text { get; set; }
-            [JsonConverter(typeof(JsonStringEnumConverter<DefectType>))]
-            public DefectType? Type { get; set; }
-        }
-        public DateTime? CompletedDate { get; set; }
-        public string? TestResult { get; set; }
-        public string? OdometerResultType { get; set; }
-        public string? DataSource { get; set; }
-        public string? RegistrationAtTimeOfTest { get; set; }
-        public DateTime? ExpiryDate { get; set; }
-        public string? OdometerValue { get; set; }
-        public string? OdometerUnit { get; set; }
-        public string? MotTestNumber { get; set; }
-        public required List<Defect> Defects { get; set; }
-    }
     public string? Registration { get; set; }
     public string? Make { get; set; }
     public string? Model { get; set; }
@@ -58,4 +15,25 @@ public class MotApiResponse
     public string? ErrorCode { get; set; }
     public string? ErrorMessage { get; set; }
     public string? RequestId { get; set; }
+
+    public class MotTest
+    {
+        public DateTime? CompletedDate { get; set; }
+        public string? TestResult { get; set; }
+        public string? OdometerResultType { get; set; }
+        public string? DataSource { get; set; }
+        public string? RegistrationAtTimeOfTest { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public string? OdometerValue { get; set; }
+        public string? OdometerUnit { get; set; }
+        public string? MotTestNumber { get; set; }
+        public required List<Defect> Defects { get; set; }
+
+        public class Defect
+        {
+            public bool? Dangerous { get; set; }
+            public string? Text { get; set; }
+            public string? Type { get; set; }
+        }
+    }
 }

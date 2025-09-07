@@ -6,7 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- ASP.NET Packages -->
-    <PackageVersion Include="Ardalis.Result.AspNetCore" Version="10.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.8" />
@@ -41,7 +40,6 @@
     <PackageVersion Include="Grpc.Tools" Version="2.72.0" PrivateAssets="All" />
     <PackageVersion Include="Google.Protobuf" Version="3.32.0" />
     <!-- Miscellaneous -->
-    <PackageVersion Include="Ardalis.Result" Version="10.1.0" />
     <PackageVersion Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <PackageVersion Include="libsodium" Version="1.0.20.1" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
