@@ -48,14 +48,21 @@ public static class VehicleInformationAndMotEmbedBuilder
 
         embed.AddFields(new EmbedFieldProperties().WithName("MOT Status").WithValue(motStatusText).WithInline());
 
-        if (vehicleInformation.MotStatus.ValidUntil.HasValue)
-            embed.AddFields(new EmbedFieldProperties().WithName("MOT Valid Until")
+        if (vehicleInformation.MotStatus.ValidUntil.HasValue &&
+            DateTime.UtcNow < vehicleInformation.MotStatus.ValidUntil.Value)
+            embed.AddFields(new EmbedFieldProperties().WithName("MOT Due Date")
                 .WithValue(vehicleInformation.MotStatus.ValidUntil.Value.ToShortDateString()).WithInline());
 
         embed.AddFields(new EmbedFieldProperties().WithName("Tax Status")
             .WithValue(vehicleInformation.TaxStatus.IsExempt
                 ? "Exempt"
-                : vehicleInformation.TaxStatus.DvlaTaxStatusText).WithInline());
+                : vehicleInformation.TaxStatus.DvlaTaxStatusText)
+            .WithInline());
+
+        if (vehicleInformation.TaxStatus.TaxDueDate.HasValue)
+            embed.AddFields(new EmbedFieldProperties().WithName("Tax Due Date")
+                .WithValue(vehicleInformation.TaxStatus.TaxDueDate.GetValueOrDefault().ToShortDateString())
+                .WithInline());
 
         if (vehicleInformation.LastIssuedV5CDate.HasValue)
             embed.AddFields(new EmbedFieldProperties().WithName("Last Issued V5C Date")
@@ -129,7 +136,9 @@ public static class VehicleInformationAndMotEmbedBuilder
         var motTests = vehicleInformation.VehicleMotTests.OrderByDescending(x => x.CompletedDate).ToList();
         var latestMot = motTests.FirstOrDefault();
         var embed = new EmbedProperties();
-        var embedColour = latestMot?.Result == MotTestResult.PASSED && latestMot.Defects.Count == 0 ? Green :
+        var embedColour =
+            latestMot?.Result == MotTestResult.PASSED && latestMot.Defects.Count == 0 &&
+            vehicleInformation.MotStatus.IsValid ? Green :
             latestMot?.Result == MotTestResult.PASSED ? Orange : Red;
         embed.WithColor(embedColour);
         embed.WithTitle("MOT Information");

@@ -132,7 +132,7 @@ public class VehicleInformationCommandModule(
             vehicleRegistrationResult.Value?.MotStatus,
             motHistoryResult.Value?.MotTestDueDate,
             motHistoryResult.Value?.MotTests.Where(x => x.TestResult == "PASSED")
-                .OrderByDescending(x => x.CompletedDate).FirstOrDefault()?.CompletedDate,
+                .OrderByDescending(x => x.CompletedDate).FirstOrDefault()?.ExpiryDate,
             vehicleRegistrationResult.Value?.TaxStatus,
             vehicleRegistrationResult.Value?.TaxDueDate,
             !string.IsNullOrWhiteSpace(vehicleRegistrationResult.Value?.MonthOfFirstDvlaRegistration)

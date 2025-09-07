@@ -6,7 +6,7 @@ public class VehicleInformation
         bool potentiallyScrapped,
         string? make, string? model, string? colour,
         string? fuelType,
-        string? dvlaMotStatus, DateTime? firstMotDueDate, DateTime? lastMotPassDate,
+        string? dvlaMotStatus, DateTime? firstMotDueDate, DateTime? latestMotExpiryDate,
         string? taxStatus,
         DateTime? taxDueDate,
         DateTime? vehicleRegistrationDate, string? engineCapacity, int? weightInKg, int? co2InGramPerKilometer,
@@ -25,7 +25,7 @@ public class VehicleInformation
             FuelType = FuelType.Diesel;
         else
             FuelType = FuelType.Unknown;
-        MotStatus = new MotStatus(dvlaMotStatus, firstMotDueDate, lastMotPassDate, vehicleRegistrationDate);
+        MotStatus = new MotStatus(dvlaMotStatus, firstMotDueDate, latestMotExpiryDate, vehicleRegistrationDate);
         TaxStatus = new TaxStatus(taxStatus ?? "Unknown", taxDueDate, vehicleRegistrationDate);
         WeightInKg = weightInKg;
         RegistrationDate = vehicleRegistrationDate;
@@ -73,10 +73,10 @@ public enum FuelType
 
 public class MotStatus
 {
-    public MotStatus(string? dvlaMotStatus, DateTime? firstMotDueDate, DateTime? lastMotPassDate,
+    public MotStatus(string? dvlaMotStatus, DateTime? firstMotDueDate, DateTime? latestMotExpiryDate,
         DateTime? vehicleRegistrationDate)
     {
-        ValidUntil = firstMotDueDate ?? lastMotPassDate;
+        ValidUntil = firstMotDueDate ?? latestMotExpiryDate;
         var vehicleAge = vehicleRegistrationDate - DateTime.UtcNow;
         if ((dvlaMotStatus != null && dvlaMotStatus.Equals("valid", StringComparison.InvariantCultureIgnoreCase)) ||
             ValidUntil > DateTime.Now)
@@ -102,8 +102,11 @@ public class TaxStatus
         DvlaTaxStatusText = taxStatus;
         TaxDueDate = taxDueDate;
         var vehicleAge = vehicleRegistrationDate - DateTime.UtcNow;
-        if (DvlaTaxStatusText.Equals("taxed", StringComparison.InvariantCultureIgnoreCase) ||
-            vehicleAge?.TotalDays / 365.2425 >= 40)
+        if (DvlaTaxStatusText.Equals("taxed", StringComparison.InvariantCultureIgnoreCase))
+        {
+            IsValid = true;
+        }
+        else if (vehicleAge?.TotalDays / 365.2425 >= 40)
         {
             IsValid = true;
             IsExempt = true;
