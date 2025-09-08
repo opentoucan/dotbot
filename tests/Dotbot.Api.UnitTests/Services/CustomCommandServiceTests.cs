@@ -180,7 +180,7 @@ public class CustomCommandServiceTests
             .GetObjectAsync(Arg.Is<GetObjectRequest>(x => x.BucketName == fileBucketName && x.Key == fileName),
                 Arg.Any<CancellationToken>())
             .Returns(new GetObjectResponse
-                { ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName });
+            { ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName });
 
         var sut = new CustomCommandService(LoggerMock, _guildQueries, FileUploadService, DiscordSettings,
             GuildRepositoryMock, _httpClient);
@@ -204,7 +204,7 @@ public class CustomCommandServiceTests
             .GetObjectAsync(Arg.Is<GetObjectRequest>(x => x.BucketName == fileBucketName && x.Key == fileName),
                 Arg.Any<CancellationToken>())
             .Returns(new GetObjectResponse
-                { ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName });
+            { ResponseStream = new MemoryStream(), Key = fileName, BucketName = fileBucketName });
 
         var sut = new CustomCommandService(LoggerMock, _guildQueries, FileUploadService, DiscordSettings,
             GuildRepositoryMock, _httpClient);
