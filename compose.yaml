@@ -51,8 +51,11 @@ services:
     container_name: ngrok
     image: docker.io/ngrok/ngrok:3-debian
     env_file: .env
-    command: 'http 127.0.0.1:8080'
-    network_mode: host
+    command: 'http host.docker.internal:8080'
+    ports:
+        - '4040:4040'
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -71,6 +74,8 @@ services:
         target: /etc/prometheus/prometheus.yml
     ports:
       - '9090:9090'
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
 configs:
   grafana.yaml:
     content: |
@@ -96,7 +101,7 @@ configs:
       - job_name: prometheus
         static_configs:
           - targets:
-            - localhost:8080
+            - host.docker.internal:8080
   motur.yaml:
     content: |
         enabled_sites:
@@ -105,11 +110,6 @@ configs:
             - www.pistonheads.com
             - www.facebook.com
             - www.gumtree.com
-        redis:
-            host: dragonfly
-            port: 6379
-            ttl: 300
-            password: local
         scraper:
             chrome_binary_location: /usr/bin/chromium
             disable_sandbox: True
