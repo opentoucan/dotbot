@@ -12,7 +12,7 @@ using ServiceDefaults;
 namespace Dotbot.Api.Discord.Modules;
 
 [SlashCommand("vehicle", "Retrieves vehicle information and MOT history")]
-public class VehicleInformationCommandModule(
+public partial class VehicleInformationCommandModule(
     IMoturService moturService,
     IVehicleEnquiryService vehicleEnquiryService,
     IMotHistoryService motHistoryService,
@@ -27,7 +27,7 @@ public class VehicleInformationCommandModule(
         using var activity = Instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage(),
             cancellationToken: cancellationTokenSource.Token);
-        var normalisedRegistrationPlate = Regex.Replace(reg, @"\s+", "").ToUpper();
+        var normalisedRegistrationPlate = AllWhitespaceRegex().Replace(reg, "").ToUpper();
 
         await RetrieveAndPostVehicleData(normalisedRegistrationPlate, activity, "vehicle_registration",
             cancellationTokenSource.Token);
@@ -187,4 +187,7 @@ public class VehicleInformationCommandModule(
 
         Instrumentation.VehicleRegistrationCounter.Add(1, tags);
     }
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex AllWhitespaceRegex();
 }

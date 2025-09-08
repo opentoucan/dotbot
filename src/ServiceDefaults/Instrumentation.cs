@@ -8,7 +8,7 @@ public class Instrumentation : IDisposable
     internal const string ActivitySourceName = "dotbot";
     internal const string MeterName = "dotbot";
 
-    public static Counter<long> ExceptionCounter =
+    public static Counter<long> ExceptionCounter =>
         Meter.CreateCounter<long>($"{MeterName}.exceptions", description: "Total exceptions thrown");
 
     public static ActivitySource ActivitySource => new(ActivitySourceName);
