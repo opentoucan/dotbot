@@ -12,9 +12,11 @@ public static class AvatarSlashCommands
         Instrumentation instrumentation,
         HttpApplicationCommandContext context,
         GuildUser user,
-        [SlashCommandParameter(Name = "global", Description = "Optional flag if you want the user's global avatar instead of the server")] bool globalAvatar = false)
+        [SlashCommandParameter(Name = "global",
+            Description = "Optional flag if you want the user's global avatar instead of the server")]
+        bool globalAvatar = false)
     {
-        using var activity = instrumentation.ActivitySource.StartActivity("AvatarCommand", ActivityKind.Client);
+        using var activity = Instrumentation.ActivitySource.StartActivity("AvatarCommand", ActivityKind.Client);
         var userAvatarUrl = user.GetAvatarUrl();
         var guildAvatarUrl = user.GetGuildAvatarUrl();
 
@@ -31,7 +33,7 @@ public static class AvatarSlashCommands
 
         foreach (var tag in tags)
             activity?.SetTag(tag.Key, tag.Value);
-        instrumentation.AvatarCounter.Add(1, tags);
+        Instrumentation.AvatarCounter.Add(1, tags);
 
         var embed = new EmbedProperties()
             .WithTitle("Avatar")
