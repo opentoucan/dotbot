@@ -1,7 +1,6 @@
 using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Dotbot.Api.Application.Queries;
 using Dotbot.Api.Queries;
 using Dotbot.Api.Services;
 using Dotbot.Api.Settings;

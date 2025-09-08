@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using Dotbot.Api.Discord.HostedServices;
 using Dotbot.Api.Discord.SlashCommandApis;
-using Dotbot.Api.Services;
 using Dotbot.Api.Settings;
 using Microsoft.Extensions.Options;
 using NetCord;
@@ -18,6 +17,7 @@ namespace Dotbot.Api.Discord.Extensions;
 public static class Extensions
 {
     private const string InteractionEndpoint = "/interactions";
+
     public static IHostApplicationBuilder ConfigureDiscordServices(this IHostApplicationBuilder builder)
     {
         var section = builder.Configuration.GetSection("Discord");
@@ -34,9 +34,7 @@ public static class Extensions
             .AddHttpComponentInteractions();
 
         if (builder.Environment.EnvironmentName == "local")
-        {
             builder.Services.AddHostedService<DiscordHttpInteractionSetupService>();
-        }
 
         return builder;
     }
@@ -70,12 +68,15 @@ public static class Extensions
             var publicUrl = jsonNode?["tunnels"]?[0]?["public_url"]?.GetValue<string?>();
 
             if (!response.IsSuccessStatusCode || string.IsNullOrEmpty(publicUrl))
-                throw new Exception($"Ngrok failed to return a public url ({response.StatusCode}: {response.ReasonPhrase}). Is ngrok running?");
+                throw new Exception(
+                    $"Ngrok failed to return a public url ({response.StatusCode}: {response.ReasonPhrase}). Is ngrok running?");
 
             logger.LogInformation("Ngrok API returned: {publicUrl}", publicUrl);
 
             var interactionsEndpointUrl = $"{publicUrl}{InteractionEndpoint}";
-            var discordInteractionPatch = new JsonObject([KeyValuePair.Create<string, JsonNode?>("interactions_endpoint_url", interactionsEndpointUrl)]);
+            var discordInteractionPatch = new JsonObject([
+                KeyValuePair.Create<string, JsonNode?>("interactions_endpoint_url", interactionsEndpointUrl)
+            ]);
 
             var content = JsonContent.Create(discordInteractionPatch);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -84,10 +85,12 @@ public static class Extensions
 
             logger.LogInformation("Updating Discord bot endpoint with: {interactionEndpoint}", interactionsEndpointUrl);
 
-            var discordApiResponse = await httpClient.PatchAsync("https://discord.com/api/applications/@me", content, cancellationToken);
+            var discordApiResponse =
+                await httpClient.PatchAsync("https://discord.com/api/applications/@me", content, cancellationToken);
 
             if (!discordApiResponse.IsSuccessStatusCode)
-                throw new Exception($"Failed to update Discord bot interaction endpoint ({response.StatusCode}: {response.ReasonPhrase}). Is the endpoint publicly accessible and is the token valid?");
+                throw new Exception(
+                    $"Failed to update Discord bot interaction endpoint ({response.StatusCode}: {response.ReasonPhrase}). Is the endpoint publicly accessible and is the token valid?");
 
             logger.LogInformation("Successfully updated the discord bot interaction endpoint");
         }

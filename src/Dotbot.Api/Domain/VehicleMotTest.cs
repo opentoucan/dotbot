@@ -37,7 +37,7 @@ public class VehicleMotTest
     public int? OdometerReadingInMiles { get; private set; }
     public OdometerResult OdometerReadResult { get; private set; }
     public string? TestNumber { get; private set; }
-    public List<Defect> Defects { get; } = new();
+    public List<Defect> Defects { get; } = [];
 
     public void AddDefect(string? defectType, string? defectText, bool? isDangerous)
     {

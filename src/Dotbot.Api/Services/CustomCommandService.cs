@@ -1,4 +1,4 @@
-using Dotbot.Api.Application.Queries;
+using Dotbot.Api.Queries;
 using Dotbot.Api.Settings;
 using Dotbot.Infrastructure.Repositories;
 using Microsoft.Extensions.Options;

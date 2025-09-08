@@ -16,7 +16,6 @@ public class VehicleInformationCommandModule(
     IMoturService moturService,
     IVehicleEnquiryService vehicleEnquiryService,
     IMotHistoryService motHistoryService,
-    Instrumentation instrumentation,
     ILogger<VehicleInformationCommandModule> logger) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("registration", "Registration plate to search")]
@@ -25,7 +24,7 @@ public class VehicleInformationCommandModule(
         string reg)
     {
         var cancellationTokenSource = new CancellationTokenSource();
-        using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
+        using var activity = Instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage(),
             cancellationToken: cancellationTokenSource.Token);
         var normalisedRegistrationPlate = Regex.Replace(reg, @"\s+", "").ToUpper();
@@ -40,7 +39,7 @@ public class VehicleInformationCommandModule(
         string link)
     {
         var cancellationTokenSource = new CancellationTokenSource();
-        using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
+        using var activity = Instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
         await Context.Interaction.SendResponseAsync(InteractionCallback.DeferredMessage(),
             cancellationToken: cancellationTokenSource.Token);
         try
@@ -92,7 +91,7 @@ public class VehicleInformationCommandModule(
 
             tags.Add(new KeyValuePair<string, object?>("type", ex.GetType().Name));
             tags.Add(new KeyValuePair<string, object?>("interaction_name", commandName));
-            instrumentation.ExceptionCounter.Add(1, tags);
+            Instrumentation.ExceptionCounter.Add(1, tags);
         }
 
         try
@@ -104,7 +103,7 @@ public class VehicleInformationCommandModule(
             logger.LogError(ex, "Unhandled error occurred when retrieving a response from the MOT History API");
             tags.Add(new KeyValuePair<string, object?>("type", ex.GetType().Name));
             tags.Add(new KeyValuePair<string, object?>("interaction_name", commandName));
-            instrumentation.ExceptionCounter.Add(1, tags);
+            Instrumentation.ExceptionCounter.Add(1, tags);
         }
 
         VehicleInformation vehicleInformation;
@@ -186,6 +185,6 @@ public class VehicleInformationCommandModule(
         foreach (var tag in tags)
             activity?.SetTag(tag.Key, tag.Value);
 
-        instrumentation.VehicleRegistrationCounter.Add(1, tags);
+        Instrumentation.VehicleRegistrationCounter.Add(1, tags);
     }
 }

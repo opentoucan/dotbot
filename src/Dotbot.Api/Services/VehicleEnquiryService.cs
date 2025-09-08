@@ -14,8 +14,7 @@ public interface IVehicleEnquiryService
 
 public class VehicleEnquiryEnquiryService(
     HttpClient httpClient,
-    ILogger<VehicleEnquiryEnquiryService> logger,
-    Instrumentation instrumentation)
+    ILogger<VehicleEnquiryEnquiryService> logger)
     : IVehicleEnquiryService
 {
     private static readonly JsonSerializerOptions SReadOptions = new()
@@ -48,7 +47,7 @@ public class VehicleEnquiryEnquiryService(
             "Failed to fetch vehicle registration data from endpoint: {baseAddress}/{vesApiEndpoint}/{registrationPlate} with response: {response}",
             httpClient.BaseAddress?.Host, vesApiEndpoint, registrationPlate, httpResponse.StatusCode);
 
-        instrumentation.VesApiErrorCounter.Add(1,
+        Instrumentation.VesApiErrorCounter.Add(1,
             new KeyValuePair<string, object?>("ves_api_error", (int)httpResponse.StatusCode));
 
         return ServiceResult<VesApiResponse>.Error(

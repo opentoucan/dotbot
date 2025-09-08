@@ -5,10 +5,10 @@ using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using ServiceDefaults;
 
-namespace Dotbot.Api.Application;
+namespace Dotbot.Api.Discord.Modules;
 
 [SlashCommand("save", "Save a new custom command")]
-public class SaveCommandModule(ICustomCommandService customCommandService, Instrumentation instrumentation)
+public class SaveCommandModule(ICustomCommandService customCommandService)
     : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("attachment", "Attachment to save with a custom command")]
@@ -38,7 +38,7 @@ public class SaveCommandModule(ICustomCommandService customCommandService, Instr
 
     private async Task SaveCommandAsync(string commandName, string? content = null, Attachment? file = null)
     {
-        using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
+        using var activity = Instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
 
         var guildId = Context.Interaction.GuildId?.ToString();
         if (guildId is null)
@@ -58,7 +58,7 @@ public class SaveCommandModule(ICustomCommandService customCommandService, Instr
             await Context.Interaction.SendFollowupMessageAsync(
                 "An error occurred while saving the command. It has not been saved.");
 
-            instrumentation.ExceptionCounter.Add(1,
+            Instrumentation.ExceptionCounter.Add(1,
                 new KeyValuePair<string, object?>("type", result.ErrorResult?.ErrorMessage),
                 new KeyValuePair<string, object?>("interaction_name", "save"),
                 new KeyValuePair<string, object?>("guild_id", guildId)
@@ -83,7 +83,7 @@ public class SaveCommandModule(ICustomCommandService customCommandService, Instr
             foreach (var tag in tags)
                 activity?.SetTag(tag.Key, tag.Value);
 
-            instrumentation.SavedCustomCommandsCounter.Add(1, tags);
+            Instrumentation.SavedCustomCommandsCounter.Add(1, tags);
         }
     }
 }

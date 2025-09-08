@@ -1,6 +1,6 @@
 using Dotbot.Infrastructure.Entities;
 
-namespace Dotbot.Api.Application.Queries;
+namespace Dotbot.Api.Queries;
 
 public interface IGuildQueries
 {

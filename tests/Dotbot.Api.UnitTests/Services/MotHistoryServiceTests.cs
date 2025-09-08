@@ -5,7 +5,6 @@ using Dotbot.Api.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using ServiceDefaults;
 
 namespace Dotbot.Api.UnitTests.Services;
 
@@ -40,7 +39,6 @@ public class MotHistoryServiceTests
         var reg = "AAA1 AAA";
         var sut = new MotHistoryService(_httpClient,
             Substitute.For<ILogger<MotHistoryService>>(),
-            Substitute.For<Instrumentation>(),
             Substitute.For<IMotHistoryAuthenticationProvider>());
 
         _handler
@@ -67,7 +65,6 @@ public class MotHistoryServiceTests
         var reg = "AAA1 AAA";
         var sut = new MotHistoryService(_httpClient,
             Substitute.For<ILogger<MotHistoryService>>(),
-            Substitute.For<Instrumentation>(),
             Substitute.For<IMotHistoryAuthenticationProvider>());
 
         _handler

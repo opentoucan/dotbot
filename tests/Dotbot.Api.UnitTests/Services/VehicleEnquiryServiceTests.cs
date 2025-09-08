@@ -5,7 +5,6 @@ using Dotbot.Api.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using ServiceDefaults;
 
 namespace Dotbot.Api.UnitTests.Services;
 
@@ -39,8 +38,7 @@ public class VehicleEnquiryServiceTests
     {
         var reg = "AAA1 AAA";
         var sut = new VehicleEnquiryEnquiryService(_httpClient,
-            Substitute.For<ILogger<VehicleEnquiryEnquiryService>>(),
-            Substitute.For<Instrumentation>());
+            Substitute.For<ILogger<VehicleEnquiryEnquiryService>>());
 
         _handler
             .Expect(HttpMethod.Post, $"{_httpClient.BaseAddress}vehicle-enquiry/v1/vehicles")
@@ -66,8 +64,7 @@ public class VehicleEnquiryServiceTests
     {
         var reg = "AAA1 AAA";
         var sut = new VehicleEnquiryEnquiryService(_httpClient,
-            Substitute.For<ILogger<VehicleEnquiryEnquiryService>>(),
-            Substitute.For<Instrumentation>());
+            Substitute.For<ILogger<VehicleEnquiryEnquiryService>>());
 
         _handler
             .Expect(HttpMethod.Post, $"{_httpClient.BaseAddress}vehicle-enquiry/v1/vehicles")

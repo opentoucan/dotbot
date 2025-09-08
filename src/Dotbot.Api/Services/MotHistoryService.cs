@@ -18,7 +18,7 @@ public interface IMotHistoryService
 
 public interface IMotHistoryAuthenticationProvider
 {
-    public Task<string> GetBearerToken(CancellationToken cancellationToken = default);
+    Task<string> GetBearerToken(CancellationToken cancellationToken = default);
 }
 
 public class MotHistoryAuthenticationProvider(IOptions<MotHistorySettings> motHistorySettings)
@@ -41,7 +41,6 @@ public class MotHistoryAuthenticationProvider(IOptions<MotHistorySettings> motHi
 public class MotHistoryService(
     HttpClient httpClient,
     ILogger<MotHistoryService> logger,
-    Instrumentation instrumentation,
     IMotHistoryAuthenticationProvider authenticationProvider) : IMotHistoryService
 {
     private static readonly JsonSerializerOptions SReadOptions = new()
@@ -82,7 +81,7 @@ public class MotHistoryService(
             "Failed to fetch MOT history from endpoint: {baseAddress}/{motHistoryEndpoint}/{registrationPlate} with response: {response}",
             httpClient.BaseAddress?.Host, motHistoryEndpoint, registrationPlate, httpResponse.StatusCode);
 
-        instrumentation.MotApiErrorCounter.Add(1,
+        Instrumentation.MotApiErrorCounter.Add(1,
             new KeyValuePair<string, object?>("mot_api_error", (int)httpResponse.StatusCode));
 
         return ServiceResult<MotApiResponse>.Error(

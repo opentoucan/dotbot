@@ -1,4 +1,3 @@
-using Dotbot.Api.Application.Queries;
 using Dotbot.Api.Queries;
 using Dotbot.Api.Services;
 using Dotbot.Api.Settings;

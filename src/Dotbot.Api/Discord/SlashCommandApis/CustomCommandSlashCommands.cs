@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Dotbot.Api.Application;
+using Dotbot.Api.Discord.Modules;
 using Dotbot.Api.Services;
 using NetCord;
 using NetCord.Rest;
@@ -19,7 +19,7 @@ public static class CustomCommandSlashCommands
             AutocompleteProviderType = typeof(CustomCommandAutocompleteProvider))]
         string commandName)
     {
-        using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
+        using var activity = Instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
 
         var guildId = context.Interaction.GuildId?.ToString();
         if (guildId is null)
@@ -60,7 +60,7 @@ public static class CustomCommandSlashCommands
             foreach (var tag in tags)
                 activity?.SetTag(tag.Key, tag.Value);
 
-            instrumentation.CustomCommandsFetchedCounter.Add(1, tags);
+            Instrumentation.CustomCommandsFetchedCounter.Add(1, tags);
         }
     }
 }

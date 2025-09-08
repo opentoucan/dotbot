@@ -26,15 +26,18 @@ public class SaveDiscordServersHostedService(IServiceScopeFactory serviceScopeFa
 
             var guild = await guildRepository.GetByExternalIdAsync(registeredGuild.Id.ToString());
             if (guild is null)
+            {
                 guildRepository.Add(new Guild(registeredGuild.Id.ToString(), registeredGuild.Name));
+            }
             else
             {
                 guild.SetName(registeredGuild.Name);
                 guildRepository.Update(guild);
             }
 
-            instrumentation.GuildsCounter.Add(1, tagList);
+            Instrumentation.GuildsCounter.Add(1, tagList);
         }
+
         await guildRepository.UnitOfWork.SaveChangesAsync(CancellationToken.None);
     }
 
