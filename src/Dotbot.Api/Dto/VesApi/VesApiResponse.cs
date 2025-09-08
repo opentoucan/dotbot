@@ -1,13 +1,5 @@
 namespace Dotbot.Api.Dto.VesApi;
 
-public class Errors
-{
-    public string? Status { get; set; }
-    public string? Code { get; set; }
-    public string? Title { get; set; }
-    public string? Detail { get; set; }
-}
-
 public class VesApiResponse
 {
     public string? RegistrationNumber { get; set; }
@@ -29,5 +21,4 @@ public class VesApiResponse
     public DateTime? DateOfLastV5cIssued { get; set; }
     public string? EuroStatus { get; set; }
     public bool? AutomatedVehicle { get; set; }
-    public List<Errors> Errors { get; set; } = [];
 }

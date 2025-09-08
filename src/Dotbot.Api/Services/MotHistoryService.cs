@@ -55,36 +55,45 @@ public class MotHistoryService(
     {
         var motHistoryEndpoint = $"/v1/trade/vehicles/registration/{registrationPlate}";
 
-
-        var accessToken = await authenticationProvider.GetBearerToken(cancellationToken);
-
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        var httpResponse = await httpClient.GetAsync(motHistoryEndpoint, cancellationToken);
-
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            var motResponse = await JsonSerializer.DeserializeAsync<MotApiResponse>(
-                await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken);
-            return ServiceResult<MotApiResponse>.Success(motResponse!);
-        }
+            var accessToken = await authenticationProvider.GetBearerToken(cancellationToken);
 
-        if (httpResponse.StatusCode == HttpStatusCode.NotFound)
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var httpResponse = await httpClient.GetAsync(motHistoryEndpoint, cancellationToken);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var motResponse = await JsonSerializer.DeserializeAsync<MotApiResponse>(
+                    await httpResponse.Content.ReadAsStreamAsync(cancellationToken), SReadOptions, cancellationToken);
+                return ServiceResult<MotApiResponse>.Success(motResponse!);
+            }
+
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                logger.LogInformation("Failed to retrieve MOT information for the vehicle: {registrationPlate}",
+                    registrationPlate);
+
+                return ServiceResult<MotApiResponse>.Error(
+                    $"MOT information not found for the vehicle: {registrationPlate}");
+            }
+
+            logger.LogWarning(
+                "Failed to fetch MOT history from endpoint: {baseAddress}/{motHistoryEndpoint}/{registrationPlate} with response: {response}",
+                httpClient.BaseAddress?.Host, motHistoryEndpoint, registrationPlate, httpResponse.StatusCode);
+
+            Instrumentation.MotApiErrorCounter.Add(1,
+                new KeyValuePair<string, object?>("mot_api_error", (int)httpResponse.StatusCode));
+        }
+        catch (Exception ex)
         {
-            logger.LogInformation("Failed to retrieve MOT information for the vehicle: {registrationPlate}",
-                registrationPlate);
-
-            return ServiceResult<MotApiResponse>.Error(
-                $"MOT information not found for the vehicle: {registrationPlate}");
+            logger.LogError(ex,
+                "Unhandled error occurred when retrieving a response from the MOT History API");
+            Instrumentation.ExceptionCounter.Add(1, new KeyValuePair<string, object?>("type", ex.GetType().Name));
+            Instrumentation.ExceptionCounter.Add(1, new KeyValuePair<string, object?>("interaction_name", "vehicle"));
         }
-
-        logger.LogWarning(
-            "Failed to fetch MOT history from endpoint: {baseAddress}/{motHistoryEndpoint}/{registrationPlate} with response: {response}",
-            httpClient.BaseAddress?.Host, motHistoryEndpoint, registrationPlate, httpResponse.StatusCode);
-
-        Instrumentation.MotApiErrorCounter.Add(1,
-            new KeyValuePair<string, object?>("mot_api_error", (int)httpResponse.StatusCode));
 
         return ServiceResult<MotApiResponse>.Error(
-            $"Something went wrong retrieving the MOT history for the vehicle: {registrationPlate}");
+            $"Something went wrong retrieving the MOT history from the DVSA for: {registrationPlate}");
     }
 }

@@ -46,6 +46,8 @@
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.7.2" />
+    <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
+    <PackageVersion Include="StackExchange.Redis.Extensions.System.Text.Json" Version="11.0.0" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.6.13" />
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.2" />

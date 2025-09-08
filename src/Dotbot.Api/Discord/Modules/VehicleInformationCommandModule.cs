@@ -1,22 +1,71 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Dotbot.Api.Domain;
-using Dotbot.Api.Dto.MotApi;
-using Dotbot.Api.Dto.VesApi;
 using Dotbot.Api.Services;
+using Dotbot.Infrastructure.Entities;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
 using ServiceDefaults;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace Dotbot.Api.Discord.Modules;
+
+public class StringMenuModule(IRedisDatabase redis) : ComponentInteractionModule<HttpStringMenuInteractionContext>
+{
+    [ComponentInteraction("mot_menu")]
+    public async Task Menu()
+    {
+        var registrationPlate = Context.SelectedValues.FirstOrDefault()?.Split("-")[0];
+        var motTestNumber = Context.SelectedValues.FirstOrDefault()?.Split("-")[1];
+        var vehicleInformation = await redis.GetAsync<VehicleInformation>(registrationPlate!);
+        var motTest = vehicleInformation?.VehicleMotTests.FirstOrDefault(x => x.TestNumber == motTestNumber);
+        var motTestEmbed = VehicleInformationAndMotEmbedBuilder.BuildMotTestEmbed(registrationPlate, motTest!);
+        await Context.Interaction.SendResponseAsync(
+            InteractionCallback.ModifyMessage(action => { action.WithEmbeds([motTestEmbed]); }),
+            cancellationToken: CancellationToken.None);
+    }
+}
+
+public class ButtonModule(IRedisDatabase redis) : ComponentInteractionModule<HttpButtonInteractionContext>
+{
+    [ComponentInteraction("mot_button")]
+    public async Task Button()
+    {
+        var interactionResponse = new InteractionMessageProperties();
+
+        var vehicleInformation = await redis.GetAsync<VehicleInformation>(Context.Interaction.Message.Id.ToString());
+        if (vehicleInformation == null)
+        {
+            await RespondAsync(InteractionCallback.Message(
+                new InteractionMessageProperties().WithContent(
+                        "This is message is too old to use, please perform another slash command for this")
+                    .WithFlags(MessageFlags.Ephemeral)));
+            return;
+        }
+
+        var stringMenu = new StringMenuProperties("mot_menu");
+
+        foreach (var motTest in vehicleInformation.VehicleMotTests)
+            stringMenu.Add(new StringMenuSelectOptionProperties(
+                $"{vehicleInformation.VehicleMotTests.IndexOf(motTest) + 1} - {motTest.CompletedDate.GetValueOrDefault().ToShortDateString()} - {motTest.Result} - {motTest.OdometerReadingInMiles} Miles",
+                $"{vehicleInformation.Registration}-{motTest.TestNumber}"));
+
+        interactionResponse
+            .WithContent("Select an MOT from the drop down")
+            .AddComponents(stringMenu)
+            .WithFlags(MessageFlags.Ephemeral);
+
+        await RespondAsync(InteractionCallback.Message(interactionResponse));
+    }
+}
 
 [SlashCommand("vehicle", "Retrieves vehicle information and MOT history")]
 public partial class VehicleInformationCommandModule(
     IMoturService moturService,
-    IVehicleEnquiryService vehicleEnquiryService,
-    IMotHistoryService motHistoryService,
-    ILogger<VehicleInformationCommandModule> logger) : ApplicationCommandModule<HttpApplicationCommandContext>
+    IVehicleInformationService vehicleInformationService,
+    ILogger<VehicleInformationCommandModule> logger,
+    IRedisDatabase redis) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("registration", "Registration plate to search")]
     public async Task RetrieveByRegistration(
@@ -75,113 +124,45 @@ public partial class VehicleInformationCommandModule(
             { "member_display_name", displayName }
         };
 
-        var vehicleRegistrationResult =
-            ServiceResult<VesApiResponse>.Error("Something went wrong fetching vehicle details");
-        var motHistoryResult = ServiceResult<MotApiResponse>.Error("Something went wrong fetching MOT details");
+        var vehicleInformationResult =
+            await vehicleInformationService.GetVehicleInformation(registrationPlate, cancellationToken);
 
-        try
-        {
-            vehicleRegistrationResult =
-                await vehicleEnquiryService.GetVehicleRegistrationInformation(registrationPlate, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex,
-                "Unhandled error occurred when retrieving a response from the Vehicle Enquiry Service API");
-
-            tags.Add(new KeyValuePair<string, object?>("type", ex.GetType().Name));
-            tags.Add(new KeyValuePair<string, object?>("interaction_name", commandName));
-            Instrumentation.ExceptionCounter.Add(1, tags);
-        }
-
-        try
-        {
-            motHistoryResult = await motHistoryService.GetVehicleMotHistory(registrationPlate, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Unhandled error occurred when retrieving a response from the MOT History API");
-            tags.Add(new KeyValuePair<string, object?>("type", ex.GetType().Name));
-            tags.Add(new KeyValuePair<string, object?>("interaction_name", commandName));
-            Instrumentation.ExceptionCounter.Add(1, tags);
-        }
-
-        VehicleInformation vehicleInformation;
-        var registrationPlateResult = vehicleRegistrationResult.Value?.RegistrationNumber ??
-                                      motHistoryResult.Value?.Registration;
-
-        if ((!vehicleRegistrationResult.IsSuccess &&
-             !motHistoryResult.IsSuccess) || string.IsNullOrWhiteSpace(registrationPlate))
-        {
-            await Context.Interaction.SendFollowupMessageAsync(
-                $"{vehicleRegistrationResult.ErrorResult?.ErrorMessage}\n{motHistoryResult.ErrorResult?.ErrorMessage}",
-                cancellationToken: cancellationToken);
-            return;
-        }
-
-        var potentiallyScrapped = !vehicleRegistrationResult.IsSuccess && motHistoryResult.IsSuccess;
-
-        vehicleInformation = new VehicleInformation(
-            registrationPlateResult!,
-            potentiallyScrapped,
-            vehicleRegistrationResult.Value?.Make ?? motHistoryResult.Value?.Make,
-            motHistoryResult.Value?.Model,
-            vehicleRegistrationResult.Value?.Colour ?? motHistoryResult.Value?.PrimaryColour,
-            vehicleRegistrationResult.Value?.FuelType ?? motHistoryResult.Value?.FuelType,
-            vehicleRegistrationResult.Value?.MotStatus,
-            motHistoryResult.Value?.MotTestDueDate,
-            motHistoryResult.Value?.MotTests.Where(x => x.TestResult == "PASSED")
-                .OrderByDescending(x => x.CompletedDate).FirstOrDefault()?.ExpiryDate,
-            vehicleRegistrationResult.Value?.TaxStatus,
-            vehicleRegistrationResult.Value?.TaxDueDate,
-            !string.IsNullOrWhiteSpace(vehicleRegistrationResult.Value?.MonthOfFirstDvlaRegistration)
-                ? DateTime.Parse($"01-{vehicleRegistrationResult.Value?.MonthOfFirstDvlaRegistration}")
-                : motHistoryResult.Value?.RegistrationDate,
-            vehicleRegistrationResult.Value?.EngineCapacity?.ToString() ?? motHistoryResult.Value?.EngineSize,
-            vehicleRegistrationResult.Value?.RevenueWeight,
-            vehicleRegistrationResult.Value?.Co2Emissions,
-            vehicleRegistrationResult.Value?.DateOfLastV5cIssued);
-
-        foreach (var motTest in motHistoryResult.Value?.MotTests ?? [])
-            vehicleInformation.AddMotTest(
-                motTest.TestResult,
-                motTest.CompletedDate,
-                motTest.OdometerValue,
-                motTest.OdometerUnit,
-                motTest.OdometerResultType,
-                motTest.MotTestNumber,
-                motTest.Defects.Select(defect =>
-                    (defect.Type, defect.Text, defect.Dangerous)).ToList());
-
-        var vehicleSummaryEmbed = !vehicleRegistrationResult.IsSuccess && !motHistoryResult.IsSuccess
+        var vehicleSummaryEmbed = !vehicleInformationResult.IsSuccess
             ? new EmbedProperties()
                 .WithTitle($"No Vehicle Information found for {registrationPlate}")
                 .WithColor(new Color(255, 0, 0))
-            : VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(vehicleInformation);
+            : VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(vehicleInformationResult.Value!);
 
-        var motHistoryEmbed = VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(vehicleInformation);
+        var motHistoryEmbed =
+            VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(vehicleInformationResult.Value!);
 
         var linkButtonComponents = new List<ActionRowProperties>
         {
             new ActionRowProperties().AddComponents(new LinkButtonProperties(
-                $"https://www.check-mot.service.gov.uk/results?registration={vehicleInformation.Registration}",
-                "Link to full MOT History"))
+                    $"https://www.check-mot.service.gov.uk/results?registration={vehicleInformationResult.Value!.Registration}",
+                    "Link to full MOT History"),
+                new ButtonProperties("mot_button", "Show MOT history in Discord", ButtonStyle.Primary))
         };
         var interactionResponse = new InteractionMessageProperties().WithEmbeds([vehicleSummaryEmbed]);
 
-        if (vehicleInformation.VehicleMotTests.Count > 0)
+        if (vehicleInformationResult.Value.VehicleMotTests.Count > 0)
             interactionResponse
                 .AddEmbeds(motHistoryEmbed)
                 .AddComponents(linkButtonComponents);
 
-        await Context.Interaction.SendFollowupMessageAsync(interactionResponse, cancellationToken: cancellationToken);
+        var message =
+            await Context.Interaction.SendFollowupMessageAsync(interactionResponse,
+                cancellationToken: cancellationToken);
 
-        tags.Add(new KeyValuePair<string, object?>("registration", vehicleInformation.Registration));
-        tags.Add(new KeyValuePair<string, object?>("make", vehicleInformation.Make));
-        tags.Add(new KeyValuePair<string, object?>("model", vehicleInformation.Model));
-        tags.Add(new KeyValuePair<string, object?>("colour", vehicleInformation.Colour));
-        tags.Add(new KeyValuePair<string, object?>("fuel_type", vehicleInformation.FuelType));
-        tags.Add(new KeyValuePair<string, object?>("engine_size", vehicleInformation.EngineCapacityLitres));
+
+        await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value);
+
+        tags.Add(new KeyValuePair<string, object?>("registration", vehicleInformationResult.Value.Registration));
+        tags.Add(new KeyValuePair<string, object?>("make", vehicleInformationResult.Value.Make));
+        tags.Add(new KeyValuePair<string, object?>("model", vehicleInformationResult.Value.Model));
+        tags.Add(new KeyValuePair<string, object?>("colour", vehicleInformationResult.Value.Colour));
+        tags.Add(new KeyValuePair<string, object?>("fuel_type", vehicleInformationResult.Value.FuelType));
+        tags.Add(new KeyValuePair<string, object?>("engine_size", vehicleInformationResult.Value.EngineCapacityLitres));
         foreach (var tag in tags)
             activity?.SetTag(tag.Key, tag.Value);
 

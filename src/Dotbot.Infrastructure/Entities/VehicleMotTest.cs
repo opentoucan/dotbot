@@ -1,11 +1,27 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Text.Json.Serialization;
 
-namespace Dotbot.Api.Domain;
+namespace Dotbot.Infrastructure.Entities;
 
 public class VehicleMotTest
 {
-    public VehicleMotTest(string? result, DateTime? completedDate, string? odometerValue, string? odometerUnit,
+    [JsonConstructor]
+    private VehicleMotTest(MotTestResult result, DateTime? completedDate, DateTime? expiryDate,
+        int? odometerReadingInMiles,
+        OdometerResult odometerReadResult, string? testNumber, List<Defect> defects)
+    {
+        Result = result;
+        CompletedDate = completedDate;
+        ExpiryDate = expiryDate;
+        OdometerReadingInMiles = odometerReadingInMiles;
+        OdometerReadResult = odometerReadResult;
+        TestNumber = testNumber;
+        Defects = defects;
+    }
+
+    public VehicleMotTest(string? result, DateTime? completedDate, DateTime? expiryDate, string? odometerValue,
+        string? odometerUnit,
         string? odometerResult, string? motTestNumber)
     {
         Result = result switch
@@ -16,6 +32,7 @@ public class VehicleMotTest
         };
 
         CompletedDate = completedDate;
+        ExpiryDate = expiryDate;
 
         var validOdometerUnits = new List<string> { "MI", "KM" };
         if (!int.TryParse(odometerValue, NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var num) ||
@@ -34,6 +51,7 @@ public class VehicleMotTest
 
     public MotTestResult Result { get; private set; }
     public DateTime? CompletedDate { get; private set; }
+    public DateTime? ExpiryDate { get; private set; }
     public int? OdometerReadingInMiles { get; private set; }
     public OdometerResult OdometerReadResult { get; private set; }
     public string? TestNumber { get; private set; }
@@ -58,6 +76,14 @@ public class VehicleMotTest
             [Display(Name = "USER ENTERED")] USERENTERED = 7,
             [Display(Name = "PRS")] PRS = 8,
             [Display(Name = "UNKNOWN")] UNKNOWN = 9
+        }
+
+        [JsonConstructor]
+        private Defect(Type defectType, string? defectMessage, bool isDangerous)
+        {
+            DefectType = defectType;
+            DefectMessage = defectMessage;
+            IsDangerous = isDangerous;
         }
 
         public Defect(string? type, string? text, bool? dangerous)

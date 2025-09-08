@@ -1,6 +1,5 @@
 using System.Globalization;
-using Dotbot.Api.Domain;
-using Dotbot.Api.Dto.MotApi;
+using Dotbot.Infrastructure.Entities;
 using NetCord;
 using NetCord.Rest;
 
@@ -243,37 +242,37 @@ public static class VehicleInformationAndMotEmbedBuilder
         return embed;
     }
 
-    public static EmbedProperties BuildMotTestEmbed(string? reg, MotApiResponse.MotTest motTest)
+    public static EmbedProperties BuildMotTestEmbed(string? reg, VehicleMotTest motTest)
     {
         var embed = new EmbedProperties();
         embed.WithTitle($"MOT {motTest.CompletedDate}");
 
 
-        var motEmbedColor = motTest.TestResult == "PASSED" && motTest.Defects.Count == 0 ? Green :
-            motTest.TestResult == "PASSED" ? Orange : Red;
+        var motEmbedColor = motTest.Result == MotTestResult.PASSED && motTest.Defects.Count == 0 ? Green :
+            motTest.Result == MotTestResult.PASSED ? Orange : Red;
 
         embed.WithColor(motEmbedColor);
-        embed.WithTitle($"MOT {motTest.CompletedDate?.ToShortDateString()} - {motTest.TestResult}");
+        embed.WithTitle($"MOT {motTest.CompletedDate?.ToShortDateString()} - {motTest.Result}");
         embed.AddFields(new EmbedFieldProperties().WithName("Reg plate").WithValue(reg));
-        if (motTest.TestResult == "PASSED")
+        if (motTest.Result == MotTestResult.PASSED)
             embed.AddFields(new EmbedFieldProperties().WithName("Expires")
                 .WithValue(motTest.ExpiryDate?.ToLongDateString()).WithInline());
         embed.AddFields(new EmbedFieldProperties().WithName("Odometer reading")
-            .WithValue($"{motTest.OdometerValue} {motTest.OdometerUnit}").WithInline());
+            .WithValue($"{motTest.OdometerReadingInMiles} Miles").WithInline());
 
         var groupedDefects = motTest.Defects
-            .OrderBy(defect => defect.Type)
-            .GroupBy(defect => defect.Type);
+            .OrderBy(defect => defect.DefectType)
+            .GroupBy(defect => defect.DefectType);
         foreach (var defectGroup in groupedDefects)
         {
             var embedFieldLengthLimit = 1024;
-            var defectText = string.Join("\n", defectGroup.Select(x => $"- {x.Text}"));
+            var defectText = string.Join("\n", defectGroup.Select(x => $"- {x.DefectMessage}"));
 
             var defectChunks = defectGroup.Chunk(defectGroup.Count() / defectText.Chunk(embedFieldLengthLimit).Count());
 
             foreach (var chunk in defectChunks)
-                embed.AddFields(new EmbedFieldProperties().WithName(chunk.FirstOrDefault()?.Type)
-                    .WithValue(string.Join("\n", chunk.Select(x => $"- {x.Text}"))));
+                embed.AddFields(new EmbedFieldProperties().WithName(chunk.FirstOrDefault()?.DefectType.ToString())
+                    .WithValue(string.Join("\n", chunk.Select(x => $"- {x.DefectMessage}"))));
         }
 
         return embed;
