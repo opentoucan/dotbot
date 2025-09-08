@@ -10,13 +10,14 @@ namespace Dotbot.Api.Discord.SlashCommandApis;
 public static class XkcdSlashCommands
 {
     public static async Task<InteractionMessageProperties> FetchXkcdAsync(
-    IXkcdService xkcdService,
-    Instrumentation instrumentation,
-    ILoggerFactory loggerFactory,
-    HttpApplicationCommandContext context,
-    [SlashCommandParameter(Name = "comic", Description = "Comic number to fetch (blank picks latest)")] int? comicNumber = null)
+        IXkcdService xkcdService,
+        Instrumentation instrumentation,
+        ILoggerFactory loggerFactory,
+        HttpApplicationCommandContext context,
+        [SlashCommandParameter(Name = "comic", Description = "Comic number to fetch (blank picks latest)")]
+        int? comicNumber = null)
     {
-        using var activity = instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
+        using var activity = Instrumentation.ActivitySource.StartActivity(ActivityKind.Client);
 
         var logger = loggerFactory.CreateLogger("XkcdCommand");
         var xkcdComic = await xkcdService.GetXkcdComicAsync(comicNumber, CancellationToken.None);
@@ -42,26 +43,21 @@ public static class XkcdSlashCommands
 
         foreach (var tag in tags)
             activity?.SetTag(tag.Key, tag.Value);
-        instrumentation.XkcdCounter.Add(1, tags);
+        Instrumentation.XkcdCounter.Add(1, tags);
 
         return new InteractionMessageProperties()
             .AddEmbeds(new EmbedProperties()
                 .WithTitle(comicNumberOrLatestText)
                 .WithImage(new EmbedImageProperties(xkcdComic.ImageUrl))
-                .AddFields(new List<EmbedFieldProperties>
+                .AddFields(new()
                 {
-                    new()
-                    {
-                        Name = "Title", Value = xkcdComic.Title, Inline = true
-                    },
-                    new()
-                    {
-                        Name = "Published", Value = xkcdComic.DatePosted.Date.ToShortDateString(), Inline = true
-                    },
-                    new()
-                    {
-                        Name = "Alt text", Value = xkcdComic.AltText, Inline = true
-                    }
+                    Name = "Title", Value = xkcdComic.Title, Inline = true
+                }, new()
+                {
+                    Name = "Published", Value = xkcdComic.DatePosted.Date.ToShortDateString(), Inline = true
+                }, new()
+                {
+                    Name = "Alt text", Value = xkcdComic.AltText, Inline = true
                 }));
     }
 }

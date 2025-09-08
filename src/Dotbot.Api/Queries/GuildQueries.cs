@@ -1,4 +1,3 @@
-using Dotbot.Api.Application.Queries;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +14,8 @@ public class GuildQueries(DotbotContext context) : IGuildQueries
             .FirstOrDefaultAsync(g => g.ExternalId == externalId))?.CustomCommands ?? [];
     }
 
-    public async Task<IEnumerable<CustomCommand>> GetCustomCommandsByFuzzySearchOnNameAsync(string externalId, string name)
+    public async Task<IEnumerable<CustomCommand>> GetCustomCommandsByFuzzySearchOnNameAsync(string externalId,
+        string name)
     {
         var guild = await context.Guilds
             .Include(g => g.CustomCommands)
