@@ -17,8 +17,9 @@ public class StringMenuModule(IRedisDatabase redis, ILogger<StringMenuModule> lo
     [ComponentInteraction("mot_menu")]
     public async Task Menu()
     {
-        var registrationPlate = Context.SelectedValues.FirstOrDefault()?.Split("-")[0];
-        var motTestNumber = Context.SelectedValues.FirstOrDefault()?.Split("-")[1];
+        var selectedValue = Context.SelectedValues.ToList().FirstOrDefault();
+        var registrationPlate = selectedValue?.Split("-")[0];
+        var motTestNumber = selectedValue?.Split("-")[1];
         VehicleInformationAggregate? vehicleInformation;
 
         try
@@ -28,7 +29,7 @@ public class StringMenuModule(IRedisDatabase redis, ILogger<StringMenuModule> lo
         catch (Exception ex)
         {
             logger.LogError(ex, "Error getting MOT test for string menu select option {regAndMotTestNumber}",
-                Context.SelectedValues.FirstOrDefault());
+                selectedValue);
             return;
         }
 
