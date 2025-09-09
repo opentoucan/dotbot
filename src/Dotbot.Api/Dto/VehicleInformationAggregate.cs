@@ -1,10 +1,10 @@
 using System.Text.Json.Serialization;
 
-namespace Dotbot.Infrastructure.Entities;
+namespace Dotbot.Api.Dto;
 
-public class VehicleInformation
+public class VehicleInformationAggregate
 {
-    public VehicleInformation(string registration,
+    public VehicleInformationAggregate(string registration,
         bool potentiallyScrapped,
         string? make, string? model, string? colour,
         string? fuelType,
@@ -39,7 +39,7 @@ public class VehicleInformation
     }
 
     [JsonConstructor]
-    private VehicleInformation(string registration, bool potentiallyScrapped, string? make, string? model,
+    private VehicleInformationAggregate(string registration, bool potentiallyScrapped, string? make, string? model,
         string? colour, FuelType fuelType, MotStatus motStatus, TaxStatus taxStatus, DateTime? registrationDate,
         decimal? engineCapacityLitres, int? weightInKg, int? co2InGramPerKilometer, DateTime? lastIssuedV5CDate,
         List<VehicleMotTest> vehicleMotTests)

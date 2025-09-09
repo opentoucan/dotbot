@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Dotbot.Api.Dto;
 using Dotbot.Api.Services;
-using Dotbot.Infrastructure.Entities;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
@@ -11,14 +11,27 @@ using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace Dotbot.Api.Discord.Modules;
 
-public class StringMenuModule(IRedisDatabase redis) : ComponentInteractionModule<HttpStringMenuInteractionContext>
+public class StringMenuModule(IRedisDatabase redis, ILogger<StringMenuModule> logger)
+    : ComponentInteractionModule<HttpStringMenuInteractionContext>
 {
     [ComponentInteraction("mot_menu")]
     public async Task Menu()
     {
         var registrationPlate = Context.SelectedValues.FirstOrDefault()?.Split("-")[0];
         var motTestNumber = Context.SelectedValues.FirstOrDefault()?.Split("-")[1];
-        var vehicleInformation = await redis.GetAsync<VehicleInformation>(registrationPlate!);
+        VehicleInformationAggregate? vehicleInformation;
+
+        try
+        {
+            vehicleInformation = await redis.GetAsync<VehicleInformationAggregate>(registrationPlate!);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting MOT test for string menu select option {regAndMotTestNumber}",
+                Context.SelectedValues.FirstOrDefault());
+            return;
+        }
+
         var motTest = vehicleInformation?.VehicleMotTests.FirstOrDefault(x => x.TestNumber == motTestNumber);
         var motTestEmbed = VehicleInformationAndMotEmbedBuilder.BuildMotTestEmbed(registrationPlate, motTest!);
         await Context.Interaction.SendResponseAsync(
@@ -27,26 +40,44 @@ public class StringMenuModule(IRedisDatabase redis) : ComponentInteractionModule
     }
 }
 
-public class ButtonModule(IRedisDatabase redis) : ComponentInteractionModule<HttpButtonInteractionContext>
+public class ButtonModule(IRedisDatabase redis, ILogger<ButtonModule> logger)
+    : ComponentInteractionModule<HttpButtonInteractionContext>
 {
     [ComponentInteraction("mot_button")]
     public async Task Button()
     {
         var interactionResponse = new InteractionMessageProperties();
 
-        var vehicleInformation = await redis.GetAsync<VehicleInformation>(Context.Interaction.Message.Id.ToString());
-        if (vehicleInformation == null)
+        VehicleInformationAggregate? vehicleInformation;
+        try
         {
+            vehicleInformation =
+                await redis.GetAsync<VehicleInformationAggregate>(Context.Interaction.Message.Id.ToString());
+            if (vehicleInformation == null)
+            {
+                await RespondAsync(InteractionCallback.Message(
+                    new InteractionMessageProperties().WithContent(
+                            "This is message is too old to use, please perform another slash command for this")
+                        .WithFlags(MessageFlags.Ephemeral)));
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "Error getting vehicle vehicle information from message ID {messageId} from the cache, unable to load mot history select menu",
+                Context.Interaction.Message.Id.ToString());
             await RespondAsync(InteractionCallback.Message(
                 new InteractionMessageProperties().WithContent(
-                        "This is message is too old to use, please perform another slash command for this")
+                        "Something has gone wrong using this interaction. Please try again later")
                     .WithFlags(MessageFlags.Ephemeral)));
             return;
         }
 
         var stringMenu = new StringMenuProperties("mot_menu");
 
-        foreach (var motTest in vehicleInformation.VehicleMotTests)
+        foreach (var motTest in vehicleInformation.VehicleMotTests.OrderByDescending(motTest => motTest.CompletedDate)
+                     .Take(10))
             stringMenu.Add(new StringMenuSelectOptionProperties(
                 $"{vehicleInformation.VehicleMotTests.IndexOf(motTest) + 1} - {motTest.CompletedDate.GetValueOrDefault().ToShortDateString()} - {motTest.Result} - {motTest.OdometerReadingInMiles} Miles",
                 $"{vehicleInformation.Registration}-{motTest.TestNumber}"));
@@ -154,8 +185,7 @@ public partial class VehicleInformationCommandModule(
             await Context.Interaction.SendFollowupMessageAsync(interactionResponse,
                 cancellationToken: cancellationToken);
 
-
-        await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value);
+        await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value, TimeSpan.FromMinutes(30));
 
         tags.Add(new KeyValuePair<string, object?>("registration", vehicleInformationResult.Value.Registration));
         tags.Add(new KeyValuePair<string, object?>("make", vehicleInformationResult.Value.Make));

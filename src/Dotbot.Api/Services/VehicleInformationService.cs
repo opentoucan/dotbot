@@ -1,27 +1,41 @@
-using Dotbot.Infrastructure.Entities;
+using Dotbot.Api.Dto;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace Dotbot.Api.Services;
 
 public interface IVehicleInformationService
 {
-    Task<ServiceResult<VehicleInformation>> GetVehicleInformation(string registrationPlate,
+    Task<ServiceResult<VehicleInformationAggregate>> GetVehicleInformation(string registrationPlate,
         CancellationToken cancellationToken);
 }
 
 public class VehicleInformationService(
     IVehicleEnquiryService vehicleEnquiryService,
     IMotHistoryService motHistoryService,
-    IRedisDatabase redisDatabase) : IVehicleInformationService
+    IRedisDatabase redisDatabase,
+    ILogger<VehicleInformationService> logger) : IVehicleInformationService
 {
-    public async Task<ServiceResult<VehicleInformation>> GetVehicleInformation(string registrationPlate,
+    public async Task<ServiceResult<VehicleInformationAggregate>> GetVehicleInformation(string registrationPlate,
         CancellationToken cancellationToken)
     {
-        VehicleInformation? vehicleInformation;
-        vehicleInformation = await redisDatabase.GetAsync<VehicleInformation>(registrationPlate);
-
-        if (vehicleInformation == null)
+        VehicleInformationAggregate? vehicleInformation = null;
+        try
         {
+            vehicleInformation = await redisDatabase.GetAsync<VehicleInformationAggregate>(registrationPlate);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred when fetching vehicle information {registrationPlate} from cache",
+                registrationPlate);
+        }
+
+        if (vehicleInformation != null)
+        {
+            logger.LogInformation("Got a cache hit for {registrationPlate}, skipping API calls", registrationPlate);
+        }
+        else if (vehicleInformation == null)
+        {
+            logger.LogInformation("No cache hit for {registrationPlate}", registrationPlate);
             var vehicleRegistrationResult =
                 await vehicleEnquiryService.GetVehicleRegistrationInformation(registrationPlate, cancellationToken);
             var motHistoryResult = await motHistoryService.GetVehicleMotHistory(registrationPlate, cancellationToken);
@@ -31,13 +45,13 @@ public class VehicleInformationService(
 
             if ((!vehicleRegistrationResult.IsSuccess &&
                  !motHistoryResult.IsSuccess) || string.IsNullOrWhiteSpace(registrationPlate))
-                return ServiceResult<VehicleInformation>.Error(string.Join("\n",
+                return ServiceResult<VehicleInformationAggregate>.Error(string.Join("\n",
                     vehicleRegistrationResult.ErrorResult?.ErrorMessage, motHistoryResult.ErrorResult?.ErrorMessage));
 
 
             var potentiallyScrapped = !vehicleRegistrationResult.IsSuccess && motHistoryResult.IsSuccess;
 
-            vehicleInformation = new VehicleInformation(
+            vehicleInformation = new VehicleInformationAggregate(
                 registrationPlateResult!,
                 potentiallyScrapped,
                 vehicleRegistrationResult.Value?.Make ?? motHistoryResult.Value?.Make,
@@ -70,9 +84,17 @@ public class VehicleInformationService(
                     motTest.Defects.Select(defect =>
                         (defect.Type, defect.Text, defect.Dangerous)).ToList());
 
-            await redisDatabase.AddAsync(registrationPlate, vehicleInformation);
+            try
+            {
+                await redisDatabase.AddAsync(registrationPlate, vehicleInformation, TimeSpan.FromMinutes(30));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred when writing {registrationPlate} to the cache",
+                    registrationPlate);
+            }
         }
 
-        return ServiceResult<VehicleInformation>.Success(vehicleInformation);
+        return ServiceResult<VehicleInformationAggregate>.Success(vehicleInformation);
     }
 }

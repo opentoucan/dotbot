@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
-namespace Dotbot.Infrastructure.Entities;
+namespace Dotbot.Api.Dto;
 
-public class VehicleMotTest
+public partial class VehicleMotTest
 {
     [JsonConstructor]
     private VehicleMotTest(MotTestResult result, DateTime? completedDate, DateTime? expiryDate,
@@ -62,7 +63,7 @@ public class VehicleMotTest
         Defects.Add(new Defect(defectType, defectText, isDangerous));
     }
 
-    public class Defect
+    public partial class Defect
     {
         public enum Type
         {
@@ -71,15 +72,19 @@ public class VehicleMotTest
             [Display(Name = "MINOR")] MINOR = 2,
             [Display(Name = "FAIL")] FAIL = 3,
             [Display(Name = "ADVISORY")] ADVISORY = 4,
+
             [Display(Name = "NON SPECIFIC")] NONSPECIFIC = 5,
+
             [Display(Name = "SYSTEM GENERATED")] SYSTEMGENERATED = 6,
+
             [Display(Name = "USER ENTERED")] USERENTERED = 7,
-            [Display(Name = "PRS")] PRS = 8,
-            [Display(Name = "UNKNOWN")] UNKNOWN = 9
+
+            [Display(Name = "PASS AFTER RECTIFICATION")]
+            PRS = 8
         }
 
         [JsonConstructor]
-        private Defect(Type defectType, string? defectMessage, bool isDangerous)
+        private Defect(Type? defectType, string? defectMessage, bool isDangerous)
         {
             DefectType = defectType;
             DefectMessage = defectMessage;
@@ -88,16 +93,20 @@ public class VehicleMotTest
 
         public Defect(string? type, string? text, bool? dangerous)
         {
-            if (!Enum.TryParse(type, out Type defectType))
-                defectType = Type.UNKNOWN;
+            if (!Enum.TryParse(MyRegex().Replace(type!, "").ToUpper(), out Type defectType))
+                throw new ArgumentException($"Invalid MOT Defect type: {type}");
             DefectType = defectType;
             DefectMessage = text;
             IsDangerous = defectType == Type.DANGEROUS || dangerous.GetValueOrDefault();
         }
 
-        public Type DefectType { get; set; }
+        public Type? DefectType { get; set; }
+
         public string? DefectMessage { get; set; }
         public bool IsDangerous { get; set; }
+
+        [GeneratedRegex(@"\s+")]
+        private static partial Regex MyRegex();
     }
 }
 
