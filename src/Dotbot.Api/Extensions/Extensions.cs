@@ -18,6 +18,7 @@ public static class Extensions
         builder.Services.AddScoped<IGuildRepository, GuildRepository>();
         builder.Services.AddScoped<IGuildQueries, GuildQueries>();
         builder.Services.AddScoped<ICustomCommandService, CustomCommandService>();
+        builder.Services.AddScoped<IVehicleInformationService, VehicleInformationService>();
         builder.AddDatabase();
         builder.ConfigureAWS();
         return builder;

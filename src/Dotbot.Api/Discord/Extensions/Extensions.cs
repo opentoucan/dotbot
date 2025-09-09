@@ -11,6 +11,7 @@ using NetCord.Hosting.Services;
 using NetCord.Hosting.Services.ApplicationCommands;
 using NetCord.Hosting.Services.ComponentInteractions;
 using NetCord.Rest;
+using NetCord.Services.ComponentInteractions;
 
 namespace Dotbot.Api.Discord.Extensions;
 
@@ -31,7 +32,8 @@ public static class Extensions
         builder.Services
             .AddDiscordRest()
             .AddHttpApplicationCommands()
-            .AddHttpComponentInteractions();
+            .AddComponentInteractions<ButtonInteraction, HttpButtonInteractionContext>()
+            .AddComponentInteractions<StringMenuInteraction, HttpStringMenuInteractionContext>();
 
         if (builder.Environment.EnvironmentName == "local")
             builder.Services.AddHostedService<DiscordHttpInteractionSetupService>();

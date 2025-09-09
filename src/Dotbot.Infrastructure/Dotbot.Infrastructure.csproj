@@ -8,16 +8,19 @@
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore"/>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
+        <PackageReference Include="StackExchange.Redis"/>
+        <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore"/>
+        <PackageReference Include="StackExchange.Redis.Extensions.System.Text.Json"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
+        <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations\" />
+        <Folder Include="Migrations\"/>
     </ItemGroup>
 
 </Project>

@@ -1,8 +1,10 @@
-namespace Dotbot.Api.Domain;
+using System.Text.Json.Serialization;
 
-public class VehicleInformation
+namespace Dotbot.Api.Dto;
+
+public class VehicleInformationAggregate
 {
-    public VehicleInformation(string registration,
+    public VehicleInformationAggregate(string registration,
         bool potentiallyScrapped,
         string? make, string? model, string? colour,
         string? fuelType,
@@ -36,6 +38,28 @@ public class VehicleInformation
         LastIssuedV5CDate = lastIssuedV5CDate;
     }
 
+    [JsonConstructor]
+    private VehicleInformationAggregate(string registration, bool potentiallyScrapped, string? make, string? model,
+        string? colour, FuelType fuelType, MotStatus motStatus, TaxStatus taxStatus, DateTime? registrationDate,
+        decimal? engineCapacityLitres, int? weightInKg, int? co2InGramPerKilometer, DateTime? lastIssuedV5CDate,
+        List<VehicleMotTest> vehicleMotTests)
+    {
+        Registration = registration;
+        PotentiallyScrapped = potentiallyScrapped;
+        Make = make;
+        Model = model;
+        Colour = colour;
+        FuelType = fuelType;
+        MotStatus = motStatus;
+        TaxStatus = taxStatus;
+        RegistrationDate = registrationDate;
+        EngineCapacityLitres = engineCapacityLitres;
+        WeightInKg = weightInKg;
+        Co2InGramPerKilometer = co2InGramPerKilometer;
+        LastIssuedV5CDate = lastIssuedV5CDate;
+        VehicleMotTests = vehicleMotTests;
+    }
+
     public string Registration { get; private set; }
     public bool PotentiallyScrapped { get; private set; }
     public string? Make { get; private set; }
@@ -51,11 +75,12 @@ public class VehicleInformation
     public DateTime? LastIssuedV5CDate { get; private set; }
     public List<VehicleMotTest> VehicleMotTests { get; } = [];
 
-    public void AddMotTest(string? result, DateTime? completedDate, string? odometerValue, string? odometerUnit,
+    public void AddMotTest(string? result, DateTime? completedDate, DateTime? expiryDate, string? odometerValue,
+        string? odometerUnit,
         string? odometerResult, string? motTestNumber,
         List<(string? defectType, string? defectText, bool? isDangerous)> defects)
     {
-        var motTest = new VehicleMotTest(result, completedDate, odometerValue, odometerUnit, odometerResult,
+        var motTest = new VehicleMotTest(result, completedDate, expiryDate, odometerValue, odometerUnit, odometerResult,
             motTestNumber);
         foreach (var defect in defects)
             motTest.AddDefect(defect.defectType, defect.defectText, defect.isDangerous);
@@ -90,6 +115,14 @@ public class MotStatus
         }
     }
 
+    [JsonConstructor]
+    private MotStatus(bool isValid, DateTime? validUntil, bool isExempt)
+    {
+        IsValid = isValid;
+        ValidUntil = validUntil;
+        IsExempt = isExempt;
+    }
+
     public bool IsValid { get; private set; }
     public DateTime? ValidUntil { get; }
     public bool IsExempt { get; private set; }
@@ -113,8 +146,17 @@ public class TaxStatus
         }
     }
 
-    public string DvlaTaxStatusText { get; }
+    [JsonConstructor]
+    private TaxStatus(string? dvlaTaxStatusText, bool isValid, bool isExempt, DateTime? taxDueDate)
+    {
+        DvlaTaxStatusText = dvlaTaxStatusText;
+        IsValid = isValid;
+        IsExempt = isExempt;
+        TaxDueDate = taxDueDate;
+    }
+
+    public string? DvlaTaxStatusText { get; }
     public bool IsValid { get; private set; }
     public bool IsExempt { get; private set; }
-    public DateTime? TaxDueDate { get; }
+    public DateTime? TaxDueDate { get; private set; }
 }
