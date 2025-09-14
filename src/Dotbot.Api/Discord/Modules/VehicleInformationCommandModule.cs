@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Dotbot.Api.Dto;
 using Dotbot.Api.Services;
+using Dotbot.Infrastructure;
+using Dotbot.Infrastructure.Entities.Reports;
+using Microsoft.EntityFrameworkCore;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
@@ -20,11 +22,11 @@ public class StringMenuModule(IRedisDatabase redis, ILogger<StringMenuModule> lo
         var selectedValue = Context.SelectedValues.ToList().FirstOrDefault();
         var registrationPlate = selectedValue?.Split("-")[0];
         var motTestNumber = selectedValue?.Split("-")[1];
-        VehicleInformationAggregate? vehicleInformation;
+        VehicleInformation? vehicleInformation;
 
         try
         {
-            vehicleInformation = await redis.GetAsync<VehicleInformationAggregate>(registrationPlate!);
+            vehicleInformation = await redis.GetAsync<VehicleInformation>(registrationPlate!);
         }
         catch (Exception ex)
         {
@@ -49,12 +51,12 @@ public class ButtonModule(IRedisDatabase redis, ILogger<ButtonModule> logger)
     {
         var interactionResponse = new InteractionMessageProperties();
 
-        VehicleInformationAggregate? vehicleInformation;
+        VehicleInformation? vehicleInformation;
         try
         {
             vehicleInformation =
-                await redis.GetAsync<VehicleInformationAggregate>(Context.Interaction.Message.Id.ToString());
-            if (vehicleInformation == null)
+                await redis.GetAsync<VehicleInformation>(Context.Interaction.Message.Id.ToString());
+            if (vehicleInformation is null)
             {
                 await RespondAsync(InteractionCallback.Message(
                     new InteractionMessageProperties().WithContent(
@@ -80,7 +82,7 @@ public class ButtonModule(IRedisDatabase redis, ILogger<ButtonModule> logger)
         foreach (var motTest in vehicleInformation.VehicleMotTests.OrderByDescending(motTest => motTest.CompletedDate)
                      .Take(10))
             stringMenu.Add(new StringMenuSelectOptionProperties(
-                $"{vehicleInformation.VehicleMotTests.IndexOf(motTest) + 1} - {motTest.CompletedDate.GetValueOrDefault().ToShortDateString()} - {motTest.Result} - {motTest.OdometerReadingInMiles} Miles",
+                $"{vehicleInformation.VehicleMotTests.IndexOf(motTest) + 1} - {motTest.CompletedDate.GetValueOrDefault().DateTime.ToShortDateString()} - {motTest.Result} - {motTest.OdometerReadingInMiles} Miles",
                 $"{vehicleInformation.Registration}-{motTest.TestNumber}"));
 
         interactionResponse
@@ -97,7 +99,8 @@ public partial class VehicleInformationCommandModule(
     IMoturService moturService,
     IVehicleInformationService vehicleInformationService,
     ILogger<VehicleInformationCommandModule> logger,
-    IRedisDatabase redis) : ApplicationCommandModule<HttpApplicationCommandContext>
+    IRedisDatabase redis,
+    DotbotContext dbContext) : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("registration", "Registration plate to search")]
     public async Task RetrieveByRegistration(
@@ -147,6 +150,15 @@ public partial class VehicleInformationCommandModule(
     private async Task RetrieveAndPostVehicleData(string registrationPlate, Activity? activity, string commandName,
         CancellationToken cancellationToken)
     {
+        var guildId = Context.Interaction.GuildId?.ToString();
+        if (guildId is null)
+        {
+            await Context.Interaction.SendResponseAsync(
+                InteractionCallback.Message("Cannot use this command outside of a server"),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
         var displayName = (Context.Interaction.User as GuildUser)?.Nickname ??
                           Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
         var tags = new TagList
@@ -159,45 +171,76 @@ public partial class VehicleInformationCommandModule(
         var vehicleInformationResult =
             await vehicleInformationService.GetVehicleInformation(registrationPlate, cancellationToken);
 
-        var vehicleSummaryEmbed = !vehicleInformationResult.IsSuccess
-            ? new EmbedProperties()
-                .WithTitle($"No Vehicle Information found for {registrationPlate}")
-                .WithColor(new Color(255, 0, 0))
-            : VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(vehicleInformationResult.Value!);
+        EmbedProperties vehicleSummaryEmbed;
+        EmbedProperties motHistoryEmbed;
+        var interactionResponse = new InteractionMessageProperties();
 
-        var motHistoryEmbed =
-            VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(vehicleInformationResult.Value!);
-
-        var linkButtonComponents = new List<ActionRowProperties>
+        if (vehicleInformationResult.Value is null || !vehicleInformationResult.IsSuccess)
         {
-            new ActionRowProperties().AddComponents(new LinkButtonProperties(
-                    $"https://www.check-mot.service.gov.uk/results?registration={vehicleInformationResult.Value!.Registration}",
-                    "Link to full MOT History"),
-                new ButtonProperties("mot_button", "Show MOT history in Discord", ButtonStyle.Primary))
-        };
-        var interactionResponse = new InteractionMessageProperties().WithEmbeds([vehicleSummaryEmbed]);
+            vehicleSummaryEmbed = new EmbedProperties()
+                .WithTitle($"No Vehicle Information found for {registrationPlate}")
+                .WithColor(new Color(255, 0, 0));
+        }
+        else
+        {
+            vehicleSummaryEmbed =
+                VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(vehicleInformationResult.Value!);
 
-        if (vehicleInformationResult.Value.VehicleMotTests.Count > 0)
-            interactionResponse
-                .AddEmbeds(motHistoryEmbed)
-                .AddComponents(linkButtonComponents);
+            var existingVehicleInformation =
+                await dbContext.VehicleInformation.FirstOrDefaultAsync(x => x.Registration == registrationPlate,
+                    cancellationToken);
+            if (existingVehicleInformation is null)
+            {
+                await dbContext.VehicleInformation.AddAsync(vehicleInformationResult.Value, cancellationToken);
+            }
+            else
+            {
+                vehicleInformationResult.Value.Id = existingVehicleInformation.Id;
+                dbContext.Entry(existingVehicleInformation).CurrentValues.SetValues(vehicleInformationResult.Value);
+            }
+
+            await dbContext.VehicleCommandLogs.AddAsync(new VehicleCommandLog
+            {
+                RegistrationPlate = registrationPlate,
+                RequestDate = DateTimeOffset.Now,
+                GuildId = guildId,
+                UserId = Context.Interaction.User.Id.ToString()
+            }, cancellationToken);
+
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        if (vehicleInformationResult.Value is not null && vehicleInformationResult.Value.VehicleMotTests.Count > 0)
+        {
+            motHistoryEmbed =
+                VehicleInformationAndMotEmbedBuilder.BuildMotSummaryEmbed(vehicleInformationResult.Value);
+
+            var linkButtonComponents = new List<ActionRowProperties>
+            {
+                new ActionRowProperties().AddComponents(new LinkButtonProperties(
+                        $"https://www.check-mot.service.gov.uk/results?registration={vehicleInformationResult.Value!.Registration}",
+                        "Link to full MOT History"),
+                    new ButtonProperties("mot_button", "Show MOT history in Discord", ButtonStyle.Primary))
+            };
+            interactionResponse.AddComponents(linkButtonComponents);
+        }
+        else
+        {
+            motHistoryEmbed = new EmbedProperties()
+                .WithDescription("No MOTs Found");
+        }
+
+        interactionResponse
+            .AddEmbeds(vehicleSummaryEmbed)
+            .AddEmbeds(motHistoryEmbed);
 
         var message =
             await Context.Interaction.SendFollowupMessageAsync(interactionResponse,
                 cancellationToken: cancellationToken);
 
-        await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value, TimeSpan.FromMinutes(30));
-
-        tags.Add(new KeyValuePair<string, object?>("registration", vehicleInformationResult.Value.Registration));
-        tags.Add(new KeyValuePair<string, object?>("make", vehicleInformationResult.Value.Make));
-        tags.Add(new KeyValuePair<string, object?>("model", vehicleInformationResult.Value.Model));
-        tags.Add(new KeyValuePair<string, object?>("colour", vehicleInformationResult.Value.Colour));
-        tags.Add(new KeyValuePair<string, object?>("fuel_type", vehicleInformationResult.Value.FuelType));
-        tags.Add(new KeyValuePair<string, object?>("engine_size", vehicleInformationResult.Value.EngineCapacityLitres));
-        foreach (var tag in tags)
-            activity?.SetTag(tag.Key, tag.Value);
-
-        Instrumentation.VehicleRegistrationCounter.Add(1, tags);
+        if (vehicleInformationResult.Value is not null)
+            await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value, TimeSpan.FromMinutes(30));
     }
 
     [GeneratedRegex(@"\s+")]

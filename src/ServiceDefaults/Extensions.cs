@@ -14,7 +14,6 @@ namespace ServiceDefaults;
 
 public static partial class Extensions
 {
-
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
         builder.AddBasicServiceDefaults();
@@ -28,10 +27,10 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// Adds the services except for making outgoing HTTP calls.
+    ///     Adds the services except for making outgoing HTTP calls.
     /// </summary>
     /// <remarks>
-    /// This allows for things like Polly to be trimmed out of the app if it isn't used.
+    ///     This allows for things like Polly to be trimmed out of the app if it isn't used.
     /// </remarks>
     public static IHostApplicationBuilder AddBasicServiceDefaults(this IHostApplicationBuilder builder)
     {
@@ -52,8 +51,8 @@ public static partial class Extensions
 
         // Configure OpenTelemetry Resources with the application name
         otel.ConfigureResource(resource => resource
-            .AddService(serviceName: builder.Environment.ApplicationName));
-
+            .AddService(builder.Environment.ApplicationName));
+        builder.Services.AddExceptionSummarizer();
         // Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
         otel.WithMetrics(metrics =>
         {
@@ -78,10 +77,7 @@ public static partial class Extensions
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation()
                 .AddAWSInstrumentation();
-            if (otlpEndpoint != null)
-            {
-                tracing.AddOtlpExporter(options => { options.Endpoint = new Uri(otlpEndpoint); });
-            }
+            if (otlpEndpoint != null) tracing.AddOtlpExporter(options => { options.Endpoint = new Uri(otlpEndpoint); });
         });
 
         return builder;
@@ -109,15 +105,13 @@ public static partial class Extensions
     {
         var s3Config = new AmazonS3Config
         {
-            ServiceURL = builder.Configuration.GetValue<string>("S3:ServiceURL"), // Use get options strong type for this config
+            ServiceURL =
+                builder.Configuration.GetValue<string>("S3:ServiceURL"), // Use get options strong type for this config
             ForcePathStyle = builder.Configuration.GetValue<bool>("S3:ForcePathStyle"),
             RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
             ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
         };
-        builder.Services.AddSingleton<IAmazonS3>(serviceProvider =>
-        {
-            return new AmazonS3Client(s3Config);
-        });
+        builder.Services.AddSingleton<IAmazonS3>(serviceProvider => { return new AmazonS3Client(s3Config); });
         return builder;
     }
 }
