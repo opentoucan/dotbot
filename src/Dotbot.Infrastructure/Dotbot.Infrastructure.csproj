@@ -14,6 +14,7 @@
         <PackageReference Include="StackExchange.Redis"/>
         <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore"/>
         <PackageReference Include="StackExchange.Redis.Extensions.System.Text.Json"/>
+        <PackageReference Include="AngleSharp"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -23,14 +24,5 @@
     <ItemGroup>
         <Folder Include="Migrations\"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="UglyToad.PdfPig">
-            <HintPath>..\..\..\..\..\..\.nuget\packages\pdfpig\0.1.12-alpha-20250913-0ef12\lib\net8.0\UglyToad.PdfPig.dll</HintPath>
-        </Reference>
-        <Reference Include="UglyToad.PdfPig.DocumentLayoutAnalysis">
-            <HintPath>..\..\..\..\..\..\.nuget\packages\pdfpig\0.1.12-alpha-20250913-0ef12\lib\net8.0\UglyToad.PdfPig.DocumentLayoutAnalysis.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
+    
 </Project>

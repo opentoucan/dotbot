@@ -27,7 +27,6 @@
         <PackageReference Include="NetCord.Services"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
-        <PackageReference Include="PdfPig"/>
         <PackageReference Include="StackExchange.Redis"/>
         <PackageReference Include="FuzzySharp"/>
         <PackageReference Include="Google.Protobuf"/>
