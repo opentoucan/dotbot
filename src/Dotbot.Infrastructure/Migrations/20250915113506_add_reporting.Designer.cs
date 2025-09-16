@@ -4,6 +4,7 @@ using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dotbot.Infrastructure.Migrations
 {
     [DbContext(typeof(DotbotContext))]
-    partial class DotbotContextModelSnapshot : ModelSnapshot
+    [Migration("20250915113506_add_reporting")]
+    partial class add_reporting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

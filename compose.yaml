@@ -81,14 +81,18 @@ configs:
     content: |
       apiVersion: 1
       providers:
-      - name: 'default'
-        org_id: 1
-        folder: ''
-        type: 'file'
-        options:
-          folder: '/var/lib/grafana/dashboards'
+        - name: "Dashboard provider"
+          orgId: 1
+          type: file
+          disableDeletion: false
+          updateIntervalSeconds: 10
+          allowUiUpdates: true
+          options:
+              path: /var/lib/grafana/dashboards
+              foldersFromFilesStructure: true
       datasources:
-        - name: 'Prometheus'
+        - name: Prometheus
+          uid: DS_PROMETHEUS
           type: prometheus
           access: proxy
           url: http://prometheus:9090
