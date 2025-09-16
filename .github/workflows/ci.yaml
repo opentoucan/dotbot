@@ -84,7 +84,7 @@ jobs:
         run: dotnet build
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@2d92b76c45b91eb80fc44c74ce3fce0ee94e8f9d # v3.30.0
+        uses: github/codeql-action/upload-sarif@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
             sarif_file: ${{ matrix.sarif-path.path }}
             category: ${{ matrix.sarif-path.category }}
@@ -370,7 +370,7 @@ jobs:
           echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
 
       - name: Generate Token
-        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
