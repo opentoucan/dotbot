@@ -60,11 +60,11 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9" />
     <PackageVersion Include="StackExchange.Redis" Version="2.9.17" />
     <!-- Discord -->
-    <PackageVersion Include="NetCord" Version="1.0.0-alpha.423" />
-    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.423" />
-    <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.423" />
-    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.423" />
-    <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.423" />
+    <PackageVersion Include="NetCord" Version="1.0.0-alpha.427" />
+    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.427" />
+    <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.427" />
+    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.427" />
+    <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.427" />
     <!-- Testing -->
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.4" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
