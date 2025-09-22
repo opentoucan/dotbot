@@ -48,7 +48,7 @@ public static class SeedMotInspectionDefectDefinitions
                         }
 
                         var tableBodyElements = htmlElement.QuerySelector("tbody");
-                        if (tableBodyElements != null && htmlElement.InnerHtml.Contains("Defect reference"))
+                        if (tableBodyElements != null && htmlElement.InnerHtml.Contains("Defect"))
                         {
                             var rows = tableBodyElements.QuerySelectorAll("tr");
                             foreach (var row in rows)
