@@ -34,7 +34,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -85,7 +85,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -117,7 +117,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -167,7 +167,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -199,7 +199,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -248,7 +248,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -280,7 +280,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -329,7 +329,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -361,7 +361,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -411,7 +411,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -443,7 +443,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -506,7 +506,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -552,7 +552,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -637,7 +637,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "time_series",
@@ -675,7 +675,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -759,7 +759,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -791,7 +791,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -859,7 +859,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -891,7 +891,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -966,7 +966,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -998,7 +998,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1081,7 +1081,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -1127,7 +1127,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1191,7 +1191,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -1223,7 +1223,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1292,7 +1292,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -1360,7 +1360,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1449,7 +1449,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "table",
@@ -1492,7 +1492,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1641,7 +1641,7 @@
               "dataset": "dotbot",
               "datasource": {
                 "type": "grafana-postgresql-datasource",
-                "uid": "eexrv9wwlnl6oe"
+                "uid": "${DS_POSTGRES}"
               },
               "editorMode": "code",
               "format": "time_series",
@@ -1690,7 +1690,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "eexrv9wwlnl6oe"
+        "uid": "${DS_POSTGRES}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1742,7 +1742,7 @@
           "dataset": "dotbot",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "editorMode": "code",
           "format": "table",
@@ -1793,7 +1793,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "eexrv9wwlnl6oe"
+        "uid": "${DS_POSTGRES}"
       },
       "description": "",
       "fieldConfig": {
@@ -1852,7 +1852,7 @@
           "dataset": "dotbot",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "editorMode": "code",
           "format": "table",
@@ -1885,7 +1885,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "eexrv9wwlnl6oe"
+        "uid": "${DS_POSTGRES}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1961,7 +1961,7 @@
           "dataset": "dotbot",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "eexrv9wwlnl6oe"
+            "uid": "${DS_POSTGRES}"
           },
           "editorMode": "code",
           "format": "time_series",
@@ -2005,7 +2005,7 @@
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
-          "uid": "eexrv9wwlnl6oe"
+          "uid": "${DS_POSTGRES}"
         },
         "definition": "SELECT registration FROM reporting.vehicle_information",
         "description": "Registration plate to search metrics for",
@@ -2026,6 +2026,6 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "Vehicle Dashboard for registration plate",
-  "uid": "67bb2a8a-43c6-4945-8b29-3d18c2f20124",
+  "uid": "vehicle-dashboard-for-registration-plate",
   "version": 80
 }
