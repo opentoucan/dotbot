@@ -8,7 +8,7 @@ public class VehicleCommandLogEntityTypeConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<VehicleCommandLog> builder)
     {
-        builder.ToTable("vehicle_command_log", "reporting");
+        builder.ToTable("vehicle_command_log", "vehicle_reporting");
         builder.HasKey(mc => mc.Id);
     }
 }

@@ -44,7 +44,7 @@ namespace Dotbot.Infrastructure.Migrations
                 table: "command_attachments");
 
             migrationBuilder.EnsureSchema(
-                name: "reporting");
+                name: "vehicle_reporting");
 
             migrationBuilder.RenameTable(
                 name: "Xkcds",
@@ -173,10 +173,10 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "ix_command_attachments_custom_command_id");
 
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:reporting.fuel_type", "diesel,electric,petrol,unknown")
-                .Annotation("Npgsql:Enum:reporting.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
-                .Annotation("Npgsql:Enum:reporting.odometer_result", "no_odometer,read,unreadable")
-                .Annotation("Npgsql:Enum:reporting.test_result", "failed,passed");
+                .Annotation("Npgsql:Enum:vehicle_reporting.fuel_type", "diesel,electric,petrol,unknown")
+                .Annotation("Npgsql:Enum:vehicle_reporting.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
+                .Annotation("Npgsql:Enum:vehicle_reporting.odometer_result", "no_odometer,read,unreadable")
+                .Annotation("Npgsql:Enum:vehicle_reporting.test_result", "failed,passed");
 
             migrationBuilder.AddPrimaryKey(
                 name: "pk_xkcds",
@@ -204,7 +204,7 @@ namespace Dotbot.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "vehicle_command_log",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -220,7 +220,7 @@ namespace Dotbot.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "vehicle_information",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -229,7 +229,7 @@ namespace Dotbot.Infrastructure.Migrations
                     make = table.Column<string>(type: "text", nullable: true),
                     model = table.Column<string>(type: "text", nullable: true),
                     colour = table.Column<string>(type: "text", nullable: true),
-                    fuel_type = table.Column<FuelType>(type: "reporting.fuel_type", nullable: false),
+                    fuel_type = table.Column<FuelType>(type: "vehicle_reporting.fuel_type", nullable: false),
                     mot_status_is_valid = table.Column<bool>(type: "boolean", nullable: false),
                     mot_status_valid_until = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     mot_status_is_exempt = table.Column<bool>(type: "boolean", nullable: false),
@@ -250,7 +250,7 @@ namespace Dotbot.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "vehicle_mot_inspection_defect_definitions",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -267,15 +267,15 @@ namespace Dotbot.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "vehicle_mot_test",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    result = table.Column<TestResult>(type: "reporting.test_result", nullable: false),
+                    result = table.Column<TestResult>(type: "vehicle_reporting.test_result", nullable: false),
                     completed_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     expiry_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     odometer_reading_in_miles = table.Column<int>(type: "integer", nullable: true),
-                    odometer_read_result = table.Column<OdometerResult>(type: "reporting.odometer_result", nullable: false),
+                    odometer_read_result = table.Column<OdometerResult>(type: "vehicle_reporting.odometer_result", nullable: false),
                     test_number = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: true),
                     vehicle_information_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
@@ -285,18 +285,18 @@ namespace Dotbot.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_vehicle_mot_test_vehicle_information_vehicle_information_id",
                         column: x => x.vehicle_information_id,
-                        principalSchema: "reporting",
+                        principalSchema: "vehicle_reporting",
                         principalTable: "vehicle_information",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "vehicle_mot_test_defect",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    category = table.Column<MotDefectCategory>(type: "reporting.mot_defect_category", nullable: false),
+                    category = table.Column<MotDefectCategory>(type: "vehicle_reporting.mot_defect_category", nullable: false),
                     defect_definition_id = table.Column<Guid>(type: "uuid", nullable: false),
                     is_dangerous = table.Column<bool>(type: "boolean", nullable: false),
                     vehicle_mot_test_id = table.Column<Guid>(type: "uuid", nullable: true)
@@ -307,47 +307,47 @@ namespace Dotbot.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_vehicle_mot_test_defect_mot_inspection_defect_definitions_d",
                         column: x => x.defect_definition_id,
-                        principalSchema: "reporting",
+                        principalSchema: "vehicle_reporting",
                         principalTable: "vehicle_mot_inspection_defect_definitions",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_vehicle_mot_test_defect_vehicle_mot_test_vehicle_mot_test_id",
                         column: x => x.vehicle_mot_test_id,
-                        principalSchema: "reporting",
+                        principalSchema: "vehicle_reporting",
                         principalTable: "vehicle_mot_test",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_information_registration",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 table: "vehicle_information",
                 column: "registration",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_test_number",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 table: "vehicle_mot_test",
                 column: "test_number",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_vehicle_information_id",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 table: "vehicle_mot_test",
                 column: "vehicle_information_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_defect_defect_definition_id",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 table: "vehicle_mot_test_defect",
                 column: "defect_definition_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_defect_vehicle_mot_test_id",
-                schema: "reporting",
+                schema: "vehicle_reporting",
                 table: "vehicle_mot_test_defect",
                 column: "vehicle_mot_test_id");
 
@@ -386,23 +386,23 @@ namespace Dotbot.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "vehicle_command_log",
-                schema: "reporting");
+                schema: "vehicle_reporting");
 
             migrationBuilder.DropTable(
                 name: "vehicle_mot_test_defect",
-                schema: "reporting");
+                schema: "vehicle_reporting");
 
             migrationBuilder.DropTable(
                 name: "vehicle_mot_inspection_defect_definitions",
-                schema: "reporting");
+                schema: "vehicle_reporting");
 
             migrationBuilder.DropTable(
                 name: "vehicle_mot_test",
-                schema: "reporting");
+                schema: "vehicle_reporting");
 
             migrationBuilder.DropTable(
                 name: "vehicle_information",
-                schema: "reporting");
+                schema: "vehicle_reporting");
 
             migrationBuilder.DropPrimaryKey(
                 name: "pk_xkcds",
@@ -551,10 +551,10 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "IX_command_attachments_CustomCommandId");
 
             migrationBuilder.AlterDatabase()
-                .OldAnnotation("Npgsql:Enum:reporting.fuel_type", "diesel,electric,petrol,unknown")
-                .OldAnnotation("Npgsql:Enum:reporting.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
-                .OldAnnotation("Npgsql:Enum:reporting.odometer_result", "no_odometer,read,unreadable")
-                .OldAnnotation("Npgsql:Enum:reporting.test_result", "failed,passed");
+                .OldAnnotation("Npgsql:Enum:vehicle_reporting.fuel_type", "diesel,electric,petrol,unknown")
+                .OldAnnotation("Npgsql:Enum:vehicle_reporting.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
+                .OldAnnotation("Npgsql:Enum:vehicle_reporting.odometer_result", "no_odometer,read,unreadable")
+                .OldAnnotation("Npgsql:Enum:vehicle_reporting.test_result", "failed,passed");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Xkcds",

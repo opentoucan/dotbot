@@ -8,7 +8,7 @@ public class VehicleInformationEntityTypeConfiguration : IEntityTypeConfiguratio
 {
     public void Configure(EntityTypeBuilder<VehicleInformation> builder)
     {
-        builder.ToTable("vehicle_information", "reporting");
+        builder.ToTable("vehicle_information", "vehicle_reporting");
         builder.HasKey(vi => vi.Id);
 
         builder.OwnsOne(vi => vi.TaxStatus);
