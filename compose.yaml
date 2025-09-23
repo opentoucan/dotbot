@@ -112,6 +112,7 @@ configs:
              user: dotbot
              jsonData:
                database: dotbot
+               sslmode: 'disable'
              secureJsonData:
                password: 'yourWeak(!)Password'
   prometheus.yaml:
