@@ -34,7 +34,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${DS_POSTGRES}"
           },
           "fieldConfig": {
             "defaults": {
@@ -90,7 +90,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT make FROM reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT make FROM vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -172,7 +172,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT model from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT model from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -253,7 +253,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT colour from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT colour from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -334,7 +334,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT fuel_type from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT fuel_type from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -416,7 +416,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT CONCAT(engine_capacity_litres, 'L') as engine_capacity_litres from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT CONCAT(engine_capacity_litres, 'L') as engine_capacity_litres from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -511,7 +511,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT registration_date as registration_date from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT registration_date as registration_date from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -642,7 +642,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT vi.\"registration\", vmt.\"completed_date\" as time, vmt.\"odometer_reading_in_miles\" as mileage, vi.\"make\", vi.\"model\"\nFROM reporting.vehicle_mot_test AS vmt\nINNER JOIN reporting.vehicle_information vi on vmt.\"vehicle_information_id\" = vi.\"id\"\nWHERE vi.registration = '$registration_plate' and $__timeFilter(vmt.\"completed_date\")\nORDER BY vmt.\"completed_date\" asc",
+              "rawSql": "SELECT vi.\"registration\", vmt.\"completed_date\" as time, vmt.\"odometer_reading_in_miles\" as mileage, vi.\"make\", vi.\"model\"\nFROM vehicle_mot_test AS vmt\nINNER JOIN vehicle_information vi on vmt.\"vehicle_information_id\" = vi.\"id\"\nWHERE vi.registration = '$registration_plate' and $__timeFilter(vmt.\"completed_date\")\nORDER BY vmt.\"completed_date\" asc",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -764,7 +764,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT mot_status_is_valid from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT mot_status_is_valid from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -864,7 +864,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT tax_status_dvla_tax_status_text from reporting.vehicle_information WHERE registration = '$registration_plate'",
+              "rawSql": "SELECT tax_status_dvla_tax_status_text from vehicle_information WHERE registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -971,7 +971,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT EXTRACT(DAY FROM mot_status_valid_until - now()) as days_remaining \nFROM reporting.vehicle_information \nWHERE registration = '$registration_plate';",
+              "rawSql": "SELECT EXTRACT(DAY FROM mot_status_valid_until - now()) as days_remaining \nFROM vehicle_information \nWHERE registration = '$registration_plate';",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1086,7 +1086,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT EXTRACT(DAY FROM tax_status_tax_due_date - now()) as days_remaining \nFROM reporting.vehicle_information \nWHERE registration = '$registration_plate';",
+              "rawSql": "SELECT EXTRACT(DAY FROM tax_status_tax_due_date - now()) as days_remaining \nFROM vehicle_information \nWHERE registration = '$registration_plate';",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1196,7 +1196,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT result FROM reporting.vehicle_mot_test vmt\nINNER JOIN reporting.vehicle_information vi on vi.id = vmt.vehicle_information_id\nWHERE vi.registration = '$registration_plate'\nORDER BY vmt.completed_date DESC\nLIMIT 1;",
+              "rawSql": "SELECT result FROM vehicle_mot_test vmt\nINNER JOIN vehicle_information vi on vi.id = vmt.vehicle_information_id\nWHERE vi.registration = '$registration_plate'\nORDER BY vmt.completed_date DESC\nLIMIT 1;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1297,7 +1297,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT \nvmt.result,\nvmt.test_number,\nvmt.completed_date,\nEXTRACT(EPOCH FROM DATE_TRUNC('year', vmt.completed_date)) as time\nFROM reporting.vehicle_mot_test vmt\nINNER JOIN reporting.vehicle_information vi on vi.id = vmt.vehicle_information_id\nWHERE vi.registration = '$registration_plate'",
+              "rawSql": "SELECT \nvmt.result,\nvmt.test_number,\nvmt.completed_date,\nEXTRACT(EPOCH FROM DATE_TRUNC('year', vmt.completed_date)) as time\nFROM vehicle_mot_test vmt\nINNER JOIN vehicle_information vi on vi.id = vmt.vehicle_information_id\nWHERE vi.registration = '$registration_plate'",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1454,7 +1454,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT vmt.completed_date AS \"Test Date\", vmt.result AS \"MOT Result\", vmt.odometer_reading_in_miles AS \"Odometer (miles)\", STRING_AGG('[' || vmtd.category || ']\n' || vmidd.top_level_category || '\n' || vmidd.defect_name ,'\n\n' order by vmtd.category desc) AS \"Defect Details\" FROM reporting.vehicle_mot_test vmt\nINNER JOIN reporting.vehicle_information vi on vi.id = vmt.vehicle_information_id\nLEFT JOIN reporting.vehicle_mot_test_defect vmtd on vmtd.vehicle_mot_test_id = vmt.id\nLEFT JOIN reporting.vehicle_mot_inspection_defect_definitions vmidd on vmidd.id = vmtd.defect_definition_id\nWHERE vi.registration = '$registration_plate'\nGROUP BY vmt.completed_date, vmt.result, vmt.odometer_reading_in_miles\nORDER BY vmt.completed_date DESC",
+              "rawSql": "SELECT vmt.completed_date AS \"Test Date\", vmt.result AS \"MOT Result\", vmt.odometer_reading_in_miles AS \"Odometer (miles)\", STRING_AGG('[' || vmtd.category || ']\n' || vmidd.top_level_category || '\n' || vmidd.defect_name ,'\n\n' order by vmtd.category desc) AS \"Defect Details\" FROM vehicle_mot_test vmt\nINNER JOIN vehicle_information vi on vi.id = vmt.vehicle_information_id\nLEFT JOIN vehicle_mot_test_defect vmtd on vmtd.vehicle_mot_test_id = vmt.id\nLEFT JOIN mot_inspection_defect_definitions vmidd on vmidd.id = vmtd.defect_definition_id\nWHERE vi.registration = '$registration_plate'\nGROUP BY vmt.completed_date, vmt.result, vmt.odometer_reading_in_miles\nORDER BY vmt.completed_date DESC",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1646,7 +1646,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT vmt.completed_date as time,\n       COUNT(CASE WHEN vmtd.category = 'advisory' THEN vmtd.category END) as \"Advisory\",\n       COUNT(CASE WHEN vmtd.category = 'minor' THEN vmtd.category END) as \"Minor\",\n       COUNT(CASE WHEN vmtd.category = 'major' THEN vmtd.category END) as \"Major\",\n       COUNT(CASE WHEN vmtd.category not in('advisory', 'minor', 'major') THEN vmtd.category END) as \"Other\"\nFROM reporting.vehicle_mot_test_defect vmtd\n         RIGHT JOIN reporting.vehicle_mot_test vmt on vmt.id = vmtd.vehicle_mot_test_id\n         INNER JOIN reporting.vehicle_information vi on vi.id = vmt.vehicle_information_id\nWHERE vi.registration = '$registration_plate' and $__timeFilter(vmt.\"completed_date\")\nGROUP BY vmt.completed_date\nORDER BY vmt.completed_date DESC",
+              "rawSql": "SELECT vmt.completed_date as time,\n       COUNT(CASE WHEN vmtd.category = 'advisory' THEN vmtd.category END) as \"Advisory\",\n       COUNT(CASE WHEN vmtd.category = 'minor' THEN vmtd.category END) as \"Minor\",\n       COUNT(CASE WHEN vmtd.category = 'major' THEN vmtd.category END) as \"Major\",\n       COUNT(CASE WHEN vmtd.category not in('advisory', 'minor', 'major') THEN vmtd.category END) as \"Other\"\nFROM vehicle_mot_test_defect vmtd\n         RIGHT JOIN vehicle_mot_test vmt on vmt.id = vmtd.vehicle_mot_test_id\n         INNER JOIN vehicle_information vi on vi.id = vmt.vehicle_information_id\nWHERE vi.registration = '$registration_plate' and $__timeFilter(vmt.\"completed_date\")\nGROUP BY vmt.completed_date\nORDER BY vmt.completed_date DESC",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1747,7 +1747,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*), vmidd.top_level_category FROM reporting.vehicle_mot_test_defect vmtd \nINNER JOIN (SELECT vmt.Id FROM reporting.vehicle_mot_test vmt\n                             INNER JOIN reporting.vehicle_information vi on vi.id = vmt.vehicle_information_id\n      WHERE vi.registration = '$registration_plate' AND vmt.result = 'failed'\n      ORDER BY vmt.completed_date DESC\n      LIMIT 1) vmt ON vmt.id = vmtd.vehicle_mot_test_id\n    INNER JOIN reporting.vehicle_mot_inspection_defect_definitions vmidd on vmidd.id = vmtd.defect_definition_id\n--WHERE vmtd.category > 'advisory' maybe use distinct defect code so that all 4 corners of suspension arms don't skew results\nGROUP BY vmidd.top_level_category",
+          "rawSql": "SELECT COUNT(*), vmidd.top_level_category FROM vehicle_mot_test_defect vmtd \nINNER JOIN (SELECT vmt.Id FROM vehicle_mot_test vmt\n                             INNER JOIN vehicle_information vi on vi.id = vmt.vehicle_information_id\n      WHERE vi.registration = '$registration_plate' AND vmt.result = 'failed'\n      ORDER BY vmt.completed_date DESC\n      LIMIT 1) vmt ON vmt.id = vmtd.vehicle_mot_test_id\n    INNER JOIN mot_inspection_defect_definitions vmidd on vmidd.id = vmtd.defect_definition_id\n--WHERE vmtd.category > 'advisory' maybe use distinct defect code so that all 4 corners of suspension arms don't skew results\nGROUP BY vmidd.top_level_category",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1857,7 +1857,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(vmidd.\"id\"), CONCAT('(', regexp_replace(vmidd.\"top_level_category\", '\\d+\\.\\s+', ''), ') ', COALESCE(vmidd.\"sub_category_name\", vmidd.\"category_area\"))  \nFROM reporting.vehicle_mot_test_defect vmtd \nINNER JOIN reporting.vehicle_mot_test vmt ON vmtd.\"vehicle_mot_test_id\" = vmt.\"id\"\nINNER JOIN reporting.vehicle_mot_inspection_defect_definitions vmidd ON vmtd.\"defect_definition_id\" = vmidd.\"id\"\nINNER JOIN reporting.vehicle_information vi ON vmt.vehicle_information_id = vi.id\nWHERE vi.registration = '$registration_plate' AND vmtd.\"category\" in ('dangerous', 'fail', 'major', 'minor')\nGROUP BY vmidd.\"sub_category_name\", vmidd.\"category_area\", vmidd.\"top_level_category\", vmt.\"result\"\nHAVING vmt.\"result\" = 'failed'  AND vmidd.\"category_area\" IS NOT NULL\nORDER BY COUNT(vmidd.\"id\") DESC",
+          "rawSql": "SELECT COUNT(vmidd.\"id\"), CONCAT('(', regexp_replace(vmidd.\"top_level_category\", '\\d+\\.\\s+', ''), ') ', COALESCE(vmidd.\"sub_category_name\", vmidd.\"category_area\"))  \nFROM vehicle_mot_test_defect vmtd \nINNER JOIN vehicle_mot_test vmt ON vmtd.\"vehicle_mot_test_id\" = vmt.\"id\"\nINNER JOIN mot_inspection_defect_definitions vmidd ON vmtd.\"defect_definition_id\" = vmidd.\"id\"\nINNER JOIN vehicle_information vi ON vmt.vehicle_information_id = vi.id\nWHERE vi.registration = '$registration_plate' AND vmtd.\"category\" in ('dangerous', 'fail', 'major', 'minor')\nGROUP BY vmidd.\"sub_category_name\", vmidd.\"category_area\", vmidd.\"top_level_category\", vmt.\"result\"\nHAVING vmt.\"result\" = 'failed'  AND vmidd.\"category_area\" IS NOT NULL\nORDER BY COUNT(vmidd.\"id\") DESC",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1876,7 +1876,7 @@
             ],
             "limit": 50
           },
-          "table": "reporting.vehicle_mot_test_defect"
+          "table": "vehicle_mot_test_defect"
         }
       ],
       "title": "Most common MOT failure defect",
@@ -1966,7 +1966,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroupAlias(vmt.completed_date, '$__interval'),\n       CONCAT('(', regexp_replace(vmidd.\"top_level_category\", '\\d+\\.\\s+', ''), ') ', COALESCE(vmidd.\"sub_category_name\", vmidd.\"category_area\")) as category,\n       COUNT(*) as bucket\nFROM reporting.vehicle_mot_test_defect vmtd\n         INNER JOIN reporting.vehicle_mot_test vmt ON vmtd.\"vehicle_mot_test_id\" = vmt.\"id\"\n         INNER JOIN reporting.vehicle_mot_inspection_defect_definitions vmidd ON vmtd.\"defect_definition_id\" = vmidd.\"id\"\n         INNER JOIN reporting.vehicle_information vi ON vmt.vehicle_information_id = vi.id\nWHERE vi.registration = '$registration_plate' \n  AND vmtd.\"category\" not in ('advisory') \n  AND vmt.\"result\" = 'failed' \nGROUP BY vmt.completed_date, vmidd.top_level_category, vmidd.sub_category_name, vmidd.category_area",
+          "rawSql": "SELECT $__timeGroupAlias(vmt.completed_date, '$__interval'),\n       CONCAT('(', regexp_replace(vmidd.\"top_level_category\", '\\d+\\.\\s+', ''), ') ', COALESCE(vmidd.\"sub_category_name\", vmidd.\"category_area\")) as category,\n       COUNT(*) as bucket\nFROM vehicle_mot_test_defect vmtd\n         INNER JOIN vehicle_mot_test vmt ON vmtd.\"vehicle_mot_test_id\" = vmt.\"id\"\n         INNER JOIN mot_inspection_defect_definitions vmidd ON vmtd.\"defect_definition_id\" = vmidd.\"id\"\n         INNER JOIN vehicle_information vi ON vmt.vehicle_information_id = vi.id\nWHERE vi.registration = '$registration_plate' \n  AND vmtd.\"category\" not in ('advisory') \n  AND vmt.\"result\" = 'failed' \nGROUP BY vmt.completed_date, vmidd.top_level_category, vmidd.sub_category_name, vmidd.category_area",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2007,12 +2007,12 @@
           "type": "grafana-postgresql-datasource",
           "uid": "${DS_POSTGRES}"
         },
-        "definition": "SELECT registration FROM reporting.vehicle_information",
+        "definition": "SELECT registration FROM vehicle_information",
         "description": "Registration plate to search metrics for",
         "label": "Registration Plate",
         "name": "registration_plate",
         "options": [],
-        "query": "SELECT registration FROM reporting.vehicle_information",
+        "query": "SELECT registration FROM vehicle_information",
         "refresh": 1,
         "regex": "",
         "type": "query"
