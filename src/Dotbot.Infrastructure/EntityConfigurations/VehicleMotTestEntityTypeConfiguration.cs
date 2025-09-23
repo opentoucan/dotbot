@@ -8,8 +8,6 @@ public class VehicleMotTestEntityTypeConfiguration : IEntityTypeConfiguration<Ve
 {
     public void Configure(EntityTypeBuilder<VehicleMotTest> builder)
     {
-        builder.ToTable("vehicle_mot_test", "vehicle_reporting");
-
         builder.HasKey(vmt => vmt.Id);
         builder.Property(vmt => vmt.TestNumber).HasMaxLength(12);
         builder.HasIndex(vmt => vmt.TestNumber).IsUnique();

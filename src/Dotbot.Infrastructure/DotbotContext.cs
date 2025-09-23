@@ -16,7 +16,7 @@ public class DotbotContext : DbContext, IUnitOfWork
     public DbSet<Guild> Guilds { get; set; } = null!;
     public DbSet<CommandAttachment> Attachments { get; set; } = null!;
     public DbSet<Xkcd> Xkcds { get; set; } = null!;
-    public DbSet<VehicleCommandLog> VehicleCommandLogs { get; set; } = null!;
+    public DbSet<DiscordCommandLog> DiscordCommandLogs { get; set; } = null!;
     public DbSet<VehicleInformation> VehicleInformation { get; set; } = null!;
     public DbSet<VehicleMotInspectionDefectDefinition> MotInspectionDefectDefinitions { get; set; } = null!;
 
@@ -32,7 +32,7 @@ public class DotbotContext : DbContext, IUnitOfWork
         modelBuilder.ApplyConfiguration(new VehicleMotTestDefectEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new VehicleMotInspectionDefectDefinitionEntityTypeConfiguration());
 
-        modelBuilder.ApplyConfiguration(new VehicleCommandLogEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new DiscordCommandLogEntityTypeConfiguration());
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

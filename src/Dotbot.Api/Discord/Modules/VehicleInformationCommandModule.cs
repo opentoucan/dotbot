@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Dotbot.Api.Services;
-using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities.Reports;
-using Microsoft.EntityFrameworkCore;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
@@ -100,7 +98,8 @@ public partial class VehicleInformationCommandModule(
     IVehicleInformationService vehicleInformationService,
     ILogger<VehicleInformationCommandModule> logger,
     IRedisDatabase redis,
-    DotbotContext dbContext) : ApplicationCommandModule<HttpApplicationCommandContext>
+    IHttpInteractionCommandLogger httpInteractionCommandLogger)
+    : ApplicationCommandModule<HttpApplicationCommandContext>
 {
     [SubSlashCommand("registration", "Registration plate to search")]
     public async Task RetrieveByRegistration(
@@ -159,14 +158,8 @@ public partial class VehicleInformationCommandModule(
             return;
         }
 
-        var displayName = (Context.Interaction.User as GuildUser)?.Nickname ??
-                          Context.Interaction.User.GlobalName ?? Context.Interaction.User.Username;
-        var tags = new TagList
-        {
-            { "interaction_name", commandName },
-            { "member_id", Context.Interaction.User.Id },
-            { "member_display_name", displayName }
-        };
+        await httpInteractionCommandLogger.LogCommand(commandName, registrationPlate, guildId,
+            Context.User.Id.ToString(), cancellationToken);
 
         var vehicleInformationResult =
             await vehicleInformationService.GetVehicleInformation(registrationPlate, cancellationToken);
@@ -186,29 +179,8 @@ public partial class VehicleInformationCommandModule(
             vehicleSummaryEmbed =
                 VehicleInformationAndMotEmbedBuilder.BuildVehicleInformationEmbed(vehicleInformationResult.Value!);
 
-            var existingVehicleInformation =
-                await dbContext.VehicleInformation.FirstOrDefaultAsync(x => x.Registration == registrationPlate,
-                    cancellationToken);
-            if (existingVehicleInformation is null)
-            {
-                await dbContext.VehicleInformation.AddAsync(vehicleInformationResult.Value, cancellationToken);
-            }
-            else
-            {
-                vehicleInformationResult.Value.Id = existingVehicleInformation.Id;
-                dbContext.Entry(existingVehicleInformation).CurrentValues.SetValues(vehicleInformationResult.Value);
-            }
-
-            await dbContext.VehicleCommandLogs.AddAsync(new VehicleCommandLog
-            {
-                RegistrationPlate = registrationPlate,
-                RequestDate = DateTimeOffset.Now,
-                GuildId = guildId,
-                UserId = Context.Interaction.User.Id.ToString()
-            }, cancellationToken);
-
-
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await vehicleInformationService.SaveVehicleInformation(registrationPlate, vehicleInformationResult.Value,
+                Context.Interaction.User.Id.ToString(), guildId, cancellationToken);
         }
 
         if (vehicleInformationResult.Value is not null && vehicleInformationResult.Value.VehicleMotTests.Count > 0)
@@ -240,7 +212,7 @@ public partial class VehicleInformationCommandModule(
                 cancellationToken: cancellationToken);
 
         if (vehicleInformationResult.Value is not null)
-            await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value, TimeSpan.FromMinutes(30));
+            await redis.AddAsync(message.Id.ToString(), vehicleInformationResult.Value, TimeSpan.FromHours(6));
     }
 
     [GeneratedRegex(@"\s+")]

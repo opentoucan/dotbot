@@ -52,10 +52,10 @@ public static class Extensions
     public static NpgsqlDbContextOptionsBuilder AddPostgresOptions(this NpgsqlDbContextOptionsBuilder builder)
     {
         builder
-            .MapEnum<MotDefectCategory>(schemaName: "vehicle_reporting")
-            .MapEnum<TestResult>(schemaName: "vehicle_reporting")
-            .MapEnum<OdometerResult>(schemaName: "vehicle_reporting")
-            .MapEnum<FuelType>(schemaName: "vehicle_reporting");
+            .MapEnum<MotDefectCategory>()
+            .MapEnum<TestResult>()
+            .MapEnum<OdometerResult>()
+            .MapEnum<FuelType>();
         return builder;
     }
 }

@@ -1,5 +1,7 @@
+using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities.Reports;
 using Dotbot.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace Dotbot.Api.Services;
@@ -8,6 +10,12 @@ public interface IVehicleInformationService
 {
     Task<ServiceResult<VehicleInformation>> GetVehicleInformation(string registrationPlate,
         CancellationToken cancellationToken);
+
+    Task SaveVehicleInformation(string registrationPlate,
+        VehicleInformation vehicleInformation,
+        string callingUserId,
+        string callingGuildId,
+        CancellationToken cancellationToken = default);
 }
 
 public class VehicleInformationService(
@@ -15,7 +23,8 @@ public class VehicleInformationService(
     IMotHistoryService motHistoryService,
     IRedisDatabase redisDatabase,
     ILogger<VehicleInformationService> logger,
-    IMotInspectionDefectDefinitionRepository motInspectionDefectDefinitionRepository) : IVehicleInformationService
+    IMotInspectionDefectDefinitionRepository motInspectionDefectDefinitionRepository,
+    DotbotContext dbContext) : IVehicleInformationService
 {
     public async Task<ServiceResult<VehicleInformation>> GetVehicleInformation(string registrationPlate,
         CancellationToken cancellationToken)
@@ -100,5 +109,27 @@ public class VehicleInformationService(
         }
 
         return ServiceResult<VehicleInformation>.Success(vehicleInformation);
+    }
+
+    public async Task SaveVehicleInformation(string registrationPlate,
+        VehicleInformation vehicleInformation,
+        string callingUserId,
+        string callingGuildId,
+        CancellationToken cancellationToken)
+    {
+        var existingVehicleInformation =
+            await dbContext.VehicleInformation.FirstOrDefaultAsync(x => x.Registration == registrationPlate,
+                cancellationToken);
+        if (existingVehicleInformation is null)
+        {
+            await dbContext.VehicleInformation.AddAsync(vehicleInformation, cancellationToken);
+        }
+        else
+        {
+            vehicleInformation.Id = existingVehicleInformation.Id;
+            dbContext.Entry(existingVehicleInformation).CurrentValues.SetValues(vehicleInformation);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

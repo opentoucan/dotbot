@@ -24,11 +24,6 @@ namespace Dotbot.Infrastructure.Migrations
                 table: "custom_commands");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Xkcds",
-                schema: "dotbot",
-                table: "Xkcds");
-
-            migrationBuilder.DropPrimaryKey(
                 name: "PK_Guilds",
                 schema: "dotbot",
                 table: "Guilds");
@@ -39,18 +34,14 @@ namespace Dotbot.Infrastructure.Migrations
                 table: "custom_commands");
 
             migrationBuilder.DropPrimaryKey(
+                name: "PK_Xkcds",
+                schema: "dotbot",
+                table: "Xkcds");
+
+            migrationBuilder.DropPrimaryKey(
                 name: "PK_command_attachments",
                 schema: "dotbot",
                 table: "command_attachments");
-
-            migrationBuilder.EnsureSchema(
-                name: "vehicle_reporting");
-
-            migrationBuilder.RenameTable(
-                name: "Xkcds",
-                schema: "dotbot",
-                newName: "xkcds",
-                newSchema: "dotbot");
 
             migrationBuilder.RenameTable(
                 name: "Guilds",
@@ -58,23 +49,17 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "guilds",
                 newSchema: "dotbot");
 
-            migrationBuilder.RenameColumn(
-                name: "Posted",
+            migrationBuilder.RenameTable(
+                name: "Xkcds",
                 schema: "dotbot",
-                table: "xkcds",
-                newName: "posted");
+                newName: "xkcd",
+                newSchema: "dotbot");
 
-            migrationBuilder.RenameColumn(
-                name: "Id",
+            migrationBuilder.RenameTable(
+                name: "command_attachments",
                 schema: "dotbot",
-                table: "xkcds",
-                newName: "id");
-
-            migrationBuilder.RenameColumn(
-                name: "ComicNumber",
-                schema: "dotbot",
-                table: "xkcds",
-                newName: "comic_number");
+                newName: "attachments",
+                newSchema: "dotbot");
 
             migrationBuilder.RenameColumn(
                 name: "Name",
@@ -137,52 +122,73 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "ix_custom_commands_guild_id");
 
             migrationBuilder.RenameColumn(
+                name: "Posted",
+                schema: "dotbot",
+                table: "xkcd",
+                newName: "posted");
+
+            migrationBuilder.RenameColumn(
+                name: "Id",
+                schema: "dotbot",
+                table: "xkcd",
+                newName: "id");
+
+            migrationBuilder.RenameColumn(
+                name: "ComicNumber",
+                schema: "dotbot",
+                table: "xkcd",
+                newName: "comic_number");
+
+            migrationBuilder.RenameColumn(
                 name: "Url",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "attachments",
                 newName: "url");
 
             migrationBuilder.RenameColumn(
                 name: "Name",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "attachments",
                 newName: "name");
 
             migrationBuilder.RenameColumn(
                 name: "Id",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "attachments",
                 newName: "id");
 
             migrationBuilder.RenameColumn(
                 name: "FileType",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "attachments",
                 newName: "file_type");
 
             migrationBuilder.RenameColumn(
                 name: "CustomCommandId",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "attachments",
                 newName: "custom_command_id");
 
             migrationBuilder.RenameIndex(
                 name: "IX_command_attachments_CustomCommandId",
                 schema: "dotbot",
-                table: "command_attachments",
-                newName: "ix_command_attachments_custom_command_id");
+                table: "attachments",
+                newName: "ix_attachments_custom_command_id");
 
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:vehicle_reporting.fuel_type", "diesel,electric,petrol,unknown")
-                .Annotation("Npgsql:Enum:vehicle_reporting.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
-                .Annotation("Npgsql:Enum:vehicle_reporting.odometer_result", "no_odometer,read,unreadable")
-                .Annotation("Npgsql:Enum:vehicle_reporting.test_result", "failed,passed");
+                .Annotation("Npgsql:Enum:fuel_type", "diesel,electric,petrol,unknown")
+                .Annotation("Npgsql:Enum:mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
+                .Annotation("Npgsql:Enum:odometer_result", "no_odometer,read,unreadable")
+                .Annotation("Npgsql:Enum:test_result", "failed,passed");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "pk_xkcds",
+            migrationBuilder.AlterColumn<Guid>(
+                name: "custom_command_id",
                 schema: "dotbot",
-                table: "xkcds",
-                column: "id");
+                table: "attachments",
+                type: "uuid",
+                nullable: true,
+                oldClrType: typeof(Guid),
+                oldType: "uuid");
 
             migrationBuilder.AddPrimaryKey(
                 name: "pk_guilds",
@@ -197,30 +203,54 @@ namespace Dotbot.Infrastructure.Migrations
                 column: "id");
 
             migrationBuilder.AddPrimaryKey(
-                name: "pk_command_attachments",
+                name: "pk_xkcd",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "xkcd",
+                column: "id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "pk_attachments",
+                schema: "dotbot",
+                table: "attachments",
                 column: "id");
 
             migrationBuilder.CreateTable(
-                name: "vehicle_command_log",
-                schema: "vehicle_reporting",
+                name: "discord_command_logs",
+                schema: "dotbot",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    registration_plate = table.Column<string>(type: "text", nullable: false),
-                    request_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    command_name = table.Column<string>(type: "text", nullable: false),
+                    identifier = table.Column<string>(type: "text", nullable: false),
+                    timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     user_id = table.Column<string>(type: "text", nullable: false),
                     guild_id = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_vehicle_command_log", x => x.id);
+                    table.PrimaryKey("pk_discord_command_logs", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "mot_inspection_defect_definitions",
+                schema: "dotbot",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    top_level_category = table.Column<string>(type: "text", nullable: false),
+                    category_area = table.Column<string>(type: "text", nullable: true),
+                    sub_category_name = table.Column<string>(type: "text", nullable: true),
+                    defect_reference_code = table.Column<string>(type: "text", nullable: true),
+                    defect_name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_mot_inspection_defect_definitions", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "vehicle_information",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -229,7 +259,7 @@ namespace Dotbot.Infrastructure.Migrations
                     make = table.Column<string>(type: "text", nullable: true),
                     model = table.Column<string>(type: "text", nullable: true),
                     colour = table.Column<string>(type: "text", nullable: true),
-                    fuel_type = table.Column<FuelType>(type: "vehicle_reporting.fuel_type", nullable: false),
+                    fuel_type = table.Column<FuelType>(type: "fuel_type", nullable: false),
                     mot_status_is_valid = table.Column<bool>(type: "boolean", nullable: false),
                     mot_status_valid_until = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     mot_status_is_exempt = table.Column<bool>(type: "boolean", nullable: false),
@@ -249,33 +279,16 @@ namespace Dotbot.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "vehicle_mot_inspection_defect_definitions",
-                schema: "vehicle_reporting",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    top_level_category = table.Column<string>(type: "text", nullable: false),
-                    category_area = table.Column<string>(type: "text", nullable: true),
-                    sub_category_name = table.Column<string>(type: "text", nullable: true),
-                    defect_reference_code = table.Column<string>(type: "text", nullable: true),
-                    defect_name = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_vehicle_mot_inspection_defect_definitions", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "vehicle_mot_test",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    result = table.Column<TestResult>(type: "vehicle_reporting.test_result", nullable: false),
+                    result = table.Column<TestResult>(type: "test_result", nullable: false),
                     completed_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     expiry_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     odometer_reading_in_miles = table.Column<int>(type: "integer", nullable: true),
-                    odometer_read_result = table.Column<OdometerResult>(type: "vehicle_reporting.odometer_result", nullable: false),
+                    odometer_read_result = table.Column<OdometerResult>(type: "odometer_result", nullable: false),
                     test_number = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: true),
                     vehicle_information_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
@@ -285,18 +298,18 @@ namespace Dotbot.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_vehicle_mot_test_vehicle_information_vehicle_information_id",
                         column: x => x.vehicle_information_id,
-                        principalSchema: "vehicle_reporting",
+                        principalSchema: "dotbot",
                         principalTable: "vehicle_information",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "vehicle_mot_test_defect",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    category = table.Column<MotDefectCategory>(type: "vehicle_reporting.mot_defect_category", nullable: false),
+                    category = table.Column<MotDefectCategory>(type: "mot_defect_category", nullable: false),
                     defect_definition_id = table.Column<Guid>(type: "uuid", nullable: false),
                     is_dangerous = table.Column<bool>(type: "boolean", nullable: false),
                     vehicle_mot_test_id = table.Column<Guid>(type: "uuid", nullable: true)
@@ -307,59 +320,58 @@ namespace Dotbot.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_vehicle_mot_test_defect_mot_inspection_defect_definitions_d",
                         column: x => x.defect_definition_id,
-                        principalSchema: "vehicle_reporting",
-                        principalTable: "vehicle_mot_inspection_defect_definitions",
+                        principalSchema: "dotbot",
+                        principalTable: "mot_inspection_defect_definitions",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_vehicle_mot_test_defect_vehicle_mot_test_vehicle_mot_test_id",
                         column: x => x.vehicle_mot_test_id,
-                        principalSchema: "vehicle_reporting",
+                        principalSchema: "dotbot",
                         principalTable: "vehicle_mot_test",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_information_registration",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 table: "vehicle_information",
                 column: "registration",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_test_number",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 table: "vehicle_mot_test",
                 column: "test_number",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_vehicle_information_id",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 table: "vehicle_mot_test",
                 column: "vehicle_information_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_defect_defect_definition_id",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 table: "vehicle_mot_test_defect",
                 column: "defect_definition_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_vehicle_mot_test_defect_vehicle_mot_test_id",
-                schema: "vehicle_reporting",
+                schema: "dotbot",
                 table: "vehicle_mot_test_defect",
                 column: "vehicle_mot_test_id");
 
             migrationBuilder.AddForeignKey(
-                name: "fk_command_attachments_custom_commands_custom_command_id",
+                name: "fk_attachments_custom_commands_custom_command_id",
                 schema: "dotbot",
-                table: "command_attachments",
+                table: "attachments",
                 column: "custom_command_id",
                 principalSchema: "dotbot",
                 principalTable: "custom_commands",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "fk_custom_commands_guilds_guild_id",
@@ -375,9 +387,9 @@ namespace Dotbot.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "fk_command_attachments_custom_commands_custom_command_id",
+                name: "fk_attachments_custom_commands_custom_command_id",
                 schema: "dotbot",
-                table: "command_attachments");
+                table: "attachments");
 
             migrationBuilder.DropForeignKey(
                 name: "fk_custom_commands_guilds_guild_id",
@@ -385,29 +397,24 @@ namespace Dotbot.Infrastructure.Migrations
                 table: "custom_commands");
 
             migrationBuilder.DropTable(
-                name: "vehicle_command_log",
-                schema: "vehicle_reporting");
+                name: "discord_command_logs",
+                schema: "dotbot");
 
             migrationBuilder.DropTable(
                 name: "vehicle_mot_test_defect",
-                schema: "vehicle_reporting");
+                schema: "dotbot");
 
             migrationBuilder.DropTable(
-                name: "vehicle_mot_inspection_defect_definitions",
-                schema: "vehicle_reporting");
+                name: "mot_inspection_defect_definitions",
+                schema: "dotbot");
 
             migrationBuilder.DropTable(
                 name: "vehicle_mot_test",
-                schema: "vehicle_reporting");
+                schema: "dotbot");
 
             migrationBuilder.DropTable(
                 name: "vehicle_information",
-                schema: "vehicle_reporting");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "pk_xkcds",
-                schema: "dotbot",
-                table: "xkcds");
+                schema: "dotbot");
 
             migrationBuilder.DropPrimaryKey(
                 name: "pk_guilds",
@@ -420,15 +427,14 @@ namespace Dotbot.Infrastructure.Migrations
                 table: "custom_commands");
 
             migrationBuilder.DropPrimaryKey(
-                name: "pk_command_attachments",
+                name: "pk_xkcd",
                 schema: "dotbot",
-                table: "command_attachments");
+                table: "xkcd");
 
-            migrationBuilder.RenameTable(
-                name: "xkcds",
+            migrationBuilder.DropPrimaryKey(
+                name: "pk_attachments",
                 schema: "dotbot",
-                newName: "Xkcds",
-                newSchema: "dotbot");
+                table: "attachments");
 
             migrationBuilder.RenameTable(
                 name: "guilds",
@@ -436,23 +442,17 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "Guilds",
                 newSchema: "dotbot");
 
-            migrationBuilder.RenameColumn(
-                name: "posted",
+            migrationBuilder.RenameTable(
+                name: "xkcd",
                 schema: "dotbot",
-                table: "Xkcds",
-                newName: "Posted");
+                newName: "Xkcds",
+                newSchema: "dotbot");
 
-            migrationBuilder.RenameColumn(
-                name: "id",
+            migrationBuilder.RenameTable(
+                name: "attachments",
                 schema: "dotbot",
-                table: "Xkcds",
-                newName: "Id");
-
-            migrationBuilder.RenameColumn(
-                name: "comic_number",
-                schema: "dotbot",
-                table: "Xkcds",
-                newName: "ComicNumber");
+                newName: "command_attachments",
+                newSchema: "dotbot");
 
             migrationBuilder.RenameColumn(
                 name: "name",
@@ -515,6 +515,24 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "IX_custom_commands_GuildId");
 
             migrationBuilder.RenameColumn(
+                name: "posted",
+                schema: "dotbot",
+                table: "Xkcds",
+                newName: "Posted");
+
+            migrationBuilder.RenameColumn(
+                name: "id",
+                schema: "dotbot",
+                table: "Xkcds",
+                newName: "Id");
+
+            migrationBuilder.RenameColumn(
+                name: "comic_number",
+                schema: "dotbot",
+                table: "Xkcds",
+                newName: "ComicNumber");
+
+            migrationBuilder.RenameColumn(
                 name: "url",
                 schema: "dotbot",
                 table: "command_attachments",
@@ -545,22 +563,27 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "CustomCommandId");
 
             migrationBuilder.RenameIndex(
-                name: "ix_command_attachments_custom_command_id",
+                name: "ix_attachments_custom_command_id",
                 schema: "dotbot",
                 table: "command_attachments",
                 newName: "IX_command_attachments_CustomCommandId");
 
             migrationBuilder.AlterDatabase()
-                .OldAnnotation("Npgsql:Enum:vehicle_reporting.fuel_type", "diesel,electric,petrol,unknown")
-                .OldAnnotation("Npgsql:Enum:vehicle_reporting.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
-                .OldAnnotation("Npgsql:Enum:vehicle_reporting.odometer_result", "no_odometer,read,unreadable")
-                .OldAnnotation("Npgsql:Enum:vehicle_reporting.test_result", "failed,passed");
+                .OldAnnotation("Npgsql:Enum:fuel_type", "diesel,electric,petrol,unknown")
+                .OldAnnotation("Npgsql:Enum:mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
+                .OldAnnotation("Npgsql:Enum:odometer_result", "no_odometer,read,unreadable")
+                .OldAnnotation("Npgsql:Enum:test_result", "failed,passed");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Xkcds",
+            migrationBuilder.AlterColumn<Guid>(
+                name: "CustomCommandId",
                 schema: "dotbot",
-                table: "Xkcds",
-                column: "Id");
+                table: "command_attachments",
+                type: "uuid",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
+                oldClrType: typeof(Guid),
+                oldType: "uuid",
+                oldNullable: true);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Guilds",
@@ -572,6 +595,12 @@ namespace Dotbot.Infrastructure.Migrations
                 name: "PK_custom_commands",
                 schema: "dotbot",
                 table: "custom_commands",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Xkcds",
+                schema: "dotbot",
+                table: "Xkcds",
                 column: "Id");
 
             migrationBuilder.AddPrimaryKey(

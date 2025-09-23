@@ -22,10 +22,10 @@ namespace Dotbot.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "vehicle_reporting", "fuel_type", new[] { "diesel", "electric", "petrol", "unknown" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "vehicle_reporting", "mot_defect_category", new[] { "advisory", "dangerous", "fail", "major", "minor", "nonspecific", "prs", "systemgenerated", "userentered" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "vehicle_reporting", "odometer_result", new[] { "no_odometer", "read", "unreadable" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "vehicle_reporting", "test_result", new[] { "failed", "passed" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "fuel_type", new[] { "diesel", "electric", "petrol", "unknown" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "mot_defect_category", new[] { "advisory", "dangerous", "fail", "major", "minor", "nonspecific", "prs", "systemgenerated", "userentered" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "odometer_result", new[] { "no_odometer", "read", "unreadable" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "test_result", new[] { "failed", "passed" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CommandAttachment", b =>
@@ -35,7 +35,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("CustomCommandId")
+                    b.Property<Guid?>("CustomCommandId")
                         .HasColumnType("uuid")
                         .HasColumnName("custom_command_id");
 
@@ -55,12 +55,12 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("url");
 
                     b.HasKey("Id")
-                        .HasName("pk_command_attachments");
+                        .HasName("pk_attachments");
 
                     b.HasIndex("CustomCommandId")
-                        .HasDatabaseName("ix_command_attachments_custom_command_id");
+                        .HasDatabaseName("ix_attachments_custom_command_id");
 
-                    b.ToTable("command_attachments", "dotbot");
+                    b.ToTable("attachments", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CustomCommand", b =>
@@ -124,26 +124,31 @@ namespace Dotbot.Infrastructure.Migrations
                     b.ToTable("guilds", "dotbot");
                 });
 
-            modelBuilder.Entity("Dotbot.Infrastructure.Entities.Reports.VehicleCommandLog", b =>
+            modelBuilder.Entity("Dotbot.Infrastructure.Entities.Reports.DiscordCommandLog", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("CommandName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("command_name");
+
                     b.Property<string>("GuildId")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("guild_id");
 
-                    b.Property<string>("RegistrationPlate")
+                    b.Property<string>("Identifier")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("registration_plate");
+                        .HasColumnName("identifier");
 
-                    b.Property<DateTimeOffset>("RequestDate")
+                    b.Property<DateTimeOffset>("Timestamp")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("request_date");
+                        .HasColumnName("timestamp");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -151,9 +156,9 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_vehicle_command_log");
+                        .HasName("pk_discord_command_logs");
 
-                    b.ToTable("vehicle_command_log", "vehicle_reporting");
+                    b.ToTable("discord_command_logs", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.Reports.VehicleInformation", b =>
@@ -176,7 +181,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("engine_capacity_litres");
 
                     b.Property<FuelType>("FuelType")
-                        .HasColumnType("vehicle_reporting.fuel_type")
+                        .HasColumnType("fuel_type")
                         .HasColumnName("fuel_type");
 
                     b.Property<DateTimeOffset?>("LastIssuedV5CDate")
@@ -215,7 +220,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_vehicle_information_registration");
 
-                    b.ToTable("vehicle_information", "vehicle_reporting");
+                    b.ToTable("vehicle_information", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.Reports.VehicleMotInspectionDefectDefinition", b =>
@@ -248,9 +253,9 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("top_level_category");
 
                     b.HasKey("Id")
-                        .HasName("pk_vehicle_mot_inspection_defect_definitions");
+                        .HasName("pk_mot_inspection_defect_definitions");
 
-                    b.ToTable("vehicle_mot_inspection_defect_definitions", "vehicle_reporting");
+                    b.ToTable("mot_inspection_defect_definitions", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.Reports.VehicleMotTest", b =>
@@ -269,7 +274,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("expiry_date");
 
                     b.Property<OdometerResult>("OdometerReadResult")
-                        .HasColumnType("vehicle_reporting.odometer_result")
+                        .HasColumnType("odometer_result")
                         .HasColumnName("odometer_read_result");
 
                     b.Property<int?>("OdometerReadingInMiles")
@@ -277,7 +282,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("odometer_reading_in_miles");
 
                     b.Property<TestResult>("Result")
-                        .HasColumnType("vehicle_reporting.test_result")
+                        .HasColumnType("test_result")
                         .HasColumnName("result");
 
                     b.Property<string>("TestNumber")
@@ -299,7 +304,7 @@ namespace Dotbot.Infrastructure.Migrations
                     b.HasIndex("VehicleInformationId")
                         .HasDatabaseName("ix_vehicle_mot_test_vehicle_information_id");
 
-                    b.ToTable("vehicle_mot_test", "vehicle_reporting");
+                    b.ToTable("vehicle_mot_test", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.Reports.VehicleMotTestDefect", b =>
@@ -310,7 +315,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<MotDefectCategory>("Category")
-                        .HasColumnType("vehicle_reporting.mot_defect_category")
+                        .HasColumnType("mot_defect_category")
                         .HasColumnName("category");
 
                     b.Property<Guid>("DefectDefinitionId")
@@ -334,7 +339,7 @@ namespace Dotbot.Infrastructure.Migrations
                     b.HasIndex("VehicleMotTestId")
                         .HasDatabaseName("ix_vehicle_mot_test_defect_vehicle_mot_test_id");
 
-                    b.ToTable("vehicle_mot_test_defect", "vehicle_reporting");
+                    b.ToTable("vehicle_mot_test_defect", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.Xkcd", b =>
@@ -353,9 +358,9 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("posted");
 
                     b.HasKey("Id")
-                        .HasName("pk_xkcds");
+                        .HasName("pk_xkcd");
 
-                    b.ToTable("xkcds", "dotbot");
+                    b.ToTable("xkcd", "dotbot");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CommandAttachment", b =>
@@ -363,9 +368,7 @@ namespace Dotbot.Infrastructure.Migrations
                     b.HasOne("Dotbot.Infrastructure.Entities.CustomCommand", null)
                         .WithMany("Attachments")
                         .HasForeignKey("CustomCommandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_command_attachments_custom_commands_custom_command_id");
+                        .HasConstraintName("fk_attachments_custom_commands_custom_command_id");
                 });
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CustomCommand", b =>
@@ -398,7 +401,7 @@ namespace Dotbot.Infrastructure.Migrations
 
                             b1.HasKey("VehicleInformationId");
 
-                            b1.ToTable("vehicle_information", "vehicle_reporting");
+                            b1.ToTable("vehicle_information", "dotbot");
 
                             b1.WithOwner()
                                 .HasForeignKey("VehicleInformationId")
@@ -429,7 +432,7 @@ namespace Dotbot.Infrastructure.Migrations
 
                             b1.HasKey("VehicleInformationId");
 
-                            b1.ToTable("vehicle_information", "vehicle_reporting");
+                            b1.ToTable("vehicle_information", "dotbot");
 
                             b1.WithOwner()
                                 .HasForeignKey("VehicleInformationId")

@@ -10,7 +10,6 @@ public class
 {
     public void Configure(EntityTypeBuilder<VehicleMotInspectionDefectDefinition> builder)
     {
-        builder.ToTable("vehicle_mot_inspection_defect_definitions", "vehicle_reporting");
         builder.HasKey(md => md.Id);
     }
 }

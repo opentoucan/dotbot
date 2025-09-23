@@ -4,11 +4,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dotbot.Infrastructure.EntityConfigurations;
 
-public class VehicleCommandLogEntityTypeConfiguration : IEntityTypeConfiguration<VehicleCommandLog>
+public class DiscordCommandLogEntityTypeConfiguration : IEntityTypeConfiguration<DiscordCommandLog>
 {
-    public void Configure(EntityTypeBuilder<VehicleCommandLog> builder)
+    public void Configure(EntityTypeBuilder<DiscordCommandLog> builder)
     {
-        builder.ToTable("vehicle_command_log", "vehicle_reporting");
         builder.HasKey(mc => mc.Id);
     }
 }

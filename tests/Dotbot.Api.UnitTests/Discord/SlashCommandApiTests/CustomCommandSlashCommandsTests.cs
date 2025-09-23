@@ -1,3 +1,4 @@
+using Dotbot.Api.Discord;
 using Dotbot.Api.Discord.SlashCommandApis;
 using Dotbot.Api.Services;
 using Microsoft.Extensions.Logging;
@@ -17,18 +18,27 @@ public class CustomCommandSlashCommandsTests
     private const ulong GuildId = 1234;
     private static readonly IRestRequestHandler RestRequestHandlerMock = Substitute.For<IRestRequestHandler>();
     private static readonly ILoggerFactory LoggerFactoryMock = Substitute.For<ILoggerFactory>();
+
+    private static readonly IHttpInteractionCommandLogger HttpInteractionCommandLoggerMock =
+        Substitute.For<IHttpInteractionCommandLogger>();
+
     private static readonly IUserContext UserContextMock = Substitute.For<IUserContext>();
-    private static readonly HttpApplicationCommandContext CommandContext = new(new SlashCommandInteraction(new JsonInteraction
-    {
-        GuildId = null,
-        Data = new JsonInteractionData(),
-        User = new JsonUser(),
-        GuildUser = new JsonGuildUser(),
-        Channel = new JsonChannel(),
-        Entitlements =
+
+    private static readonly HttpApplicationCommandContext CommandContext = new(new SlashCommandInteraction(
+            new JsonInteraction
+            {
+                GuildId = null,
+                Data = new JsonInteractionData(),
+                User = new JsonUser(),
+                GuildUser = new JsonGuildUser(),
+                Channel = new JsonChannel(),
+                Entitlements =
                     []
-    }, new Guild(new JsonGuild(), GuildId, new RestClient(new RestClientConfiguration()), IDictionaryProvider.OfDictionary),
-            (_, _, _, _, _) => Task.FromResult<InteractionCallbackResponse?>(null), new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock })),
+            },
+            new Guild(new JsonGuild(), GuildId, new RestClient(new RestClientConfiguration()),
+                IDictionaryProvider.OfDictionary),
+            (_, _, _, _, _) => Task.FromResult<InteractionCallbackResponse?>(null),
+            new RestClient(new RestClientConfiguration { RequestHandler = RestRequestHandlerMock })),
         new RestClient(new RestClientConfiguration()));
 
     private static readonly ICustomCommandService CustomCommandService = Substitute.For<ICustomCommandService>();
@@ -38,7 +48,8 @@ public class CustomCommandSlashCommandsTests
     public async Task CustomCommand_NoGuildId_DoesNotReturnsError()
     {
         var commandName = "test";
-        await CustomCommandSlashCommands.FetchCustomCommandAsync(CustomCommandService, Instrumentation, LoggerFactoryMock, CommandContext, commandName);
+        await CustomCommandSlashCommands.FetchCustomCommandAsync(CustomCommandService, Instrumentation,
+            LoggerFactoryMock, HttpInteractionCommandLoggerMock, CommandContext, commandName);
 
         await CustomCommandService.DidNotReceive().GetCustomCommandAsync(Arg.Any<string>(), commandName);
     }
