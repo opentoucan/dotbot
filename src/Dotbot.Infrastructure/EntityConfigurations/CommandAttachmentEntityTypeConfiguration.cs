@@ -8,8 +8,5 @@ public class CommandAttachmentEntityTypeConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<CommandAttachment> attachmentConfiguration)
     {
-        attachmentConfiguration.ToTable("command_attachments");
-
-        attachmentConfiguration.Property<Guid>("CustomCommandId");
     }
 }

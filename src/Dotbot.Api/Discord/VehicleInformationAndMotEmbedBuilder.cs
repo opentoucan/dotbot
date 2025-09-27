@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using Dotbot.Api.Dto;
+using Dotbot.Infrastructure;
+using Dotbot.Infrastructure.Entities.Reports;
 using Microsoft.OpenApi.Extensions;
 using NetCord;
 using NetCord.Rest;
-using VehicleMotTest = Dotbot.Api.Dto.VehicleMotTest;
+using VehicleMotTest = Dotbot.Infrastructure.Entities.Reports.VehicleMotTest;
 
 namespace Dotbot.Api.Discord;
 
@@ -15,7 +16,7 @@ public static class VehicleInformationAndMotEmbedBuilder
     private static readonly Color Red = new(255, 0, 0);
     private static readonly Color Black = new(0, 0, 0);
 
-    public static EmbedProperties BuildVehicleInformationEmbed(VehicleInformationAggregate vehicleInformationAggregate)
+    public static EmbedProperties BuildVehicleInformationEmbed(VehicleInformation vehicleInformation)
     {
         var embed = new EmbedProperties();
 
@@ -23,16 +24,16 @@ public static class VehicleInformationAndMotEmbedBuilder
 
         Color embedColour;
 
-        if (vehicleInformationAggregate.MotStatus.IsValid || vehicleInformationAggregate.TaxStatus.IsValid)
+        if (vehicleInformation.MotStatus.IsValid || vehicleInformation.TaxStatus.IsValid)
         {
             embedColour = Green;
         }
-        else if (vehicleInformationAggregate.PotentiallyScrapped)
+        else if (vehicleInformation.PotentiallyScrapped)
         {
             embedColour = Black;
             embed.WithDescription("DVLA has no records for this vehicle, it has probably been scrapped");
         }
-        else if (vehicleInformationAggregate.MotStatus.IsValid || !vehicleInformationAggregate.TaxStatus.IsValid)
+        else if (vehicleInformation.MotStatus.IsValid || !vehicleInformation.TaxStatus.IsValid)
         {
             embedColour = Orange;
         }
@@ -43,72 +44,76 @@ public static class VehicleInformationAndMotEmbedBuilder
 
         embed.WithColor(embedColour);
         embed.AddFields(new EmbedFieldProperties().WithName("Reg plate")
-            .WithValue(vehicleInformationAggregate.Registration)
+            .WithValue(vehicleInformation.Registration)
             .WithInline());
 
-        var motStatusText = vehicleInformationAggregate.MotStatus.IsExempt ? "Exempt" :
-            vehicleInformationAggregate.MotStatus.IsValid ? "Valid" : "Expired";
+        var motStatusText = vehicleInformation.MotStatus.IsExempt ? "Exempt" :
+            vehicleInformation.MotStatus.IsValid ? "Valid" : "Expired";
 
         embed.AddFields(new EmbedFieldProperties().WithName("MOT Status").WithValue(motStatusText).WithInline());
 
-        if (vehicleInformationAggregate.MotStatus.ValidUntil.HasValue &&
-            DateTime.UtcNow < vehicleInformationAggregate.MotStatus.ValidUntil.Value)
+        if (vehicleInformation.MotStatus.ValidUntil.HasValue &&
+            DateTime.UtcNow < vehicleInformation.MotStatus.ValidUntil.Value)
             embed.AddFields(new EmbedFieldProperties().WithName("MOT Due Date")
-                .WithValue(vehicleInformationAggregate.MotStatus.ValidUntil.Value.ToShortDateString()).WithInline());
+                .WithValue(vehicleInformation.MotStatus.ValidUntil.Value.DateTime.ToShortDateString())
+                .WithInline());
 
         embed.AddFields(new EmbedFieldProperties().WithName("Tax Status")
-            .WithValue(vehicleInformationAggregate.TaxStatus.IsExempt
+            .WithValue(vehicleInformation.TaxStatus.IsExempt
                 ? "Exempt"
-                : vehicleInformationAggregate.TaxStatus.DvlaTaxStatusText)
+                : vehicleInformation.TaxStatus.DvlaTaxStatusText)
             .WithInline());
 
-        if (vehicleInformationAggregate.TaxStatus.TaxDueDate.HasValue)
+        if (vehicleInformation.TaxStatus.TaxDueDate.HasValue)
             embed.AddFields(new EmbedFieldProperties().WithName("Tax Due Date")
-                .WithValue(vehicleInformationAggregate.TaxStatus.TaxDueDate.GetValueOrDefault().ToShortDateString())
+                .WithValue(vehicleInformation.TaxStatus.TaxDueDate.GetValueOrDefault().DateTime
+                    .ToShortDateString())
                 .WithInline());
 
-        if (vehicleInformationAggregate.LastIssuedV5CDate.HasValue)
+        if (vehicleInformation.LastIssuedV5CDate.HasValue)
             embed.AddFields(new EmbedFieldProperties().WithName("Last Issued V5C Date")
-                .WithValue(vehicleInformationAggregate.LastIssuedV5CDate.GetValueOrDefault().ToShortDateString())
+                .WithValue(vehicleInformation.LastIssuedV5CDate.GetValueOrDefault().DateTime
+                    .ToShortDateString())
                 .WithInline());
 
-        if (!string.IsNullOrWhiteSpace(vehicleInformationAggregate.Make))
-            embed.AddFields(new EmbedFieldProperties().WithName("Make").WithValue(vehicleInformationAggregate.Make)
+        if (!string.IsNullOrWhiteSpace(vehicleInformation.Make))
+            embed.AddFields(new EmbedFieldProperties().WithName("Make").WithValue(vehicleInformation.Make)
                 .WithInline());
 
-        if (!string.IsNullOrWhiteSpace(vehicleInformationAggregate.Model))
-            embed.AddFields(new EmbedFieldProperties().WithName("Model").WithValue(vehicleInformationAggregate.Model)
+        if (!string.IsNullOrWhiteSpace(vehicleInformation.Model))
+            embed.AddFields(new EmbedFieldProperties().WithName("Model").WithValue(vehicleInformation.Model)
                 .WithInline());
 
-        if (!string.IsNullOrWhiteSpace(vehicleInformationAggregate.Colour))
+        if (!string.IsNullOrWhiteSpace(vehicleInformation.Colour))
             embed.AddFields(new EmbedFieldProperties().WithName("Colour")
-                .WithValue(CultureInfo.InvariantCulture.TextInfo.ToTitleCase(vehicleInformationAggregate.Colour))
+                .WithValue(CultureInfo.InvariantCulture.TextInfo.ToTitleCase(vehicleInformation.Colour))
                 .WithInline());
 
-        if (vehicleInformationAggregate.EngineCapacityLitres != null)
+        if (vehicleInformation.EngineCapacityLitres != null)
             embed.AddFields(new EmbedFieldProperties().WithName("Engine Size")
-                .WithValue($"{vehicleInformationAggregate.EngineCapacityLitres}L")
+                .WithValue($"{vehicleInformation.EngineCapacityLitres}L")
                 .WithInline());
 
         embed.AddFields(new EmbedFieldProperties().WithName("Fuel Type")
-            .WithValue(vehicleInformationAggregate.FuelType.ToString()).WithInline());
+            .WithValue(vehicleInformation.FuelType.ToString()).WithInline());
 
-        if (vehicleInformationAggregate.Co2InGramPerKilometer != null)
+        if (vehicleInformation.Co2InGramPerKilometer != null)
             embed.AddFields(new EmbedFieldProperties().WithName("CO2 Emissions (g/km)")
-                .WithValue(vehicleInformationAggregate.Co2InGramPerKilometer.ToString()).WithInline());
+                .WithValue(vehicleInformation.Co2InGramPerKilometer.ToString()).WithInline());
 
-        if (vehicleInformationAggregate.RegistrationDate.HasValue)
+        if (vehicleInformation.RegistrationDate.HasValue)
             embed.AddFields(new EmbedFieldProperties().WithName("Registration Date")
-                .WithValue(vehicleInformationAggregate.RegistrationDate.GetValueOrDefault().ToShortDateString())
+                .WithValue(
+                    vehicleInformation.RegistrationDate.GetValueOrDefault().DateTime.ToShortDateString())
                 .WithInline());
 
-        if (vehicleInformationAggregate.WeightInKg != null)
+        if (vehicleInformation.WeightInKg != null)
             embed.AddFields(new EmbedFieldProperties().WithName("Weight")
-                .WithValue($"{vehicleInformationAggregate.WeightInKg}kg").WithInline());
+                .WithValue($"{vehicleInformation.WeightInKg}kg").WithInline());
 
         embed.WithFooter(
             new EmbedFooterProperties().WithText(
-                $"{VehicleMakeTaglineGenerator(vehicleInformationAggregate.Make)}\n{VehicleModelTaglineGenerator(vehicleInformationAggregate.Model)}"));
+                $"{VehicleMakeTaglineGenerator(vehicleInformation.Make)}\n{VehicleModelTaglineGenerator(vehicleInformation.Model)}"));
 
         return embed;
     }
@@ -136,36 +141,29 @@ public static class VehicleInformationAndMotEmbedBuilder
         };
     }
 
-    public static EmbedProperties BuildMotSummaryEmbed(VehicleInformationAggregate vehicleInformationAggregate)
+    public static EmbedProperties BuildMotSummaryEmbed(VehicleInformation vehicleInformation)
     {
-        var motTests = vehicleInformationAggregate.VehicleMotTests.OrderByDescending(x => x.CompletedDate).ToList();
-        var latestMot = motTests.FirstOrDefault();
         var embed = new EmbedProperties();
+
+        var motTests = vehicleInformation.VehicleMotTests.OrderByDescending(x => x.CompletedDate).ToList();
+        var latestMot = motTests.FirstOrDefault();
+
         var embedColour =
-            latestMot?.Result == MotTestResult.PASSED && latestMot.Defects.Count == 0 &&
-            vehicleInformationAggregate.MotStatus.IsValid ? Green :
-            latestMot?.Result == MotTestResult.PASSED ? Orange : Red;
+            latestMot?.Result == TestResult.PASSED && latestMot.Defects.Count == 0 &&
+            vehicleInformation.MotStatus.IsValid ? Green :
+            latestMot?.Result == TestResult.PASSED ? Orange : Red;
         embed.WithColor(embedColour);
         embed.WithTitle("MOT Information");
         embed.WithDescription("Summary for all MOT tests on this vehicle");
 
-        if (motTests.Count == 0)
-        {
-            embed.WithDescription("No MOTs Found");
-            if (vehicleInformationAggregate.MotStatus.ValidUntil.HasValue)
-                embed.AddFields(new EmbedFieldProperties().WithName("First MOT Due Date")
-                    .WithValue(vehicleInformationAggregate.MotStatus.ValidUntil.GetValueOrDefault()
-                        .ToShortDateString()));
-            return embed;
-        }
 
         foreach (var motTest in motTests.Take(5))
         {
-            var distinctDefects = motTest.Defects.DistinctBy(x => x.DefectType).ToList();
+            var distinctDefects = motTest.Defects.DistinctBy(x => x.Category).ToList();
             embed.AddFields(new EmbedFieldProperties()
                 .WithName($"{motTest.CompletedDate:dd MMM yyyy} - {motTest.Result}")
                 .WithValue(
-                    $"{string.Join("\n", distinctDefects.Select(x => $" {motTest.Defects.Count(defect => defect.DefectType == x.DefectType)} x {x.DefectType.GetAttributeOfType<DisplayAttribute>().Name}"))}"));
+                    $"{string.Join("\n", distinctDefects.Select(x => $" {motTest.Defects.Count(defect => defect.Category == x.Category)} x {x.Category.GetAttributeOfType<DisplayAttribute>().Name}"))}"));
         }
 
         embed.AddFields(new EmbedFieldProperties()
@@ -182,12 +180,12 @@ public static class VehicleInformationAndMotEmbedBuilder
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Passed tests")
-            .WithValue(motTests.Count(test => test.Result == MotTestResult.PASSED).ToString())
+            .WithValue(motTests.Count(test => test.Result == TestResult.PASSED).ToString())
             .WithInline());
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Failed tests")
-            .WithValue(motTests.Count(test => test.Result == MotTestResult.FAILED).ToString())
+            .WithValue(motTests.Count(test => test.Result == TestResult.FAILED).ToString())
             .WithInline());
 
         embed.AddFields(new EmbedFieldProperties()
@@ -195,30 +193,30 @@ public static class VehicleInformationAndMotEmbedBuilder
             .WithValue(
                 motTests.Average(test =>
                         test.Defects.Count(defect =>
-                            defect.DefectType == VehicleMotTest.Defect.Type.ADVISORY))
+                            defect.Category == MotDefectCategory.ADVISORY))
                     .ToString("F", CultureInfo.InvariantCulture))
             .WithInline());
 
         embed.AddFields(new EmbedFieldProperties()
             .WithName("Average number of minor/major/dangerous per year")
             .WithValue(
-                motTests.Average(test => test.Defects.Count(defect => defect.DefectType is
-                    VehicleMotTest.Defect.Type.DANGEROUS or
-                    VehicleMotTest.Defect.Type.MAJOR or
-                    VehicleMotTest.Defect.Type.MINOR or
-                    VehicleMotTest.Defect.Type.FAIL)).ToString("F", CultureInfo.InvariantCulture))
+                motTests.Average(test => test.Defects.Count(defect => defect.Category is
+                    MotDefectCategory.DANGEROUS or
+                    MotDefectCategory.MAJOR or
+                    MotDefectCategory.MINOR or
+                    MotDefectCategory.FAIL)).ToString("F", CultureInfo.InvariantCulture))
             .WithInline());
 
         var motTestDifferencesBetweenSuccessAndFailureCycles = new List<(int, TimeSpan?)>();
         foreach (var motTest in motTests.Select((value, i) => new { value, i })
-                     .Where(test => test.value.Result == MotTestResult.PASSED))
+                     .Where(test => test.value.Result == TestResult.PASSED))
         {
             int? previousOdometerReadingInMiles = null;
-            DateTime? previousCompletedDate = null;
+            DateTimeOffset? previousCompletedDate = null;
             var inFailureCycle = false;
 
             for (var index = motTest.i + 1; index < motTests.Count - 1; index++)
-                if (motTests.ElementAt(index).Result == MotTestResult.PASSED)
+                if (motTests.ElementAt(index).Result == TestResult.PASSED)
                 {
                     break;
                 }
@@ -255,32 +253,32 @@ public static class VehicleInformationAndMotEmbedBuilder
         embed.WithTitle($"MOT {motTest.CompletedDate}");
 
 
-        var motEmbedColor = motTest.Result == MotTestResult.PASSED && motTest.Defects.Count == 0 ? Green :
-            motTest.Result == MotTestResult.PASSED ? Orange : Red;
+        var motEmbedColor = motTest.Result == TestResult.PASSED && motTest.Defects.Count == 0 ? Green :
+            motTest.Result == TestResult.PASSED ? Orange : Red;
 
         embed.WithColor(motEmbedColor);
-        embed.WithTitle($"MOT {motTest.CompletedDate?.ToShortDateString()} - {motTest.Result}");
+        embed.WithTitle($"MOT {motTest.CompletedDate?.DateTime.ToShortDateString()} - {motTest.Result}");
         embed.AddFields(new EmbedFieldProperties().WithName("Reg plate").WithValue(reg));
-        if (motTest.Result == MotTestResult.PASSED)
+        if (motTest.Result == TestResult.PASSED)
             embed.AddFields(new EmbedFieldProperties().WithName("Expires")
-                .WithValue(motTest.ExpiryDate?.ToLongDateString()).WithInline());
+                .WithValue(motTest.ExpiryDate?.DateTime.ToLongDateString()).WithInline());
         embed.AddFields(new EmbedFieldProperties().WithName("Odometer reading")
             .WithValue($"{motTest.OdometerReadingInMiles} Miles").WithInline());
 
         var groupedDefects = motTest.Defects
-            .OrderBy(defect => defect.DefectType)
-            .GroupBy(defect => defect.DefectType);
+            .OrderBy(defect => defect.Category)
+            .GroupBy(defect => defect.Category);
         foreach (var defectGroup in groupedDefects)
         {
             var embedFieldLengthLimit = 1024;
-            var defectText = string.Join("\n", defectGroup.Select(x => $"- {x.DefectMessage}"));
+            var defectText = string.Join("\n", defectGroup.Select(x => $"- {x.DefectDefinition.DefectName}"));
 
             var defectChunks = defectGroup.Chunk(defectGroup.Count() / defectText.Chunk(embedFieldLengthLimit).Count());
 
             foreach (var chunk in defectChunks)
                 embed.AddFields(new EmbedFieldProperties()
-                    .WithName(chunk.FirstOrDefault()?.DefectType.GetAttributeOfType<DisplayAttribute>().Name)
-                    .WithValue(string.Join("\n", chunk.Select(x => $"- {x.DefectMessage}"))));
+                    .WithName(chunk.FirstOrDefault()?.Category.GetAttributeOfType<DisplayAttribute>().Name)
+                    .WithValue(string.Join("\n", chunk.Select(x => $"- {x.DefectDefinition.DefectName}"))));
         }
 
         return embed;

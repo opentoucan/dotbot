@@ -44,10 +44,9 @@
     <PackageVersion Include="libsodium" Version="1.0.20.1" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
+    <PackageVersion Include="AngleSharp" Version="1.3.0" />
     <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.8.7" />
-    <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
-    <PackageVersion Include="StackExchange.Redis.Extensions.System.Text.Json" Version="11.0.0" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.7.4" />
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.1" />
@@ -56,9 +55,12 @@
     <PackageVersion Include="System.Drawing.Common" Version="9.0.9" />
     <PackageVersion Include="System.Formats.Asn1" Version="9.0.9" />
     <!-- Database -->
+    <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9" />
     <PackageVersion Include="StackExchange.Redis" Version="2.9.17" />
+    <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
+    <PackageVersion Include="StackExchange.Redis.Extensions.System.Text.Json" Version="11.0.0" />
     <!-- Discord -->
     <PackageVersion Include="NetCord" Version="1.0.0-alpha.428" />
     <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.428" />

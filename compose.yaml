@@ -59,11 +59,15 @@ services:
   grafana:
     image: grafana/grafana
     container_name: grafana
+    depends_on:
+        - postgres
     ports:
       - '3000:3000'
     configs:
       - source: grafana.yaml
         target: /etc/grafana/provisioning/dashboards/main.yaml
+      - source: datasource.yaml
+        target: /etc/grafana/provisioning/datasources/datasource.yaml
     volumes:
       - ./dashboards:/var/lib/grafana/dashboards
   prometheus:
@@ -81,18 +85,36 @@ configs:
     content: |
       apiVersion: 1
       providers:
-      - name: 'default'
-        org_id: 1
-        folder: ''
-        type: 'file'
-        options:
-          folder: '/var/lib/grafana/dashboards'
-      datasources:
-        - name: 'Prometheus'
-          type: prometheus
-          access: proxy
-          url: http://prometheus:9090
-          isDefault: true
+        - name: "Dashboard provider"
+          orgId: 1
+          type: file
+          disableDeletion: false
+          updateIntervalSeconds: 10
+          allowUiUpdates: true
+          options:
+              path: /var/lib/grafana/dashboards
+              foldersFromFilesStructure: true
+  datasource.yaml:
+    content: |
+         apiVersion: 1
+         prune: true
+         datasources:
+           - name: Prometheus
+             uid: DS_PROMETHEUS
+             type: prometheus
+             access: proxy
+             url: http://prometheus:9090
+             isDefault: true
+           - name: Postgres
+             uid: DS_POSTGRES
+             type: postgres
+             url: postgres:5432
+             user: dotbot
+             jsonData:
+               database: dotbot
+               sslmode: 'disable'
+             secureJsonData:
+               password: 'yourWeak(!)Password'
   prometheus.yaml:
     content: |
       global:

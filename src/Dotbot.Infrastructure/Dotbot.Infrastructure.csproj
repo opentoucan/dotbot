@@ -7,12 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="EFCore.NamingConventions"/>
         <PackageReference Include="Grpc.AspNetCore"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
         <PackageReference Include="StackExchange.Redis"/>
         <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore"/>
         <PackageReference Include="StackExchange.Redis.Extensions.System.Text.Json"/>
+        <PackageReference Include="AngleSharp"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -22,5 +24,5 @@
     <ItemGroup>
         <Folder Include="Migrations\"/>
     </ItemGroup>
-
+    
 </Project>
