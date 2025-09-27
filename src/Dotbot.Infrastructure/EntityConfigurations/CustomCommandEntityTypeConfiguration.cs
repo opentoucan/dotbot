@@ -8,8 +8,6 @@ public class CustomCommandEntityTypeConfiguration : IEntityTypeConfiguration<Cus
 {
     public void Configure(EntityTypeBuilder<CustomCommand> customCommandConfiguration)
     {
-        customCommandConfiguration.ToTable("custom_commands");
-
         customCommandConfiguration.HasMany(cc => cc.Attachments)
             .WithOne();
     }

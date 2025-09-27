@@ -27,14 +27,16 @@ public static class Extensions
         var restClient = new RestClient(botToken);
         builder.Services.AddOptions<DiscordSettings>().Bind(section);
         builder.Services.AddHostedService<SaveDiscordServersHostedService>();
-        builder.Services.AddScoped<RestClient>(_ => restClient);
 
+        //Netcord dependencies
         builder.Services
+            .AddScoped<RestClient>(_ => restClient)
             .AddDiscordRest()
             .AddHttpApplicationCommands()
             .AddComponentInteractions<ButtonInteraction, HttpButtonInteractionContext>()
             .AddComponentInteractions<StringMenuInteraction, HttpStringMenuInteractionContext>();
 
+        builder.Services.AddScoped<IHttpInteractionCommandLogger, HttpInteractionCommandLogger>();
         if (builder.Environment.EnvironmentName == "local")
             builder.Services.AddHostedService<DiscordHttpInteractionSetupService>();
 

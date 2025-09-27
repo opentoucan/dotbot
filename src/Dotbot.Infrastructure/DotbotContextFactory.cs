@@ -1,3 +1,4 @@
+using Dotbot.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -8,7 +9,8 @@ public class DotbotContextFactory : IDesignTimeDbContextFactory<DotbotContext>
     public DotbotContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<DotbotContext>();
-        optionsBuilder.UseNpgsql();
+        optionsBuilder.UseNpgsql(o => o.AddPostgresOptions())
+            .AddDbContextOptions();
         return new DotbotContext(optionsBuilder.Options);
     }
 }

@@ -1,27 +1,38 @@
-using Dotbot.Api.Dto;
+using Dotbot.Infrastructure;
+using Dotbot.Infrastructure.Entities.Reports;
+using Dotbot.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace Dotbot.Api.Services;
 
 public interface IVehicleInformationService
 {
-    Task<ServiceResult<VehicleInformationAggregate>> GetVehicleInformation(string registrationPlate,
+    Task<ServiceResult<VehicleInformation>> GetVehicleInformation(string registrationPlate,
         CancellationToken cancellationToken);
+
+    Task SaveVehicleInformation(string registrationPlate,
+        VehicleInformation vehicleInformation,
+        string callingUserId,
+        string callingGuildId,
+        CancellationToken cancellationToken = default);
 }
 
 public class VehicleInformationService(
     IVehicleEnquiryService vehicleEnquiryService,
     IMotHistoryService motHistoryService,
     IRedisDatabase redisDatabase,
-    ILogger<VehicleInformationService> logger) : IVehicleInformationService
+    ILogger<VehicleInformationService> logger,
+    IMotInspectionDefectDefinitionRepository motInspectionDefectDefinitionRepository,
+    DotbotContext dbContext) : IVehicleInformationService
 {
-    public async Task<ServiceResult<VehicleInformationAggregate>> GetVehicleInformation(string registrationPlate,
+    public async Task<ServiceResult<VehicleInformation>> GetVehicleInformation(string registrationPlate,
         CancellationToken cancellationToken)
     {
-        VehicleInformationAggregate? vehicleInformation = null;
+        VehicleInformation? vehicleInformation = null;
         try
         {
-            vehicleInformation = await redisDatabase.GetAsync<VehicleInformationAggregate>(registrationPlate);
+            vehicleInformation = await redisDatabase.GetAsync<VehicleInformation?>(registrationPlate);
         }
         catch (Exception ex)
         {
@@ -29,11 +40,11 @@ public class VehicleInformationService(
                 registrationPlate);
         }
 
-        if (vehicleInformation != null)
+        if (vehicleInformation is not null)
         {
             logger.LogInformation("Got a cache hit for {registrationPlate}, skipping API calls", registrationPlate);
         }
-        else if (vehicleInformation == null)
+        else if (vehicleInformation is null)
         {
             logger.LogInformation("No cache hit for {registrationPlate}", registrationPlate);
             var vehicleRegistrationResult =
@@ -45,13 +56,13 @@ public class VehicleInformationService(
 
             if ((!vehicleRegistrationResult.IsSuccess &&
                  !motHistoryResult.IsSuccess) || string.IsNullOrWhiteSpace(registrationPlate))
-                return ServiceResult<VehicleInformationAggregate>.Error(string.Join("\n",
+                return ServiceResult<VehicleInformation>.Error(string.Join("\n",
                     vehicleRegistrationResult.ErrorResult?.ErrorMessage, motHistoryResult.ErrorResult?.ErrorMessage));
 
 
             var potentiallyScrapped = !vehicleRegistrationResult.IsSuccess && motHistoryResult.IsSuccess;
 
-            vehicleInformation = new VehicleInformationAggregate(
+            vehicleInformation = new VehicleInformation(
                 registrationPlateResult!,
                 potentiallyScrapped,
                 vehicleRegistrationResult.Value?.Make ?? motHistoryResult.Value?.Make,
@@ -82,7 +93,9 @@ public class VehicleInformationService(
                     motTest.OdometerResultType,
                     motTest.MotTestNumber,
                     motTest.Defects.Select(defect =>
-                        (defect.Type, defect.Text, defect.Dangerous)).ToList());
+                        (defect.Type,
+                            motInspectionDefectDefinitionRepository.GetByDefectDescription(defect.Text!),
+                            defect.Dangerous)).ToList());
 
             try
             {
@@ -95,6 +108,28 @@ public class VehicleInformationService(
             }
         }
 
-        return ServiceResult<VehicleInformationAggregate>.Success(vehicleInformation);
+        return ServiceResult<VehicleInformation>.Success(vehicleInformation);
+    }
+
+    public async Task SaveVehicleInformation(string registrationPlate,
+        VehicleInformation vehicleInformation,
+        string callingUserId,
+        string callingGuildId,
+        CancellationToken cancellationToken)
+    {
+        var existingVehicleInformation =
+            await dbContext.VehicleInformation.FirstOrDefaultAsync(x => x.Registration == registrationPlate,
+                cancellationToken);
+        if (existingVehicleInformation is null)
+        {
+            await dbContext.VehicleInformation.AddAsync(vehicleInformation, cancellationToken);
+        }
+        else
+        {
+            vehicleInformation.Id = existingVehicleInformation.Id;
+            dbContext.Entry(existingVehicleInformation).CurrentValues.SetValues(vehicleInformation);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
