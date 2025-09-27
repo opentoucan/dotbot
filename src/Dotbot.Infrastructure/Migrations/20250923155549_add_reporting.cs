@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities.Reports;
 using Microsoft.EntityFrameworkCore.Migrations;
