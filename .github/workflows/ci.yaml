@@ -397,7 +397,7 @@ jobs:
             gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
             
       - name: Release
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2
         with:
             name: ${{ format('{0}-{1}', matrix.image, needs.prepare.outputs.original-tag) }}
             generate_release_notes: true
