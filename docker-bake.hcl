@@ -19,6 +19,8 @@ target "image-release" {
     "linux/amd64",
     "linux/arm64"
   ]
+  provenance = "mode=max"
+  sbom = "true"
 }
 
 target "image-all" {
