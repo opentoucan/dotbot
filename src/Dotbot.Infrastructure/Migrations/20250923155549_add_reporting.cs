@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.Entities.Reports;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -176,10 +176,10 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "ix_attachments_custom_command_id");
 
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:fuel_type", "diesel,electric,petrol,unknown")
-                .Annotation("Npgsql:Enum:mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
-                .Annotation("Npgsql:Enum:odometer_result", "no_odometer,read,unreadable")
-                .Annotation("Npgsql:Enum:test_result", "failed,passed");
+                .Annotation("Npgsql:Enum:dotbot.fuel_type", "diesel,electric,petrol,unknown")
+                .Annotation("Npgsql:Enum:dotbot.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
+                .Annotation("Npgsql:Enum:dotbot.odometer_result", "no_odometer,read,unreadable")
+                .Annotation("Npgsql:Enum:dotbot.test_result", "failed,passed");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "custom_command_id",
@@ -259,7 +259,7 @@ namespace Dotbot.Infrastructure.Migrations
                     make = table.Column<string>(type: "text", nullable: true),
                     model = table.Column<string>(type: "text", nullable: true),
                     colour = table.Column<string>(type: "text", nullable: true),
-                    fuel_type = table.Column<FuelType>(type: "fuel_type", nullable: false),
+                    fuel_type = table.Column<FuelType>(type: "dotbot.fuel_type", nullable: false),
                     mot_status_is_valid = table.Column<bool>(type: "boolean", nullable: false),
                     mot_status_valid_until = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     mot_status_is_exempt = table.Column<bool>(type: "boolean", nullable: false),
@@ -284,11 +284,11 @@ namespace Dotbot.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    result = table.Column<TestResult>(type: "test_result", nullable: false),
+                    result = table.Column<TestResult>(type: "dotbot.test_result", nullable: false),
                     completed_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     expiry_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     odometer_reading_in_miles = table.Column<int>(type: "integer", nullable: true),
-                    odometer_read_result = table.Column<OdometerResult>(type: "odometer_result", nullable: false),
+                    odometer_read_result = table.Column<OdometerResult>(type: "dotbot.odometer_result", nullable: false),
                     test_number = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: true),
                     vehicle_information_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
@@ -309,7 +309,7 @@ namespace Dotbot.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    category = table.Column<MotDefectCategory>(type: "mot_defect_category", nullable: false),
+                    category = table.Column<MotDefectCategory>(type: "dotbot.mot_defect_category", nullable: false),
                     defect_definition_id = table.Column<Guid>(type: "uuid", nullable: false),
                     is_dangerous = table.Column<bool>(type: "boolean", nullable: false),
                     vehicle_mot_test_id = table.Column<Guid>(type: "uuid", nullable: true)
@@ -569,10 +569,10 @@ namespace Dotbot.Infrastructure.Migrations
                 newName: "IX_command_attachments_CustomCommandId");
 
             migrationBuilder.AlterDatabase()
-                .OldAnnotation("Npgsql:Enum:fuel_type", "diesel,electric,petrol,unknown")
-                .OldAnnotation("Npgsql:Enum:mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
-                .OldAnnotation("Npgsql:Enum:odometer_result", "no_odometer,read,unreadable")
-                .OldAnnotation("Npgsql:Enum:test_result", "failed,passed");
+                .OldAnnotation("Npgsql:Enum:dotbot.fuel_type", "diesel,electric,petrol,unknown")
+                .OldAnnotation("Npgsql:Enum:dotbot.mot_defect_category", "advisory,dangerous,fail,major,minor,nonspecific,prs,systemgenerated,userentered")
+                .OldAnnotation("Npgsql:Enum:dotbot.odometer_result", "no_odometer,read,unreadable")
+                .OldAnnotation("Npgsql:Enum:dotbot.test_result", "failed,passed");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CustomCommandId",

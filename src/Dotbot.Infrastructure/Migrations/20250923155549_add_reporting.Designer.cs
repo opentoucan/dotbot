@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dotbot.Infrastructure.Migrations
 {
     [DbContext(typeof(DotbotContext))]
-    [Migration("20250923155549_add_reporting")]
+    [Migration("20251013151049_add_reporting")]
     partial class add_reporting
     {
         /// <inheritdoc />
@@ -25,10 +25,10 @@ namespace Dotbot.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "fuel_type", new[] { "diesel", "electric", "petrol", "unknown" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "mot_defect_category", new[] { "advisory", "dangerous", "fail", "major", "minor", "nonspecific", "prs", "systemgenerated", "userentered" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "odometer_result", new[] { "no_odometer", "read", "unreadable" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "test_result", new[] { "failed", "passed" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "dotbot", "fuel_type", new[] { "diesel", "electric", "petrol", "unknown" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "dotbot", "mot_defect_category", new[] { "advisory", "dangerous", "fail", "major", "minor", "nonspecific", "prs", "systemgenerated", "userentered" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "dotbot", "odometer_result", new[] { "no_odometer", "read", "unreadable" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "dotbot", "test_result", new[] { "failed", "passed" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Dotbot.Infrastructure.Entities.CommandAttachment", b =>
@@ -184,7 +184,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("engine_capacity_litres");
 
                     b.Property<FuelType>("FuelType")
-                        .HasColumnType("fuel_type")
+                        .HasColumnType("dotbot.fuel_type")
                         .HasColumnName("fuel_type");
 
                     b.Property<DateTimeOffset?>("LastIssuedV5CDate")
@@ -277,7 +277,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("expiry_date");
 
                     b.Property<OdometerResult>("OdometerReadResult")
-                        .HasColumnType("odometer_result")
+                        .HasColumnType("dotbot.odometer_result")
                         .HasColumnName("odometer_read_result");
 
                     b.Property<int?>("OdometerReadingInMiles")
@@ -285,7 +285,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("odometer_reading_in_miles");
 
                     b.Property<TestResult>("Result")
-                        .HasColumnType("test_result")
+                        .HasColumnType("dotbot.test_result")
                         .HasColumnName("result");
 
                     b.Property<string>("TestNumber")
@@ -318,7 +318,7 @@ namespace Dotbot.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<MotDefectCategory>("Category")
-                        .HasColumnType("mot_defect_category")
+                        .HasColumnType("dotbot.mot_defect_category")
                         .HasColumnName("category");
 
                     b.Property<Guid>("DefectDefinitionId")
