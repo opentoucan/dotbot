@@ -246,7 +246,7 @@ jobs:
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=docker' }}
+            ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=oci,dest=/tmp/image.tar' }}
             *.platform=${{ matrix.platform }}
             *.tags=
           targets: ${{ matrix.image }}
@@ -395,7 +395,7 @@ jobs:
             GITHUB_TOKEN: ${{ github.token }}
         run: |
             gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
-            
+
       - name: Release
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2
         with:
