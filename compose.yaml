@@ -40,7 +40,7 @@ services:
       DFLY_requirepass: local
   motur:
     container_name: motur
-    image: ghcr.io/opentoucan/motur:3.0.0
+    image: ghcr.io/opentoucan/motur:3.1.0
     ports:
       - '8081:8080'
     env_file: .env
