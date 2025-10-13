@@ -21,7 +21,7 @@ target "image-release" {
   ]
   attest = [
     {
-      type = "provnenance",
+      type = "provenance",
       mode = "max"
     },
     {
