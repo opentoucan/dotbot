@@ -58,7 +58,7 @@
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.9.25" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.9.32" />
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.System.Text.Json" Version="11.0.0" />
     <!-- Discord -->
