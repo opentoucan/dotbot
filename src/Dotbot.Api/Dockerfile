@@ -1,7 +1,7 @@
 ﻿# renovate: datasource=dotnet-version depName=dotnet-runtime
-ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:9.0.9-bookworm-slim
+ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:9.0.10-bookworm-slim
 # renovate: datasource=dotnet-version depName=dotnet-sdk
-ARG DOTNET_SDK=mcr.microsoft.com/dotnet/sdk:9.0.305
+ARG DOTNET_SDK=mcr.microsoft.com/dotnet/sdk:9.0.306
 
 FROM ${DOTNET_RUNTIME} AS base
 WORKDIR /app
