@@ -22,6 +22,7 @@ COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefa
 COPY ["src/Dotbot.Api/", "Dotbot.Api"]
 COPY ["src/Dotbot.Infrastructure/", "Dotbot.Infrastructure"]
 COPY ["src/ServiceDefaults/", "ServiceDefaults"]
+COPY ["mot-manuals", "mot-manuals"]
 
 # Build the migrationbundle here
 FROM build AS migrationbuilder
