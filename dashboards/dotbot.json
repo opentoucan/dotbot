@@ -1313,7 +1313,9 @@
   "preload": false,
   "refresh": "5s",
   "schemaVersion": 40,
-  "tags": [],
+  "tags": [
+    "dotbot"
+  ],
   "templating": {
     "list": [
       {
@@ -1374,7 +1376,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Dotbot",
+  "title": "Dotbot - Overview",
   "uid": "dotbot",
   "version": 9,
   "weekStart": ""

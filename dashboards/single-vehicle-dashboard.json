@@ -1994,7 +1994,9 @@
   ],
   "preload": false,
   "schemaVersion": 41,
-  "tags": [],
+  "tags": [
+    "dotbot"
+  ],
   "templating": {
     "list": [
       {
@@ -2025,7 +2027,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Vehicle Dashboard for registration plate",
-  "uid": "vehicle-dashboard-for-registration-plate",
+  "title": "Dotbot - Single Vehicle Dashboard",
+  "uid": "single-vehicle-dashboard",
   "version": 80
 }
