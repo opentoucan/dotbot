@@ -377,7 +377,7 @@ jobs:
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Upload Dependency Snapshot
-        uses: anchore/sbom-action@f8bdd1d8ac5e901a77a92f111440fdb1b593736b # v0.20.6
+        uses: anchore/sbom-action@8e94d75ddd33f69f691467e42275782e4bfefe84 # v0.20.9
         with:
             dependency-snapshot: true
             image: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
