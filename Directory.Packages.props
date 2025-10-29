@@ -62,11 +62,11 @@
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.System.Text.Json" Version="11.0.0" />
     <!-- Discord -->
-    <PackageVersion Include="NetCord" Version="1.0.0-alpha.433" />
-    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.433" />
-    <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.433" />
-    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.433" />
-    <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.433" />
+    <PackageVersion Include="NetCord" Version="1.0.0-alpha.441" />
+    <PackageVersion Include="NetCord.Services" Version="1.0.0-alpha.441" />
+    <PackageVersion Include="NetCord.Hosting" Version="1.0.0-alpha.441" />
+    <PackageVersion Include="NetCord.Hosting.AspNetCore" Version="1.0.0-alpha.441" />
+    <PackageVersion Include="NetCord.Hosting.Services" Version="1.0.0-alpha.441" />
     <!-- Testing -->
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.9.0" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
