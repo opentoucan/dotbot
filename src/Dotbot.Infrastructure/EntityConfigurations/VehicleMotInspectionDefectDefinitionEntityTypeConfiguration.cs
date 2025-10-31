@@ -11,5 +11,7 @@ public class
     public void Configure(EntityTypeBuilder<VehicleMotInspectionDefectDefinition> builder)
     {
         builder.HasKey(md => md.Id);
+        builder.HasIndex(i => new
+            { i.TopLevelCategory, i.CategoryArea, i.SubCategoryName, i.DefectName, i.DefectReferenceCode }).IsUnique();
     }
 }

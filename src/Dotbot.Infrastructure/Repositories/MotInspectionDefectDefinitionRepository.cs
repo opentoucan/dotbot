@@ -29,7 +29,6 @@ public partial class MotInspectionDefectDefinitionRepository(DotbotContext dbCon
             : "Manually entered defect by tester";
         return new VehicleMotInspectionDefectDefinition
         {
-            Id = Guid.NewGuid(),
             TopLevelCategory = topLevelCategory,
             DefectName = defectDescription
         };

@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using Dotbot.Api.Discord.HostedServices;
 using Dotbot.Api.Discord.SlashCommandApis;
+using Dotbot.Api.HostedServices;
 using Dotbot.Api.Settings;
 using Microsoft.Extensions.Options;
 using NetCord;
@@ -27,6 +27,7 @@ public static class Extensions
         var restClient = new RestClient(botToken);
         builder.Services.AddOptions<DiscordSettings>().Bind(section);
         builder.Services.AddHostedService<SaveDiscordServersHostedService>();
+        builder.Services.AddHostedService<SyncMotManualsService>();
 
         //Netcord dependencies
         builder.Services

@@ -32,46 +32,46 @@ public static class SeedMotInspectionDefectDefinitions
                         categoryArea = htmlElement.TextContent.Trim();
                         break;
                     case "table":
+                    {
+                        for (var index = htmlElements.IndexOf(htmlElement) - 1; index > 0; index--)
                         {
-                            for (var index = htmlElements.IndexOf(htmlElement) - 1; index > 0; index--)
+                            var element = htmlElements.ElementAtOrDefault(index);
+                            if (element?.LocalName == "table")
+                                break;
+
+                            if (element?.LocalName == "h3" && !string.IsNullOrWhiteSpace(element.Id) &&
+                                element.Id.StartsWith("section"))
                             {
-                                var element = htmlElements.ElementAtOrDefault(index);
-                                if (element?.LocalName == "table")
-                                    break;
-
-                                if (element?.LocalName == "h3" && !string.IsNullOrWhiteSpace(element.Id) &&
-                                    element.Id.StartsWith("section"))
-                                {
-                                    subCategoryName = element.TextContent.Trim();
-                                    break;
-                                }
+                                subCategoryName = element.TextContent.Trim();
+                                break;
                             }
-
-                            var tableBodyElements = htmlElement.QuerySelector("tbody");
-                            if (tableBodyElements != null && htmlElement.InnerHtml.Contains("Defect"))
-                            {
-                                var rows = tableBodyElements.QuerySelectorAll("tr");
-                                foreach (var row in rows)
-                                {
-                                    var columns = row.QuerySelectorAll("td");
-                                    var referenceCode = columns.ElementAtOrDefault(0)?.TextContent;
-                                    var defectText = columns.ElementAtOrDefault(1)?.TextContent;
-
-                                    if (!string.IsNullOrWhiteSpace(topLevelCategory) &&
-                                        !string.IsNullOrWhiteSpace(defectText))
-                                        motInspectionDefectDefinitions.Add(new VehicleMotInspectionDefectDefinition
-                                        {
-                                            TopLevelCategory = topLevelCategory,
-                                            CategoryArea = categoryArea,
-                                            SubCategoryName = subCategoryName,
-                                            DefectName = defectText,
-                                            DefectReferenceCode = referenceCode
-                                        });
-                                }
-                            }
-
-                            break;
                         }
+
+                        var tableBodyElements = htmlElement.QuerySelector("tbody");
+                        if (tableBodyElements != null && htmlElement.InnerHtml.Contains("Defect"))
+                        {
+                            var rows = tableBodyElements.QuerySelectorAll("tr");
+                            foreach (var row in rows)
+                            {
+                                var columns = row.QuerySelectorAll("td");
+                                var referenceCode = columns.ElementAtOrDefault(0)?.TextContent;
+                                var defectText = columns.ElementAtOrDefault(1)?.TextContent;
+
+                                if (!string.IsNullOrWhiteSpace(topLevelCategory) &&
+                                    !string.IsNullOrWhiteSpace(defectText))
+                                    motInspectionDefectDefinitions.Add(new VehicleMotInspectionDefectDefinition
+                                    {
+                                        TopLevelCategory = topLevelCategory,
+                                        CategoryArea = categoryArea,
+                                        SubCategoryName = subCategoryName,
+                                        DefectName = defectText,
+                                        DefectReferenceCode = referenceCode
+                                    });
+                            }
+                        }
+
+                        break;
+                    }
                 }
         }
 

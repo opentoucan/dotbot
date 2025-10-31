@@ -4,7 +4,7 @@ using Dotbot.Infrastructure.Repositories;
 using NetCord.Rest;
 using ServiceDefaults;
 
-namespace Dotbot.Api.Discord.HostedServices;
+namespace Dotbot.Api.HostedServices;
 
 public class SaveDiscordServersHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
 {

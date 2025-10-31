@@ -1,5 +1,4 @@
 using Dotbot.Infrastructure.Entities.Reports;
-using Dotbot.Infrastructure.SeedWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,12 +17,7 @@ public static class Extensions
         {
             options.UseNpgsql(builder.Configuration.GetConnectionString("dotbot"),
                     o => o.AddPostgresOptions())
-                .AddDbContextOptions()
-                .UseSeeding((context, _) =>
-                {
-                    context.UpdateRange(SeedMotInspectionDefectDefinitions.GenerateMotInspectionDefectDefinitions());
-                    context.SaveChanges();
-                });
+                .AddDbContextOptions();
         });
         builder.Services.AddStackExchangeRedisExtensions<SystemTextJsonSerializer>(new RedisConfiguration
         {

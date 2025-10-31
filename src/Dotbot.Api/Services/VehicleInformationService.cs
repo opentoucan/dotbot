@@ -122,12 +122,14 @@ public class VehicleInformationService(
                 cancellationToken);
         if (existingVehicleInformation is null)
         {
+            foreach (var defect in vehicleInformation.VehicleMotTests.SelectMany(motTest => motTest.Defects))
+                dbContext.Attach(defect);
             await dbContext.VehicleInformation.AddAsync(vehicleInformation, cancellationToken);
         }
         else
         {
             vehicleInformation.Id = existingVehicleInformation.Id;
-            dbContext.Entry(existingVehicleInformation).CurrentValues.SetValues(vehicleInformation);
+            dbContext.Attach(vehicleInformation);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

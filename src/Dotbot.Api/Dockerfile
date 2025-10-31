@@ -22,6 +22,8 @@ COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "ServiceDefaults/ServiceDefa
 COPY ["src/Dotbot.Api/", "Dotbot.Api"]
 COPY ["src/Dotbot.Infrastructure/", "Dotbot.Infrastructure"]
 COPY ["src/ServiceDefaults/", "ServiceDefaults"]
+COPY ["mot-manuals", "mot-manuals"]
+
 RUN dotnet restore "Dotbot.Api/Dotbot.Api.csproj"
 RUN dotnet build "Dotbot.Api/Dotbot.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
