@@ -129,7 +129,7 @@ public class VehicleInformationService(
         else
         {
             vehicleInformation.Id = existingVehicleInformation.Id;
-            dbContext.Attach(vehicleInformation);
+            dbContext.Entry(existingVehicleInformation).CurrentValues.SetValues(vehicleInformation);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
