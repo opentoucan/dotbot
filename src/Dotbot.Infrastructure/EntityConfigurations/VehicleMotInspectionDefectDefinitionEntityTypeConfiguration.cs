@@ -12,6 +12,6 @@ public class
     {
         builder.HasKey(md => md.Id);
         builder.HasIndex(i => new
-            { i.TopLevelCategory, i.CategoryArea, i.SubCategoryName, i.DefectName, i.DefectReferenceCode }).IsUnique();
+        { i.TopLevelCategory, i.CategoryArea, i.SubCategoryName, i.DefectName, i.DefectReferenceCode }).IsUnique();
     }
 }
