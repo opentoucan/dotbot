@@ -38,7 +38,7 @@ public static class Extensions
             .AddComponentInteractions<StringMenuInteraction, HttpStringMenuInteractionContext>();
 
         builder.Services.AddScoped<IHttpInteractionCommandLogger, HttpInteractionCommandLogger>();
-        if (builder.Environment.EnvironmentName == "local")
+        if (builder.Environment.EnvironmentName == "local" || builder.Environment.EnvironmentName == "compose")
             builder.Services.AddHostedService<DiscordHttpInteractionSetupService>();
 
         return builder;
@@ -62,7 +62,9 @@ public static class Extensions
         public async Task StartedAsync(CancellationToken cancellationToken)
         {
             var httpClient = httpClientFactory.CreateClient();
-            var ngrokUrl = "http://localhost:4040/api/tunnels";
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var ngrokHost = environment == "compose" ? "ngrok" : "localhost";
+            var ngrokUrl = $"http://{ngrokHost}:4040/api/tunnels";
 
             logger.LogInformation("Reading tunnel from ngrok {ngrokUrl}", ngrokUrl);
 
