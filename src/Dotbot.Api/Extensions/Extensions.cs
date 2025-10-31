@@ -14,6 +14,7 @@ public static class Extensions
         builder.ConfigureXkcd();
         builder.ConfigureVehicleService();
         builder.ConfigureMoturService();
+        builder.Services.AddOptions<VehicleSettings>().Bind(builder.Configuration.GetSection("Vehicle"));
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IGuildRepository, GuildRepository>();
         builder.Services.AddScoped<IGuildQueries, GuildQueries>();

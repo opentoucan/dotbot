@@ -5,13 +5,10 @@ namespace Dotbot.Infrastructure.SeedWork;
 
 public static class SeedMotInspectionDefectDefinitions
 {
-    private static readonly string MotManualDirectory =
-        Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName +
-        "/Assets/mot-manuals";
-
-    public static IEnumerable<VehicleMotInspectionDefectDefinition> GenerateMotInspectionDefectDefinitions()
+    public static IEnumerable<VehicleMotInspectionDefectDefinition> GenerateMotInspectionDefectDefinitions(
+        string motManualsPath)
     {
-        var manualSections = Directory.GetFiles(MotManualDirectory).ToList();
+        var manualSections = Directory.GetFiles(motManualsPath).ToList();
         List<VehicleMotInspectionDefectDefinition> motInspectionDefectDefinitions = [];
         foreach (var manualSection in manualSections)
         {

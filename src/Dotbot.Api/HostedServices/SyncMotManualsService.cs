@@ -1,5 +1,7 @@
+using Dotbot.Api.Settings;
 using Dotbot.Infrastructure;
 using Dotbot.Infrastructure.SeedWork;
+using Microsoft.Extensions.Options;
 
 namespace Dotbot.Api.HostedServices;
 
@@ -10,7 +12,13 @@ public class SyncMotManualsService(IServiceScopeFactory serviceScopeFactory) : I
         using var scope = serviceScopeFactory.CreateScope();
 
         var dbContext = scope.ServiceProvider.GetRequiredService<DotbotContext>();
-        var newMotManualDefinitions = SeedMotInspectionDefectDefinitions.GenerateMotInspectionDefectDefinitions();
+        var vehicleSettings = scope.ServiceProvider.GetRequiredService<IOptions<VehicleSettings>>();
+        var motManualsPath = !string.IsNullOrWhiteSpace(vehicleSettings.Value.MotManualsPath) ?
+                                vehicleSettings.Value.MotManualsPath :
+                                 Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName +
+                                 "/Assets/mot-manuals";
+        var newMotManualDefinitions =
+            SeedMotInspectionDefectDefinitions.GenerateMotInspectionDefectDefinitions(motManualsPath);
         foreach (var motManualDefinition in newMotManualDefinitions)
             if (!dbContext.MotInspectionDefectDefinitions.Any(x =>
                     x.DefectName == motManualDefinition.DefectName &&
