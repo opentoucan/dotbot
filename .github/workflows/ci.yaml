@@ -8,16 +8,18 @@ on:
     branches: [ 'main' ]
     tags:
       - '*'
-    paths-ignore:
-      - '.github/**'
-      - 'docs/**'
-      - '**.md'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '*.hcl'
+      - '*.props'
   pull_request:
     branches: [ 'main' ]
-    paths-ignore:
-      - '.github/**'
-      - 'docs/**'
-      - '**.md'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '*.hcl'
+      - '*.props'
 
 jobs:
   lint:
