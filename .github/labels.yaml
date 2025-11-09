@@ -1,4 +1,7 @@
 ---
+# Flux deploy
+- name: deploy/flux-preview
+  color: "0c32b4"
 # Areas
 - name: area/docs
   color: "0e8a16"
