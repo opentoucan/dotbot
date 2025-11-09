@@ -408,6 +408,7 @@ jobs:
     name: Github Release
     runs-on: ubuntu-latest
     needs: ["release-images"]
+    if: needs.prepare.output.valid-release
     permissions:
       contents: write
     steps:
