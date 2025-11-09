@@ -128,7 +128,7 @@ jobs:
     needs: [lint, tests]
     outputs:
       valid-release: ${{ steps.image-version.outputs.valid-release }}
-      version: ${{ steps.image-version.outputs.VERSION }}
+      version: ${{ steps.input-version.outputs.VERSION }}
       platforms: ${{ steps.bake-options.outputs.platforms }}
       images: ${{ steps.bake-options.outputs.targets }}
     steps:
