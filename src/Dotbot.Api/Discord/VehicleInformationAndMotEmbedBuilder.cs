@@ -107,6 +107,14 @@ public static class VehicleInformationAndMotEmbedBuilder
                     vehicleInformation.RegistrationDate.GetValueOrDefault().DateTime.ToShortDateString())
                 .WithInline());
 
+        var motTests = vehicleInformation.VehicleMotTests.OrderByDescending(x => x.CompletedDate).ToList();
+        var latestMot = motTests.FirstOrDefault();
+
+        if (!string.IsNullOrWhiteSpace(latestMot.OdometerReadingInMiles))
+            embed.AddFields(new EmbedFieldProperties()
+                .WithName("Odometer")
+                .WithValue($"{latestMot.OdometerReadingInMiles} Miles"));
+
         if (vehicleInformation.WeightInKg != null)
             embed.AddFields(new EmbedFieldProperties().WithName("Weight")
                 .WithValue($"{vehicleInformation.WeightInKg}kg").WithInline());
@@ -157,7 +165,7 @@ public static class VehicleInformationAndMotEmbedBuilder
         embed.WithDescription("Summary for all MOT tests on this vehicle");
 
 
-        foreach (var motTest in motTests.Take(5))
+        foreach (var motTest in motTests.Take(10))
         {
             var distinctDefects = motTest.Defects.DistinctBy(x => x.Category).ToList();
             embed.AddFields(new EmbedFieldProperties()
@@ -165,84 +173,6 @@ public static class VehicleInformationAndMotEmbedBuilder
                 .WithValue(
                     $"{string.Join("\n", distinctDefects.Select(x => $" {motTest.Defects.Count(defect => defect.Category == x.Category)} x {x.Category.GetAttributeOfType<DisplayAttribute>().Name}"))}"));
         }
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Stats"));
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Latest odometer reading")
-            .WithValue($"{motTests.First().OdometerReadingInMiles} Miles"));
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Number of MOT tests performed")
-            .WithValue(motTests.Count.ToString())
-            .WithInline());
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Passed tests")
-            .WithValue(motTests.Count(test => test.Result == TestResult.PASSED).ToString())
-            .WithInline());
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Failed tests")
-            .WithValue(motTests.Count(test => test.Result == TestResult.FAILED).ToString())
-            .WithInline());
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Average number of advisories per year")
-            .WithValue(
-                motTests.Average(test =>
-                        test.Defects.Count(defect =>
-                            defect.Category == MotDefectCategory.ADVISORY))
-                    .ToString("F", CultureInfo.InvariantCulture))
-            .WithInline());
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Average number of minor/major/dangerous per year")
-            .WithValue(
-                motTests.Average(test => test.Defects.Count(defect => defect.Category is
-                    MotDefectCategory.DANGEROUS or
-                    MotDefectCategory.MAJOR or
-                    MotDefectCategory.MINOR or
-                    MotDefectCategory.FAIL)).ToString("F", CultureInfo.InvariantCulture))
-            .WithInline());
-
-        var motTestDifferencesBetweenSuccessAndFailureCycles = new List<(int, TimeSpan?)>();
-        foreach (var motTest in motTests.Select((value, i) => new { value, i })
-                     .Where(test => test.value.Result == TestResult.PASSED))
-        {
-            int? previousOdometerReadingInMiles = null;
-            DateTimeOffset? previousCompletedDate = null;
-            var inFailureCycle = false;
-
-            for (var index = motTest.i + 1; index < motTests.Count - 1; index++)
-                if (motTests.ElementAt(index).Result == TestResult.PASSED)
-                {
-                    break;
-                }
-                else
-                {
-                    inFailureCycle = true;
-                    previousOdometerReadingInMiles = motTests.ElementAt(index).OdometerReadingInMiles;
-                    previousCompletedDate = motTests.ElementAt(index).CompletedDate;
-                }
-
-            var currentOdometerReadingInMiles = motTest.value.OdometerReadingInMiles;
-            var currentCompletedDate = motTest.value.CompletedDate;
-            if (inFailureCycle && previousOdometerReadingInMiles.HasValue && previousCompletedDate.HasValue &&
-                currentOdometerReadingInMiles.HasValue)
-                motTestDifferencesBetweenSuccessAndFailureCycles.Add((
-                    currentOdometerReadingInMiles.Value - previousOdometerReadingInMiles.Value,
-                    currentCompletedDate - previousCompletedDate.Value));
-        }
-
-        embed.AddFields(new EmbedFieldProperties()
-            .WithName("Average amount of days from a test failure until pass")
-            .WithValue(motTestDifferencesBetweenSuccessAndFailureCycles.Count > 0
-                ? motTestDifferencesBetweenSuccessAndFailureCycles.Average(dt => dt.Item2?.Days)
-                    .ToString()
-                : "0")
-            .WithInline());
 
         return embed;
     }
