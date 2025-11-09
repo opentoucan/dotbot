@@ -21,6 +21,9 @@ on:
       - '*.hcl'
       - '*.props'
 
+env:
+ BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   lint:
     name: Lint
@@ -125,10 +128,9 @@ jobs:
     needs: [lint, tests]
     outputs:
       valid-release: ${{ steps.image-version.outputs.valid-release }}
-      version: ${{ steps.image-version.outputs.semantic }}
+      version: ${{ steps.image-version.outputs.VERSION }}
       platforms: ${{ steps.bake-options.outputs.platforms }}
       images: ${{ steps.bake-options.outputs.targets }}
-      original-tag: ${{ steps.input-version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
@@ -137,6 +139,10 @@ jobs:
       - name: Set input version
         id: input-version
         run: |
+          VERSION="${{ env.BRANCH_NAME }}-${GITHUB_SHA}"
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF/refs\/tags\//}
+          fi
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Get semantic version
@@ -248,20 +254,18 @@ jobs:
             *.labels.org.opencontainers.image.version=${{ needs.prepare.outputs.version || github.sha }}
             *.labels.org.opencontainers.image.revision=${{ github.sha }}
             *.labels.org.opencontainers.image.vendor=${{ github.repository_owner }}
-            ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' && format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=oci,dest=/tmp/image.tar' }}
+            ${{ format('*.output=type=image,name=ghcr.io/{0}/{1},push-by-digest=true,name-canonical=true,push=true', github.repository_owner, steps.vars.outputs.target-image) || '*.output=type=oci,dest=/tmp/image.tar' }}
             *.platform=${{ matrix.platform }}
             *.tags=
           targets: ${{ matrix.image }}
 
-      - if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
-        name: Export Digest
+      - name: Export Digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
           DIGEST=$(echo '${{ steps.bake.outputs.metadata }}' | jq -r '.${{ matrix.image }}."containerimage.digest"')
           touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
 
-      - if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
-        name: Upload Digest
+      - name: Upload Digest
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ github.event.repository.name }}-${{ matrix.image }}-digests-${{ steps.vars.outputs.target-arch }}
@@ -304,9 +308,8 @@ jobs:
             path: dotbot-migration.sql
           if: ${{ always() }}
 
-  release:
-    if: ${{ needs.prepare.outputs.valid-release == 'true' && github.event_name != 'pull_request' }}
-    name: Release
+  release-images:
+    name: Release Images
     runs-on: ubuntu-latest
     needs: ["prepare", "create-docker-tags", "build-docker"]
     permissions:
@@ -383,7 +386,7 @@ jobs:
         with:
             dependency-snapshot: true
             image: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
-            output-file: /tmp/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.original-tag }}.sbom.spdx
+            output-file: /tmp/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}.sbom.spdx
 
       - name: Attestation
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
@@ -398,10 +401,36 @@ jobs:
         run: |
             gh attestation verify --repo ${{ github.repository }} oci://ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
 
+      - name: Upload SBOM Artifact for Image ${{ steps.vars.outputs.target-image }}
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}
+          path: ${{ runner.temp }}/**/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}.sbom.spdx
+          if-no-files-found: error
+          retention-days: 1
+
+  github-release:
+    name: Github Release
+    runs-on: ubuntu-latest
+    needs: ["release-images"]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download SBOM artifacts
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          path: ${{ runner.temp }}/sboms
+          pattern: ${{ github.event.repository.name }}-*-${{ needs.prepare.outputs.version }}
+
       - name: Release
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2
         with:
-            name: ${{ format('{0}-{1}', matrix.image, needs.prepare.outputs.original-tag) }}
-            generate_release_notes: true
-            files: |
-                /tmp/**/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.original-tag }}.sbom.spdx
+          name: ${{ format('dotbot-{0}', needs.prepare.outputs.version) }}
+          generate_release_notes: true
+          files: |
+            ${{ runner.temp }}/sboms
