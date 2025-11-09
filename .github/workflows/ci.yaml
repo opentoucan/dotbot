@@ -138,8 +138,10 @@ jobs:
 
       - name: Set input version
         id: input-version
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          VERSION="${BRANCH_NAME//\//-}-${GITHUB_SHA}"
+          VERSION="${BRANCH_NAME//\//-}-${COMMIT_SHA}"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF/refs\/tags\//}
           fi
