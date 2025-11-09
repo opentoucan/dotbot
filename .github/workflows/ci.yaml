@@ -139,7 +139,7 @@ jobs:
       - name: Set input version
         id: input-version
         run: |
-          VERSION="${{ env.BRANCH_NAME }}-${GITHUB_SHA}"
+          VERSION="${BRANCH_NAME//\//-}-${GITHUB_SHA}"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF/refs\/tags\//}
           fi
@@ -385,7 +385,7 @@ jobs:
         with:
             dependency-snapshot: true
             image: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.target-image }}@${{ steps.digest.outputs.digest }}
-            output-file: /tmp/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}.sbom.spdx
+            output-file: ${{ runner.temp }}/sboms/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}.sbom.spdx
 
       - name: Attestation
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
@@ -404,7 +404,7 @@ jobs:
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ github.event.repository.name }}-${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}
-          path: ${{ runner.temp }}/**/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}.sbom.spdx
+          path: ${{ runner.temp }}/sboms/${{ steps.vars.outputs.target-image }}-${{ needs.prepare.outputs.version }}.sbom.spdx
           if-no-files-found: error
           retention-days: 1
 
@@ -424,7 +424,6 @@ jobs:
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           path: ${{ runner.temp }}/sboms
-          pattern: ${{ github.event.repository.name }}-*-${{ needs.prepare.outputs.version }}
 
       - name: Release
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2
