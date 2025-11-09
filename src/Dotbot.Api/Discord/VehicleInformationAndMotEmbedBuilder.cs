@@ -110,7 +110,7 @@ public static class VehicleInformationAndMotEmbedBuilder
         var motTests = vehicleInformation.VehicleMotTests.OrderByDescending(x => x.CompletedDate).ToList();
         var latestMot = motTests.FirstOrDefault();
 
-        if (!string.IsNullOrWhiteSpace(latestMot.OdometerReadingInMiles))
+        if (latestMot.OdometerReadingInMiles != null)
             embed.AddFields(new EmbedFieldProperties()
                 .WithName("Odometer")
                 .WithValue($"{latestMot.OdometerReadingInMiles} Miles"));
