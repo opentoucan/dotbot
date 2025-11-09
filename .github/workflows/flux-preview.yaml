@@ -14,7 +14,7 @@ jobs:
         run: |
           tee comment.md <<'EOF'
           Flux deployment ${{ github.event.client_payload.severity }}:
-          - Preview URL: ${{ github.event.client_payload.metadata.preview-url }}
+          - Preview URL: ${{ github.event.client_payload.metadata.preview-url }} (Remember to update the testing bot at https://discord.com/developers/applications with this URL)
           - Revision: ${{ github.event.client_payload.metadata.revision }}
           - Status: ${{ github.event.client_payload.message }}
           EOF
