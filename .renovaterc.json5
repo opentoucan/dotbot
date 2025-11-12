@@ -18,6 +18,14 @@
   ],
   packageRules: [
     {
+      matchPackageNames: ["/dotbot\/sdk/"],
+      postUpgradeTasks: {
+        commands: [
+          "./.renovate/post-upgrade-dotnet-tfm.sh"
+        ]
+      }
+    },
+    {
       matchDatasources: ["helm"],
       semanticCommitScope: "helm",
       commitMessageTopic: "chart {{depName}}",
@@ -33,12 +41,7 @@
       matchDatasources: ["dotnet-version"],
       semanticCommitScope: "dotnet",
       commitMessageTopic: "dotnet {{depName}}",
-      addLabels: ["renovate/dotnet"],
-      postUpgradeTasks: {
-        commands: [
-          "./.renovate/post-upgrade-dotnet-tfm.sh"
-        ]
-      }
+      addLabels: ["renovate/dotnet"]
     },
     {
       description: ["NetCord Group"],
