@@ -1,5 +1,5 @@
 # renovate: datasource=dotnet-version depName=dotnet-runtime
-ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:9.0.10-bookworm-slim
+ARG DOTNET_RUNTIME=mcr.microsoft.com/dotnet/aspnet:10.0
 # renovate: datasource=dotnet-version depName=dotnet-sdk
 ARG DOTNET_SDK=mcr.microsoft.com/dotnet/sdk:10.0.100
 
