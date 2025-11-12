@@ -113,7 +113,7 @@ jobs:
         run: dotnet restore
 
       - name: Test with dotnet
-        run: dotnet test -- --report-trx
+        run: dotnet test --report-trx
 
       - name: Upload dotnet test results
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
