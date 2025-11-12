@@ -33,7 +33,13 @@
       matchDatasources: ["dotnet-version"],
       semanticCommitScope: "dotnet",
       commitMessageTopic: "dotnet {{depName}}",
-      addLabels: ["renovate/dotnet"]
+      addLabels: ["renovate/dotnet"],
+      postUpgradeTasks: {
+        commands: [
+          "NEW_SDK_VERSION=$(grep -Po '\"version\":\\s*\"\\K[^\"\.]+' global.json)"
+          "sed -r -i -e 's|<TargetFramework>(net[0-9\.]+)</TargetFramework>|<TargetFramework>net'"${NEW_SDK_VERSION}"'.0</TargetFramework>|g' Directory.Packages.props"
+        ]
+      }
     },
     {
       description: ["NetCord Group"],
