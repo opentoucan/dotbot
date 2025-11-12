@@ -14,7 +14,9 @@ public class AvatarSlashCommandsTests
     private static ulong GuildId => 123;
     private static readonly Instrumentation Instrumentation = new();
     private static readonly IRestRequestHandler RestRequestHandlerMock = Substitute.For<IRestRequestHandler>();
+#pragma warning disable TUnit0023 // Member should be disposed within a clean up method
     private static readonly HttpApplicationCommandContext CommandContext = new(new SlashCommandInteraction(new JsonInteraction
+#pragma warning restore TUnit0023 // Member should be disposed within a clean up method
     {
         GuildId = null,
         Data = new JsonInteractionData(),

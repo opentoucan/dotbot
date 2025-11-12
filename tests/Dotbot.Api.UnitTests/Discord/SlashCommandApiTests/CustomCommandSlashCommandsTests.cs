@@ -24,7 +24,9 @@ public class CustomCommandSlashCommandsTests
 
     private static readonly IUserContext UserContextMock = Substitute.For<IUserContext>();
 
+#pragma warning disable TUnit0023 // Member should be disposed within a clean up method
     private static readonly HttpApplicationCommandContext CommandContext = new(new SlashCommandInteraction(
+#pragma warning restore TUnit0023 // Member should be disposed within a clean up method
             new JsonInteraction
             {
                 GuildId = null,
