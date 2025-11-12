@@ -6,7 +6,7 @@
   'helm-values': {
     pinDigests: true,
   },
-  allowedCommands: ["^./.renovate/post-upgrade-dotnet-tfm.sh$"]
+  allowedCommands: ["^./.renovate/post-upgrade-dotnet-tfm.sh$"],
   customManagers: [
     {
       customType: "regex",
