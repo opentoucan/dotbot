@@ -33,7 +33,12 @@
       matchDatasources: ["dotnet-version"],
       semanticCommitScope: "dotnet",
       commitMessageTopic: "dotnet {{depName}}",
-      addLabels: ["renovate/dotnet"]
+      addLabels: ["renovate/dotnet"],
+      postUpgradeTasks: {
+        commands: [
+          "./.renovate/post-upgrade-dotnet-tfm.sh"
+        ]
+      }
     },
     {
       description: ["NetCord Group"],
