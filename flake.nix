@@ -32,6 +32,7 @@
               pre-commit
               postgresql
               pgadmin4
+              renovate
               act;
             combinedSdk = pkgs.buildEnv {
                   name = "combinedSdk";
