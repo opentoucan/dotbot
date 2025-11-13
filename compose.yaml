@@ -46,7 +46,7 @@ services:
       - "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock"
   postgres:
     container_name: postgres
-    image: docker.io/library/postgres:18.0
+    image: docker.io/library/postgres:18.1
     ports:
       - '5432:5432'
     environment:
