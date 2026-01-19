@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           global-json-file: global.json
 
@@ -55,7 +55,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           global-json-file: global.json
 
@@ -81,7 +81,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           global-json-file: global.json
 
@@ -105,7 +105,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           global-json-file: global.json
 
@@ -290,7 +290,7 @@ jobs:
             persist-credentials: false
 
         - name: Setup dotnet
-          uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+          uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
           with:
             global-json-file: global.json
 
