@@ -55,7 +55,7 @@
     <PackageVersion Include="System.Drawing.Common" Version="9.0.10" />
     <PackageVersion Include="System.Formats.Asn1" Version="9.0.10" />
     <!-- Database -->
-    <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
     <PackageVersion Include="StackExchange.Redis" Version="2.9.32" />
