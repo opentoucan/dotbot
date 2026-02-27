@@ -43,7 +43,7 @@ public class CustomCommandServiceTests
         _httpClient = new HttpClient(_handler);
         _dbContext = new DotbotContext(
             new DbContextOptionsBuilder<DotbotContext>()
-                .UseInMemoryDatabase(TestContext.Current!.TestDetails.TestId)
+                .UseInMemoryDatabase(TestContext.Current!.Id)
                 .Options);
         _guildQueries = new GuildQueries(_dbContext);
         _guildRepository = new GuildRepository(_dbContext);
